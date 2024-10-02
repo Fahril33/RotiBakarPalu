@@ -1,0 +1,308 @@
+* {
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  right: 0;
+  padding: 0;
+  box-sizing: border-box;
+  /* user-select: none;  */
+  /* cursor: default; */
+}
+
+body {
+  min-width: 320px;
+  /* user-select: text; */
+}
+
+.profile-container ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.profile-container ul li {
+  display: inline-block;
+}
+
+.item-icon img {
+  width: 25px;
+}
+.item-text {
+  font-size: 12px;
+  color: #fff;
+  /* font-weight: bold; */
+}
+a {
+  text-decoration: none;
+  /* color: whitesmoke; */
+}
+
+
+@media (max-width: 575.98px) {
+  body {
+    margin-bottom: 100px;
+  }
+
+  nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 100;
+  }
+
+  .container_bottnav {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-height: 100%;
+    max-width: 100%;
+    margin: 10px;
+    /* padding-top:5px; */
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+    width: auto;
+    background-color: #f58404;
+    border: 5px solid #f58404;
+    border-radius: 10px;
+  }
+
+  .container-item {
+    display: flex;
+    min-width: 70px;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 8px;
+    white-space: normal; /* Izinkan teks untuk membungkus */
+  }
+}
+
+/* Profile */
+.container-profile {
+  width: 100%;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.profile-container {
+  position: relative;
+  display: inline-block;
+}
+
+.profile-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  background-color: white;
+  min-width: 150px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.dropdown-menu li {
+  list-style: none;
+  width: 100%;
+}
+
+.dropdown-menu li a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-menu li a:hover {
+  background-color: #ddd;
+}
+
+.profile-container.open .dropdown-menu {
+  display: block;
+}
+
+.status-container {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 15px;
+  /* background-color: grey; */
+  justify-content: start;
+  align-items: center;
+}
+
+.status-item {
+  height: 50px;
+  background-color: #f4c305;
+  display: flex;
+
+  align-items: center;
+  margin: 10px 0 0 20px;
+  width: fit-content;
+  /* min-width:max-content; */
+  padding: 10px;
+  border-radius: 10px;
+}
+.status-item:nth-child(2) {
+  color: rgb(0, 0, 0); /* Highlight the second status text in red */
+  width: fit-content;
+}
+
+.status-text {
+  font-size: 16px;
+  color: #c44a4a;
+  font-weight: bold;
+}
+
+/* Form Pembelian */
+
+.form-input-penjualan {
+  margin-bottom: 12px;
+}
+
+form {
+  max-width: 400px;
+  margin: 40px 40px 0 40px;
+  padding: 20px;
+  /* border: 1px solid #ff62001e; */
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+}
+
+button[type="submit"] {
+  background-color: #4caf50;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+input[type="submit"]:hover {
+  background-color: #3e8e41;
+}
+
+/* Table Penjualan Hari ini */
+
+.table-sales-today {
+  width: 80%;
+}
+table {
+  border-collapse: collapse;
+  margin: 40px;
+}
+
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background-color: #f0f0f0;
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+  
+@media (min-width: 575.98px) {
+
+    nav {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      width: auto;
+      height: 50%;
+      margin: 10px;
+    }
+
+    .container_bottnav {
+      max-height: 100%;
+      max-width: 100%;
+      /* padding-top:5px; */
+      display: flex;
+      flex-direction: column;
+      flex-wrap: wrap;
+      justify-content: space-evenly;
+      align-items: center;
+      width: auto;
+      height: 100%;
+      background-color: #f58404;
+      border: 5px solid #f58404;
+      border-radius: 10px;
+    }
+
+    .container-item {
+      display: flex;
+      min-width: auto;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 8px;
+      white-space: normal; /* Izinkan teks untuk membungkus */
+    }
+
+    /* .container-item img {
+      width: 22px;
+    } */
+  }
+
+
+  .swal2-popup {
+  font-family: "Poppins", sans-serif;
+}
+
+.swal2-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.swal2-text {
+  font-size: 14px;
+  color: #666;
+}
+
+.swal2-confirm {
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.swal2-cancel {
+  background-color: #ccc;
+  color: #333;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
