@@ -8,6 +8,13 @@ import activityIcon from "../public/activity.png"; // Import ikon activity
 import walletIcon from "../public/wallet.png"; // Import ikon wallet
 
 
+// Set src atribut untuk gambar berdasarkan import
+document.querySelector('.container-item img[alt="Beranda Icon"]').src =
+  homeIcon;
+document.querySelector('.container-item img[alt="Penjualan Icon"]').src =
+  activityIcon;
+document.querySelector('.container-item img[alt="Keuangan Icon"]').src =
+  walletIcon;
 
 // Event listener untuk DOMContentLoaded
 document.addEventListener("DOMContentLoaded", function () {
@@ -27,11 +34,6 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-// Set src atribut untuk gambar berdasarkan import
-document.querySelector('.container-item img[alt="Beranda Icon"]').src = homeIcon;
-document.querySelector('.container-item img[alt="Penjualan Icon"]').src = activityIcon;
-document.querySelector('.container-item img[alt="Keuangan Icon"]').src = walletIcon;
-
 // Inisialisasi objek App
 const app = new App({
   content: document.querySelector("#mainContent"),
@@ -46,4 +48,3 @@ window.addEventListener("hashchange", () => {
 window.addEventListener("load", () => {
   app.renderPage();
 });
-

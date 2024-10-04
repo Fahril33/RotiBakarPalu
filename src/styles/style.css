@@ -36,6 +36,97 @@ a {
   /* color: whitesmoke; */
 }
 
+/* 
+ItemsContainer
+*/
+
+.itemContainer {
+  display: flex;
+  /* flex-direction:row; */
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.item-form-sales {
+  width: 40%;
+  /* background: #d0d0d0; */
+}
+
+.item-predictions {
+  width: 60%;
+  height: 100%;
+  padding: 40px 20px 0 0;
+  gap: 10px;
+  /* height: 100px; */
+  /* border: 1px solid #000; */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-content: flex-start;
+  align-items: flex-start;
+}
+
+.salesInfo {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  gap: 10px;
+}
+.itemPenjualan {
+  padding: 20px;
+  /* margin: 0 10px; */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+  box-shadow: 0 4px 8px 0 rgba(230, 230, 230, 0.2),
+    0 6px 20px 0 rgba(202, 202, 202, 0.19);
+}
+#imgPredict {
+  margin-bottom: 10px;
+  width: 40px;
+}
+.hasilPrediksi {
+  width: 100%;
+  box-shadow: 0 4px 8px 0 rgba(230, 230, 230, 0.2),
+    0 6px 20px 0 rgba(201, 200, 200, 0.19);
+  /* margin: 20px 10px; */
+  /* margin-right: 20px; */
+  padding: 20px;
+}
+
+.dataInfo {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  gap: 10px;
+}
+.cuaca, .weekend, .event{
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  text-align: center;
+  width: 25%;
+  height: 190px;
+  /* margin: 20px 10px; */
+  padding: 40px 20px 20px;
+  box-shadow: 0 4px 8px 0 rgba(230, 230, 230, 0.2),
+    0 6px 20px 0 rgba(202, 202, 202, 0.19);
+}
+#imgCuaca, #imgDays {
+  /* width: 60px; */
+  height: 60px;
+}
+.textInfo{
+  display: flex;
+  height: 70px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
 
 @media (max-width: 575.98px) {
   body {
@@ -189,7 +280,7 @@ input[type="number"],
 select {
   width: 100%;
   padding: 10px;
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; */
   border: 1px solid #ccc;
 }
 
@@ -231,50 +322,48 @@ tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-  
 @media (min-width: 575.98px) {
-
-    nav {
-      position: fixed;
-      bottom: 0;
-      right: 0;
-      width: auto;
-      height: 50%;
-      margin: 10px;
-    }
-
-    .container_bottnav {
-      max-height: 100%;
-      max-width: 100%;
-      /* padding-top:5px; */
-      display: flex;
-      flex-direction: column;
-      flex-wrap: wrap;
-      justify-content: space-evenly;
-      align-items: center;
-      width: auto;
-      height: 100%;
-      background-color: #f58404;
-      border: 5px solid #f58404;
-      border-radius: 10px;
-    }
-
-    .container-item {
-      display: flex;
-      min-width: auto;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 8px;
-      white-space: normal; /* Izinkan teks untuk membungkus */
-    }
-
-    /* .container-item img {
-      width: 22px;
-    } */
+  nav {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: auto;
+    height: 50%;
+    margin: 10px;
   }
 
+  .container_bottnav {
+    max-height: 100%;
+    max-width: 100%;
+    /* padding-top:5px; */
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: center;
+    width: auto;
+    height: 100%;
+    background-color: #f58404;
+    border: 5px solid #f58404;
+    border-radius: 10px;
+  }
 
-  .swal2-popup {
+  .container-item {
+    display: flex;
+    min-width: auto;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 8px;
+    white-space: normal; /* Izinkan teks untuk membungkus */
+  }
+
+  /* .container-item img {
+      width: 22px;
+    } */
+}
+
+/* Sweet Alert Delete Sales */
+.swal2-popup {
   font-family: "Poppins", sans-serif;
 }
 
@@ -306,3 +395,91 @@ tr:nth-child(even) {
   padding: 10px 20px;
   cursor: pointer;
 }
+
+/* edit sales */
+.modal {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: auto;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  width: 400px;
+  height: auto;
+  max-height: 90vh;
+  overflow-y: hidden;
+  -ms-overflow-style: none; /* For Internet Explorer and Edge */
+  
+  /* For Firefox */
+  scrollbar-width: none; /* For Chrome, Safari, and Opera */
+  
+  /* For Firefox */
+  -moz-scrollbars-none: none;
+}
+
+/* For Firefox */
+@supports not (-ms-overflow-style: none) {
+  .modal-content {
+    overflow-y: auto;
+  }
+}
+
+.close {
+  position: absolute;
+  top: auto; 
+  right: auto; 
+  margin: 0; 
+  font-size: 34px;
+  cursor: pointer;
+  transform: translate(1550%, -30%); /* Pusatkan tombol */
+}
+
+.close:hover {
+  color: #e82222;
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  /* text-align: center; */
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.form-group input[type="text"], .form-group input[type="number"] {
+  width: 100%;
+  padding: 10px;
+  /* margin-bottom: 10px; */
+  border: 1px solid #ccc;
+}
+
+button[type="submit"]{
+  background-color: #4caf50;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button[type="submit"]:hover {
+  background-color: #3e8e41;
+}
+
