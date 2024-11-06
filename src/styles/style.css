@@ -1,11 +1,9 @@
 * {
-  font-family: "Poppins", sans-serif;
+  font-family: "Poppins", inter;
   margin: 0;
   right: 0;
   padding: 0;
   box-sizing: border-box;
-  /* user-select: none;  */
-  /* cursor: default; */
 }
 
 body {
@@ -49,6 +47,7 @@ ItemsContainer
 
 .item-form-sales {
   width: 40%;
+  
   /* background: #d0d0d0; */
 }
 
@@ -102,7 +101,9 @@ ItemsContainer
   width: 100%;
   gap: 10px;
 }
-.cuaca, .weekend, .event{
+.cuaca,
+.weekend,
+.event {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -115,11 +116,12 @@ ItemsContainer
   box-shadow: 0 4px 8px 0 rgba(230, 230, 230, 0.2),
     0 6px 20px 0 rgba(202, 202, 202, 0.19);
 }
-#imgCuaca, #imgDays {
+#imgCuaca,
+#imgDays {
   /* width: 60px; */
   height: 60px;
 }
-.textInfo{
+.textInfo {
   display: flex;
   height: 70px;
   flex-direction: column;
@@ -127,13 +129,13 @@ ItemsContainer
   align-items: center;
 }
 
-
 @media (max-width: 575.98px) {
   body {
     margin-bottom: 100px;
   }
 
   nav {
+    /* visibility: hidden; */
     position: fixed;
     bottom: 0;
     left: 0;
@@ -262,12 +264,25 @@ ItemsContainer
 }
 
 form {
+  display: flex;
+  flex-wrap: wrap;
   max-width: 400px;
-  margin: 40px 40px 0 40px;
+  height: max-content;
+  /* margin: 20px 20px 0 20px; */
   padding: 20px;
+  gap: 10px;
   /* border: 1px solid #ff62001e; */
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+input,
+select {
+  border-radius: 10px;
+}
+
+.form-group {
+  width: 100%;
 }
 
 label {
@@ -299,8 +314,13 @@ input[type="submit"]:hover {
 
 /* Table Penjualan Hari ini */
 
+.tableSaleContainer {
+  display: flex;
+  overflow-x: auto;
+}
+
 .table-sales-today {
-  width: 80%;
+  width: 100%;
 }
 table {
   border-collapse: collapse;
@@ -324,6 +344,7 @@ tr:nth-child(even) {
 
 @media (min-width: 575.98px) {
   nav {
+    /* display: none; */
     position: fixed;
     bottom: 0;
     right: 0;
@@ -396,6 +417,10 @@ tr:nth-child(even) {
   cursor: pointer;
 }
 
+.close {
+  overflow-x: 60%;
+}
+
 /* edit sales */
 .modal {
   position: fixed;
@@ -411,6 +436,7 @@ tr:nth-child(even) {
 }
 
 .modal-content {
+  position: relative;
   background-color: #fff;
   padding: 20px;
   border-radius: 10px;
@@ -420,12 +446,25 @@ tr:nth-child(even) {
   max-height: 90vh;
   overflow-y: hidden;
   -ms-overflow-style: none; /* For Internet Explorer and Edge */
-  
+
   /* For Firefox */
   scrollbar-width: none; /* For Chrome, Safari, and Opera */
-  
+
   /* For Firefox */
   -moz-scrollbars-none: none;
+}
+
+.close {
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  top: 0px; /* Atur jarak dari atas container modal */
+  right: 12px; /* Atur jarak dari kanan container modal */
+  border: none;
+  font-size: 30px;
+  font-weight: 500;
+  cursor: pointer;
+  z-index: 10; /* Pastikan tetap di atas konten modal */
 }
 
 /* For Firefox */
@@ -434,52 +473,3 @@ tr:nth-child(even) {
     overflow-y: auto;
   }
 }
-
-.close {
-  position: absolute;
-  top: auto; 
-  right: auto; 
-  margin: 0; 
-  font-size: 34px;
-  cursor: pointer;
-  transform: translate(1550%, -30%); /* Pusatkan tombol */
-}
-
-.close:hover {
-  color: #e82222;
-}
-
-.modal-content h2 {
-  margin-top: 0;
-  /* text-align: center; */
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-}
-
-.form-group input[type="text"], .form-group input[type="number"] {
-  width: 100%;
-  padding: 10px;
-  /* margin-bottom: 10px; */
-  border: 1px solid #ccc;
-}
-
-button[type="submit"]{
-  background-color: #4caf50;
-  color: #fff;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button[type="submit"]:hover {
-  background-color: #3e8e41;
-}
-

@@ -1,0 +1,266 @@
+/* Page Keuangan */
+.containerAllBalance {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  width: 100%;
+}
+
+.containerBalance {
+  display: flex;
+  flex-direction: column;
+  margin: 30px 0 0 15px;
+}
+
+.balanceContainer {
+  padding-left: 8px;
+  width: 100%;
+  width: max-content;
+}
+
+.balanceContainer input {
+  border-radius: 5px;
+  border: none;
+  background-color: #fceeb4;
+  color: #c16904;
+  font-weight: bold;
+}
+
+.containerKeluarMasuk {
+  display: flex;
+  flex-direction: column;
+  margin: 30px 0 0 15px;
+}
+
+.keluarMasukContainer {
+  padding-left: 8px;
+  width: 100%;
+  max-width: max-content;
+}
+
+.keluarMasukContainer input {
+  border-radius: 5px;
+  border: none;
+  background-color: #fceeb4;
+  color: #a47239;
+  font-weight: bold;
+}
+
+/* Shopping */
+.containerShopping {
+  margin: 30px 0 0 0px;
+  /* padding: 20px 0; */
+  display: flex;
+  flex-direction: column;
+}
+
+.shoppingItemQuantity {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  margin-left: 15px;
+  margin-bottom: 7px;
+}
+
+/* #selai {
+  margin-bottom: 10px;
+} */
+
+/* Radio Button Styles */
+.radioOption {
+  display: inline-block;
+  margin-right: 10px; /* Adjusted margin to make it more compact */
+}
+
+.radioOption input[type="radio"] {
+  display: none;
+}
+
+.radioOption label {
+  display: inline-block;
+  cursor: pointer;
+  padding: 5px 10px; /* Adjusted padding to make it more compact */
+  border: 1px solid #ccc;
+  border-radius: 5px; /* Adjusted border-radius to match the new padding */
+  background-color: #fceeb4; /* Adjusted background color */
+  transition: background-color 0.2s ease;
+}
+
+.radioOption label:hover {
+  background-color: #d0d0d0; /* Adjusted hover background color */
+}
+
+.radioOption input[type="radio"]:checked + label {
+  background-color: #c16904; /* Adjusted checked background color */
+  color: #fff;
+}
+
+.radioOption input[type="radio"]:checked + label::before {
+  content: "\2713";
+  font-size: 12px; /* Adjusted font size to make it more compact */
+  margin-right: 5px; /* Adjusted margin to make it more compact */
+}
+
+.itemCheckbox {
+  position: relative;
+  width: 100px; /* Lebar checkbox */
+  height: 35px; /* Tinggi checkbox */
+  margin-right: 10px; /* Jarak antar checkbox */
+  margin-bottom: 10px;
+}
+
+.checkbox-input {
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  z-index: 4;
+}
+
+.checkbox-label {
+  z-index: 3;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px; /* Ukuran teks */
+  background-color: #fceeb4;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.checkbox-input:checked + .checkbox-label {
+  background-color: rgb(216, 166, 0);
+  color: white;
+}
+
+.card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 20px;
+  padding: px;
+}
+
+h2 {
+  width: 100%;
+  height: 50px;
+  padding-top: 5px;
+  border-radius: 8px 8px 0 0;
+  text-align: center;
+  align-self: center;
+  background-color: #c16904;
+  color: #fceeb4;
+}
+
+.containerShopping p {
+  width: 100%;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+#purchase_Name {
+  margin: 7px 0 0 15px;
+}
+
+.shoppingTableContainer {
+  /* width: 100%; */
+  display: flex;
+  overflow-x: auto;
+}
+
+.shoppingTable {
+  width: 92%;
+  border-collapse: collapse;
+}
+
+.shoppingTable th,
+.shoppingTable td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.shoppingTable th {
+  background-color: #f2f2f2;
+}
+
+.konfirmasi-button {
+  background-color: #4caf50;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+}
+.konfirmasi-button:hover {
+  background-color: #3e8e41;
+}
+
+.switchDate {
+  text-align: center;
+  background-color:#c16904;
+  padding-bottom: 10px;
+}
+
+.datePickerContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f5f5f5;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.datePickerContainer button {
+  background-color: #c16904;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.datePickerContainer button:hover {
+  background-color: #a45703;
+}
+
+.datePickerContainer input[type="date"] {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 16px;
+  margin: 0 10px;
+  color: #333;
+}
+
+.datePickerContainer input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  color: #c16904;
+}
+
+.loading {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+}

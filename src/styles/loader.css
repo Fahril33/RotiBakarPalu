@@ -1,0 +1,63 @@
+.overlay {
+  position: fixed; /* Menggunakan fixed untuk menutupi seluruh layar */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* Warna latar belakang dengan transparansi */
+  backdrop-filter: blur(5px); /* Efek blur */
+  z-index: 999; /* Pastikan overlay berada di atas elemen lain */
+  display: none; /* Sembunyikan overlay secara default */
+}
+
+.custom-loader {
+  display: flex; /* Menggunakan flexbox untuk mengatur layout */
+  flex-direction: column; /* Mengatur arah kolom untuk menempatkan teks di bawah */
+  align-items: center; /* Pusatkan secara horizontal */
+  justify-content: center; /* Pusatkan secara vertikal */
+  padding: 10px; /* Tambahkan padding untuk memberi ruang di sekitar */
+  background: rgba(255, 255, 255, 0.616); /* Latar belakang putih semi-transparan */
+  border-radius: 5px; /* Sudut melengkung */
+  position: fixed; /* Menggunakan fixed untuk menempatkan loader di tengah layar */
+  top: 50%; /* Pusat vertikal */
+  left: 50%; /* Pusat horizontal */
+  transform: translate(-50%, -50%); /* Menggeser loader ke tengah */
+  z-index: 1000; /* Pastikan loader berada di atas overlay */
+  display: none; /* Sembunyikan loader secara default */
+}
+
+.loader-icon {
+  width: 40px; /* Ukuran ikon loader */
+  height: 40px; /* Ukuran ikon loader */
+  --c: linear-gradient(#F47329 0 0);
+  background: 
+    var(--c) 0    0,
+    var(--c) 0    100%, 
+    var(--c) 50%  0,  
+    var(--c) 50%  100%, 
+    var(--c) 100% 0, 
+    var(--c) 100% 100%;
+  background-size: 8px 50%;
+  background-repeat: no-repeat;
+  animation: db7-0 1s infinite;
+}
+
+.loader-text {
+  margin-top: 10px; /* Jarak antara ikon dan teks */
+  text-align: center; /* Pusatkan teks */
+}
+
+@keyframes db7-0 {
+  16.67% {background-size: 8px 30%, 8px 30%, 8px 50%, 8px 50%, 8px 50%, 8px 50%}
+  33.33% {background-size: 8px 30%, 8px 30%, 8px 30%, 8px 30%, 8px 50%, 8px 50%}
+  50%    {background-size: 8px 30%, 8px 30%, 8px 30%, 8px 30%, 8px 30%, 8px 30%}
+  66.67% {background-size: 8px 50%, 8px 50%, 8px 30%, 8px 30%, 8px 30%, 8px 30%}
+  83.33% {background-size: 8px 50%, 8px 50%, 8px 50%, 8px 50%, 8px 30%, 8px 30%}
+}
+
+@keyframes db7-1 {
+  20%  {left: 0px}
+  40%  {left: calc(50% - 4px)}
+  60%  {left: calc(100% - 8px)}
+  80%, 100% {left: 100%}
+}

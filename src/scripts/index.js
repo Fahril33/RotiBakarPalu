@@ -1,9 +1,21 @@
 import "regenerator-runtime"; // Import regenerator-runtime untuk mendukung async/await
 import App from "./views/app"; // Import kelas App
 import "../styles/style.css"; // Import stylesheet utama
+import "../styles/loader.css";
+import "../styles/finance.css"; // Import stylesheet utama
 import "../styles/responsive.css"; // Import stylesheet responsif
+import {
+  homeIcon,
+  activityIcon,
+  walletIcon,
+} from "./utils/icons";
 
-
+document.querySelector('.container-item img[alt="Beranda Icon"]').src =
+  homeIcon;
+document.querySelector('.container-item img[alt="Penjualan Icon"]').src =
+  activityIcon;
+document.querySelector('.container-item img[alt="Keuangan Icon"]').src =
+  walletIcon;
 
 // Event listener untuk DOMContentLoaded
 document.addEventListener("DOMContentLoaded", function () {

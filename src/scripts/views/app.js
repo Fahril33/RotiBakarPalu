@@ -11,6 +11,8 @@ class App {
     const page = routes[url]; // Ambil halaman berdasarkan routing
     this._content.innerHTML = await page.render(); // Render halaman
     await page.afterRender(); // Panggil afterRender jika ada logika tambahan
+
+    
   }
 }
 
