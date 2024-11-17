@@ -1,6 +1,7 @@
 export function getCurrentDate() {
   const now = new Date();
   const day = String(now.getDate()).padStart(2, "0");
+  const dayn = String(now.getDate());
   const month = String(now.getMonth() + 1).padStart(2, "0");
   const year = String(now.getFullYear());
   const formattedDate = `${year}-${month}-${day}`;
@@ -8,7 +9,24 @@ export function getCurrentDate() {
 
   return {
     pickedDate: formattedDate,
+    pickedDaten: `${year}-${month}-${dayn}`,
+    year: year,
     // pickedDate: "2024-10-31",
+    reFormattedDate: `${day}-${month}-${year}`,
+  };
+}
+export function getTomorrowDate() {
+  const now = new Date();
+  now.setDate(now.getDate() + 1); // Increment the date by 1
+  const day = String(now.getDate()).padStart(2, "0");
+  const dayn = String(now.getDate());
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const year = String(now.getFullYear());
+  const formattedDate = `${year}-${month}-${day}`;
+
+  return {
+    tomorrowDate: formattedDate,
+    pickedDaten: `${year}-${month}-${dayn}`,
     reFormattedDate: `${day}-${month}-${year}`,
   };
 }
@@ -17,7 +35,7 @@ export async function datePickerValue () {
   const dateValue = document.getElementById("dataDatePicker").value;
   return {dateValue};
 }
-
+  
 export function getYesterdayDate() {
   const now = new Date();
   const yesterdayDate = new Date(now);

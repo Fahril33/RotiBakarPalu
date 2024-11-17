@@ -20,9 +20,6 @@ const Finance = {
   },
 
   async afterRender() {
-    // Fill Today Stock Data
-    isStocksDataExist();
-
     const daftarBelanja = await RBPsource.getDaftarBelanja();
     console.log("Daftar belanja:", daftarBelanja);
 
@@ -59,6 +56,7 @@ const Finance = {
 
     // Storage to cache quantity values
     const quantityCache = {};
+    
 
     function updateShoppingListTable() {
       // Save current quantities to cache before clearing the table
@@ -87,15 +85,20 @@ const Finance = {
           const rotiQuantity = quantityCache["roti"] || 15; // Use cached value or default to 1
           const rotiTotalPrice = itemData["roti"].price * rotiQuantity; // Calculate total price for Roti
           rotiRow.innerHTML = `
-            <td>${itemCount++}</td>
-            <td>${itemData["roti"].name}</td>
-            <td>Rp. ${itemData["roti"].price.toLocaleString("id-ID")}</td>
-            <td><input type="number" value="${rotiQuantity}" min="1" id="quantity-roti" class="quantity-input"></td>
-            <td>Rp. ${rotiTotalPrice.toLocaleString("id-ID")}</td>
-          `;
+        <td>${itemCount++}</td>
+        <td>${itemData["roti"].name}</td>
+        <td>Rp. ${itemData["roti"].price.toLocaleString("id-ID")}</td>
+        <td><input type="number" value="${rotiQuantity}" min="1" id="quantity-roti" class="quantity-input"></td>
+        <td>Rp. ${rotiTotalPrice.toLocaleString("id-ID")}</td>
+        <td>
+          <div class="payment-options">
+            <input type="radio" name="payment-roti" value="cash" checked>Cash
+            <input type="radio" name="payment-roti" value="debit">Debit
+          </div>
+        </td>
+      `;
           tableBody.appendChild(rotiRow);
         }
-
         // Loop through all checkboxes
         checkboxes.forEach((checkbox) => {
           if (checkbox.checked) {
@@ -109,12 +112,18 @@ const Finance = {
               const totalPrice = item.price * cachedQuantity; // Calculate total price for the item
 
               newRow.innerHTML = `
-                <td>${itemCount++}</td>
-                <td>${item.name}</td>
-                <td>Rp. ${item.price.toLocaleString("id-ID")}</td>
-                <td><input type="number" value="${cachedQuantity}" min="1" id="quantity-${itemId}" class="quantity-input"></td>
-                <td>Rp. ${totalPrice.toLocaleString("id-ID")}</td>
-              `;
+            <td>${itemCount++}</td>
+            <td>${item.name}</td>
+            <td>Rp. ${item.price.toLocaleString("id-ID")}</td>
+            <td><input type="number" value="${cachedQuantity}" min="1" id="quantity-${itemId}" class="quantity-input"></td>
+            <td>Rp. ${totalPrice.toLocaleString("id-ID")}</td>
+            <td>
+              <div class="payment-options">
+                <input type="radio" name="payment-${itemId}" value="cash" checked>Cash
+                <input type="radio" name="payment-${itemId}" value="debit">Debit
+              </div>
+            </td>
+          `;
 
               // Add event listener to update total price when quantity changes
               const quantityInput = newRow.querySelector(`#quantity-${itemId}`);
@@ -254,65 +263,169 @@ const Finance = {
       table.id = "shoppingHistoryTable";
       table.classList.add("shoppingTable");
       table.innerHTML = `
-        <thead class="tableHead">
-          <tr>
-            <th width="3%">No</th>
-            <th>Nama Bahan</th>
-            <th>Jumlah</th>
-            <th>Harga</th>
-            <th>Total Harga</th> <!-- New Total Price Column -->
-            <th>Action</th> <!-- New Action Column -->
-          </tr>
-        </thead>
-        <tbody id="">
-        </tbody>
-        <tfoot>
-          <tr>
-            <td colspan="4" style="font-weight: bold; text-align: center;">Total</td>
-            <td colspan="2" id="totalBelanja" style="font-weight: bold;">Rp. 0</td>
-          </tr>
-        </tfoot>
-      `;
+    <thead class="tableHead">
+      <tr>
+        <th width="3%">No</th>
+        <th>Nama Bahan</th>
+        <th>Jumlah</th>
+        <th>Harga</th>
+        <th>Total Harga</th>
+        <th>Pembayaran</th> <!-- New Payment Column -->
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="">
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="4" style="font-weight: bold; text-align: center;">Total Cash Out</td>
+        <td colspan="3" id="totalBelanjaCash" style="font-weight: bold;">Rp. 0</td>
+      </tr>
+      <tr>
+        <td colspan="4" style="font-weight: bold; text-align: center;">Total Debit Out</td>
+        <td colspan="3" id="totalBelanjaDebit" style="font-weight: bold;">Rp. 0</td>
+      </tr>
+      <tr>
+        <td colspan="4" style="font-weight: bold; text-align: center;">Total</td>
+        <td colspan="3" id="totalBelanja" style="font-weight: bold;">Rp. 0</td>
+      </tr>
+    </tfoot>
+  `;
 
-      // Append each item in the 'barang' array to the table with automatic numbering
       let rowNumber = 1;
-      let totalBelanja = 0; // Initialize total belanja
+      let totalBelanja = 0;
+      let totalCash = 0;
+      let totalDebit = 0;
+
       data.forEach((entry) => {
         entry.barang.forEach((item) => {
           const row = document.createElement("tr");
           row.setAttribute("data-id", item._id);
+
+          // Tambahkan radio button untuk pembayaran
+          const paymentRadioHtml = `
+        <div class="payment-options">
+          <input type="radio" name="payment-${item._id}" value="cash" ${
+            item.payment === "cash" ? "checked" : ""
+          }>Cash
+          <input type="radio" name="payment-${item._id}" value="debit" ${
+            item.payment === "debit" ? "checked" : ""
+          }>Debit
+        </div>
+      `;
+
           row.innerHTML = `
-            <td>${rowNumber}</td>
-            <td>${item.namaBahan}</td>
-            <td contenteditable="true" onkeypress="return event.charCode >= 48 && event.charCode <= 57;">${
-              item.jumlah
-            }</td>
-            <td>Rp. ${item.harga.toLocaleString("id-ID")}</td>
-            <td>Rp. ${item.totalHarga.toLocaleString(
-              "id-ID"
-            )}</td> <!-- Display total price -->
-            <td>
-              <button class="edit-button" data-nama="${
-                item.namaBahan
-              }">Edit</button>
-              <button class="delete-button" data-nama="${
-                item.namaBahan
-              }">Delete</button>
-            </td>
-          `;
+        <td>${rowNumber}</td>
+        <td>${item.namaBahan}</td>
+        <td contenteditable="true" onkeypress="return event.charCode >= 48 && event.charCode <= 57;">${
+          item.jumlah
+        }</td>
+        <td>Rp. ${item.harga.toLocaleString("id-ID")}</td>
+        <td>Rp. ${item.totalHarga.toLocaleString("id-ID")}</td>
+        <td>${paymentRadioHtml}</td>
+        <td>
+          <button class="delete-button" data-nama="${
+            item.namaBahan
+          }">Delete</button>
+        </td>
+      `;
+
           rowNumber++;
           table.querySelector("tbody").appendChild(row);
-          totalBelanja += item.totalHarga; // Accumulate total belanja
+
+          totalBelanja += item.totalHarga;
+
+          // Hitung total berdasarkan metode pembayaran
+          if (item.payment === "cash") {
+            totalCash += item.totalHarga;
+          } else if (item.payment === "debit") {
+            totalDebit += item.totalHarga;
+          }
         });
       });
 
-      // Update the total belanja in the footer
+      // Update total di footer
       table.querySelector(
         "#totalBelanja"
       ).textContent = `Rp. ${totalBelanja.toLocaleString("id-ID")}`;
+      table.querySelector(
+        "#totalBelanjaDebit"
+      ).textContent = `Rp. ${totalDebit.toLocaleString("id-ID")}`;
+      table.querySelector(
+        "#totalBelanjaCash"
+      ).textContent = `Rp. ${totalCash.toLocaleString("id-ID")}`;
 
-      // Append the table to the container
       tableContainer.appendChild(table);
+
+      const paymentRadios = document.querySelectorAll(
+        'input[name^="payment-"]'
+      );
+      paymentRadios.forEach((radio) => {
+        radio.addEventListener("change", async (event) => {
+          const selectedDate = document.querySelector("#dataDatePicker").value;
+          const row = event.target.closest("tr");
+          const itemId = row.getAttribute("data-id");
+          const payment = event.target.value;
+
+          try {
+            const existingData = await RBPsource.getDaftarBelanja();
+            const currentDateData = existingData.find(
+              (data) => data.tanggal === selectedDate
+            );
+
+            if (!currentDateData) {
+              console.error("No data found for the selected date.");
+              return;
+            }
+
+            // Update item dengan metode pembayaran baru
+            const updatedItems = currentDateData.barang.map((item) => {
+              if (item._id === itemId) {
+                return { ...item, payment };
+              }
+              return item;
+            });
+
+            // Hitung ulang total cash dan debit
+            const totalCash = updatedItems
+              .filter((item) => item.payment === "cash")
+              .reduce((total, item) => total + item.totalHarga, 0);
+
+            const totalDebit = updatedItems
+              .filter((item) => item.payment === "debit")
+              .reduce((total, item) => total + item.totalHarga, 0);
+
+            const totalBelanja = totalCash + totalDebit;
+
+            // Kirim update ke server
+            const response = await fetch(
+              `${API_ENDPOINT.DAFTARBELANJA}/${currentDateData._id}`,
+              {
+                method: "PUT",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  tanggal: selectedDate,
+                  barang: updatedItems,
+                  totalCash,
+                  totalDebit,
+                  totalBelanja,
+                }),
+              }
+            );
+
+            if (!response.ok) {
+              throw new Error("Failed to update payment method");
+            }
+
+            // Refresh tampilan
+            setTodayDate();
+          } catch (error) {
+            console.error("Error updating payment method:", error);
+          }
+        });
+      });
 
       //
       // EDIT HISTORI BELANJA
@@ -340,31 +453,41 @@ const Finance = {
             }
 
             const row = event.target.closest("tr");
-            const itemName = row.cells[1]?.textContent; // Item name from the second cell
+            const itemName = row.cells[1]?.textContent;
+            const paymentRadio = row.querySelector(
+              'input[name^="payment-"]:checked'
+            );
+            const payment = paymentRadio ? paymentRadio.value : "cash";
 
             if (!itemName) {
               console.error("No item name found in the selected row.");
               return;
             }
 
-            // Update only the targeted item and calculate the new total
+            // Update hanya item yang ditarget dan hitung ulang total
             const updatedItems = currentDateData.barang.map((item) => {
               if (item.namaBahan === itemName) {
-                // Calculate new total price for the item
                 const newTotalPrice = item.harga * updatedValue;
                 return {
                   ...item,
                   jumlah: updatedValue,
-                  totalHarga: newTotalPrice, // Ensure totalHarga is updated
+                  totalHarga: newTotalPrice,
+                  payment: payment, // Tambahkan metode pembayaran
                 };
               }
-              return item; // Return unchanged items
+              return item;
             });
 
-            const updatedTotalBelanja = updatedItems.reduce(
-              (total, item) => total + item.totalHarga, // Use totalHarga for accurate total
-              0
-            );
+            // Hitung total cash, debit, dan total belanja
+            const totalCash = updatedItems
+              .filter((item) => item.payment === "cash")
+              .reduce((total, item) => total + item.totalHarga, 0);
+
+            const totalDebit = updatedItems
+              .filter((item) => item.payment === "debit")
+              .reduce((total, item) => total + item.totalHarga, 0);
+
+            const updatedTotalBelanja = totalCash + totalDebit;
 
             // Tampilkan elemen loading
             const loadingElement = document.querySelector(".loading");
@@ -398,6 +521,15 @@ const Finance = {
           const loadingElement = document.querySelector(".loading");
           loadingElement.style.display = "block";
 
+          // Hitung total cash dan debit
+          const totalCash = updatedItems
+            .filter((item) => item.payment === "cash")
+            .reduce((total, item) => total + item.totalHarga, 0);
+
+          const totalDebit = updatedItems
+            .filter((item) => item.payment === "debit")
+            .reduce((total, item) => total + item.totalHarga, 0);
+
           // Update daftar belanja
           const response = await fetch(`${API_ENDPOINT.DAFTARBELANJA}/${_id}`, {
             method: "PUT",
@@ -408,6 +540,8 @@ const Finance = {
               tanggal: selectedDate,
               barang: updatedItems,
               totalBelanja: totalBelanja,
+              totalCash: totalCash,
+              totalDebit: totalDebit,
             }),
           });
 
@@ -458,12 +592,12 @@ const Finance = {
 
           if (confirmDelete.isConfirmed) {
             try {
-              // Get the ID of the item to delete from the closest row
-              const itemId = event.target.closest("tr").getAttribute("data-id"); // Get the item ID from the row
+              const itemId = event.target.closest("tr").getAttribute("data-id");
               const selectedDate =
-                document.querySelector("#dataDatePicker").value; // Get the selected date
+                document.querySelector("#dataDatePicker").value;
+
               const response = await fetch(
-                `${API_ENDPOINT.DAFTARBELANJA}/${selectedDate}/${itemId}`, // Use itemId instead of namaBahan
+                `${API_ENDPOINT.DAFTARBELANJA}/${selectedDate}/${itemId}`,
                 {
                   method: "DELETE",
                 }
@@ -473,23 +607,29 @@ const Finance = {
                 throw new Error(`Gagal menghapus bahan ${namaBahan}.`);
               }
 
-              // Refresh the data after deletion
+              // Refresh data setelah penghapusan
               const existingData = await RBPsource.getDaftarBelanja();
               const currentDateData = existingData.find(
                 (data) => data.tanggal === selectedDate
               );
 
               if (currentDateData) {
-                // Calculate the new total
+                // Hitung ulang total cash, debit, dan total belanja
                 const updatedItems = currentDateData.barang.filter(
                   (item) => item._id !== itemId
                 );
-                const newTotalBelanja = updatedItems.reduce(
-                  (total, item) => total + item.totalHarga, // Use totalHarga for accurate total
-                  0
-                );
 
-                // Update the database with the new total
+                const totalCash = updatedItems
+                  .filter((item) => item.payment === "cash")
+                  .reduce((total, item) => total + item.totalHarga, 0);
+
+                const totalDebit = updatedItems
+                  .filter((item) => item.payment === "debit")
+                  .reduce((total, item) => total + item.totalHarga, 0);
+
+                const newTotalBelanja = totalCash + totalDebit;
+
+                // Update database dengan total baru
                 await fetch(
                   `${API_ENDPOINT.DAFTARBELANJA}/${currentDateData._id}`,
                   {
@@ -499,13 +639,15 @@ const Finance = {
                     },
                     body: JSON.stringify({
                       tanggal: selectedDate,
-                      barang: updatedItems, // Update barang yang baru
-                      totalBelanja: newTotalBelanja, // Gunakan total belanja terbaru
+                      barang: updatedItems,
+                      totalCash: totalCash,
+                      totalDebit: totalDebit,
+                      totalBelanja: newTotalBelanja,
                     }),
                   }
                 );
 
-                // Update the displayed total in the UI
+                // Update total yang ditampilkan di UI
                 document.querySelector(
                   "#totalBelanja"
                 ).textContent = `Rp. ${newTotalBelanja.toLocaleString(
@@ -531,9 +673,7 @@ const Finance = {
     document
       .getElementById("submit-button")
       .addEventListener("click", async () => {
-        const selectedDate = document.querySelector("#dataDatePicker").value; // Use the correct date picker ID
-        // console.log("Selected Date:", selectedDate); // Log the selected date value
-
+        const selectedDate = document.querySelector("#dataDatePicker").value;
         const shoppingTableRows = document.querySelectorAll(
           "#shoppingListTable tr"
         );
@@ -543,45 +683,60 @@ const Finance = {
         shoppingTableRows.forEach((row) => {
           const namaBahan = row.querySelector("td:nth-child(2)").textContent;
           const jumlah = parseInt(
-            row.querySelector("td:nth-child(4) input").value, // Update to the correct column for quantity
+            row.querySelector("td:nth-child(4) input").value,
             10
           );
           const hargaPerItem = parseInt(
             row
               .querySelector("td:nth-child(3)")
               .textContent.replace("Rp. ", "")
-              .replace(".", ""), // Menghapus titik untuk menghindari kesalahan konversi
+              .replace(".", ""),
             10
           );
-          const totalHarga = hargaPerItem * jumlah; // Hitung total harga berdasarkan jumlah
+          const totalHarga = hargaPerItem * jumlah;
+
+          // Dapatkan metode pembayaran
+          const paymentRadios = row.querySelectorAll('input[name^="payment-"]');
+          const payment = Array.from(paymentRadios).find(
+            (radio) => radio.checked
+          ).value;
 
           newItems.push({
             namaBahan,
             jumlah,
-            harga: hargaPerItem, // Store unit price
-            totalHarga: totalHarga, // Store total price
+            harga: hargaPerItem,
+            totalHarga,
+            payment, // Tambahkan metode pembayaran
           });
         });
 
-        // Ambil nilai totalBelanja yang ada di footer tabel
-        const totalBelanjaElement = document.querySelector("#totalBelanja");
-        const existingTotalBelanja = totalBelanjaElement
-          ? parseInt(
-              totalBelanjaElement.textContent
-                .replace("Rp. ", "")
-                .replace(".", ""),
-              10
-            )
-          : 0; // Jika tidak ada, default ke 0
+        // Proses penggabungan item dengan nama yang sama dan metode pembayaran yang berbeda
+        const mergedItems = {};
+        newItems.forEach((item) => {
+          const key = `${item.namaBahan}-${item.payment}`; // Buat key unik berdasarkan nama bahan dan metode pembayaran
+          if (mergedItems[key]) {
+            // Jika sudah ada, tambahkan jumlah dan totalHarga
+            mergedItems[key].jumlah += item.jumlah;
+            mergedItems[key].totalHarga += item.totalHarga;
+          } else {
+            // Jika belum ada, masukkan item baru
+            mergedItems[key] = { ...item };
+          }
+        });
 
-        // Hitung total belanja dari item baru
-        const totalBelanjaFromNewItems = newItems.reduce(
-          (total, item) => total + item.totalHarga, // Use totalHarga for new items
-          0
-        );
+        // Ubah mergedItems ke array
+        const finalItems = Object.values(mergedItems);
 
-        // Hitung total belanja keseluruhan
-        const totalBelanja = existingTotalBelanja + totalBelanjaFromNewItems;
+        // Hitung total cash dan debit
+        const totalCash = finalItems
+          .filter((item) => item.payment === "cash")
+          .reduce((total, item) => total + item.totalHarga, 0);
+
+        const totalDebit = finalItems
+          .filter((item) => item.payment === "debit")
+          .reduce((total, item) => total + item.totalHarga, 0);
+
+        const totalBelanja = totalCash + totalDebit;
 
         const currentDateData = await getCurrentDateData(selectedDate);
         console.log("current date data:", currentDateData);
@@ -642,6 +797,8 @@ const Finance = {
               tanggal: selectedDate,
               barang: newItems, // Ensure this matches the expected structure
               totalBelanja: totalBelanja, // Gunakan total belanja terbaru
+              totalCash: totalCash, 
+              totalDebit: totalDebit,
             }),
           });
           tableBody.innerHTML = "";
@@ -678,6 +835,8 @@ const Finance = {
         }
       });
     setTodayDate();
+    // Fill Today Stock Data
+    await isStocksDataExist();
     // updateShoppingListTable();
   },
 };

@@ -1,7 +1,7 @@
 import {
-  isAnyStockDataShell,
   putStockData,
   putNewStockData,
+  isStocksDataExist,
 } from "../../../data/utils/stockHandler";
 import RBPsource from "../../../data/source";
 import { allSalesData, allStocksData } from "../../../data/allData";
@@ -21,8 +21,10 @@ export async function updateRotiStock() {
   );
 
   if (rotiData) {
-    await isAnyStockDataShell(todayDate);
 
+    await isStocksDataExist();
+    // console.log("batalin isanystockdatashell");
+    
     const rotiItem = rotiData.barang.find((item) => item.namaBahan === "Roti");
     const rotiQuantity = rotiItem ? rotiItem.jumlah : 0;
     console.log("stok baru", rotiQuantity);

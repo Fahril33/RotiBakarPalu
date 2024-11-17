@@ -1,6 +1,6 @@
 import API_ENDPOINT from "../../config/config";
 import { getCurrentDate } from "../../scripts/utils/datePicker";
-import { allStocksData } from "../allData";
+import { allStockDataByDate, allStocksData } from "../allData";
 
 export async function putStockData(
   date,
@@ -52,7 +52,6 @@ export async function putNewStockData(date, stockData) {
 }
 
 export async function updateSoldStockData(sold, remainingStock, date) {
-  await isAnyStockDataShell();
   try {
     const response = await fetch(`${API_ENDPOINT.STOCKS}/date/${date}`, {
       method: "PUT",
@@ -96,9 +95,12 @@ export async function postStockData(stockData) {
 
 export async function isStocksDataExist() {
   const anyStockData = (await allStocksData()).todayStock;
+  console.log("anystockdata", anyStockData);
   const yesterdayRemainingStock = (await allStocksData())
     .yesterdayRemainingStock;
+
   const date = getCurrentDate().pickedDate;
+  
   if (anyStockData == 0) {
     const emptyData = {
       date: date,
@@ -110,6 +112,8 @@ export async function isStocksDataExist() {
       remaining_stock: yesterdayRemainingStock,
       total_stock: yesterdayRemainingStock,
     };
+    console.log("calon data", emptyData);
+
     postStockData(emptyData);
     const newTodatStockDataExist = (await allStocksData()).todayStock;
     console.log("data gaada, nih yang baru", newTodatStockDataExist);
@@ -130,6 +134,18 @@ export async function isAnyStockDataShell(date) {
     total_stock: 0,
   };
   postStockData(emptyData);
-  const newTodatStockDataExist = (await allStocksData()).todayStock;
-  console.log("shell gaada, nih yang baru", newTodatStockDataExist);
+  const newTodayStockDataExist = (await allStockDataByDate(date)).filteredData;
+  console.log("shell gaada, nih yang baruu", newTodayStockDataExist);
+}
+
+export async function stockConverter(value) {
+  if (value >= 0 && value <= 5) {
+    return "rendah";
+  } else if (value >= 6 && value <= 15) {
+    return "sedang";
+  } else if (value > 15) {
+    return "tinggi";
+  } else {
+    return "Nilai tidak valid"; // Menangani nilai negatif atau tidak valid
+  }
 }

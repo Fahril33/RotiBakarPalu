@@ -4,22 +4,22 @@ import {
 } from "../template/template-creator";
 import RBPsource from "../../../data/source";
 import API_ENDPOINT from "../../../config/config";
-import { displayerIncome, displayerSold } from "../../utils/sales/counterData";
+import {
+  displayerHolidays,
+  displayerIncome,
+  displayerSold,
+  displayerWeather,
+} from "../../utils/sales/displayerData";
 import { handleFormSubmit } from "../../utils/sales/form-handler";
 import { showModal, closeModal } from "../../utils/sales/modal-handler";
-import { datePickerValue, getCurrentDate } from "../../utils/datePicker";
-import {
-  bagIcon,
-  soldIcon,
-  weatherIcon,
-  tomorrowWeatherIcon,
-  weekendIcon,
-  eventIcon,
-} from "../../utils/icons";
-import { logDatesSince } from "../../utils/syncData";
-import { isStocksDataExist } from "../../../data/utils/stockHandler";
-import { allStockDataByDate } from "../../../data/allData";
+import { getCurrentDate } from "../../utils/datePicker";
+import { bagIcon, soldIcon } from "../../utils/icons";
 
+import { syncSoldToPrediction } from "../../../data/utils/predictionHandler";
+
+import { fetchDataAndTrainModel, usePrediction } from "../../utils/algorithm";
+import { getHolidayValue } from "../../../data/utils/holidayHandler";
+import { checkWeatherData } from "../../../data/utils/weatherHandler";
 const Sales = {
   async render() {
     return `
@@ -32,25 +32,12 @@ const Sales = {
   },
 
   async afterRender() {
-    // Fill Today Stock Data
-    isStocksDataExist();
-
     // image render
     document.getElementById("imgPredict").src = bagIcon;
     document.querySelector('img[alt="soldIcon"]').src = soldIcon;
-    document.querySelector('img[alt="weatherIcon"]').src = weatherIcon;
-    document.querySelector('img[alt="tomorowWeatherIcon"]').src =
-      tomorrowWeatherIcon;
-    document.querySelector('img[alt="weekendIcon"]').src = weekendIcon;
-    document.querySelector('img[alt="eventIcon"]').src = eventIcon;
 
     this.initializeDatePicker();
     await this.displaySalesData();
-
-    // const date = (await datePickerValue()).dateValue
-    // const date = "2024-11-06";
-    
-
 
     // FormHandler-Input
     const form = document.querySelector(".purchase-form form");
@@ -59,6 +46,13 @@ const Sales = {
       await handleFormSubmit(API_ENDPOINT, this);
       await this.displaySalesData();
     });
+
+    // await getHolidayValue();
+    // await checkWeatherData();
+    // await fetchDataAndTrainModel();
+
+    await usePrediction()
+   
   },
 
   initializeDatePicker() {
@@ -101,12 +95,14 @@ const Sales = {
     try {
       const sales = await RBPsource.salesData();
       const filteredData = sales.find((entry) => entry.date === selectedDate);
-      console.log(`Data for date ${selectedDate}:`, filteredData);
+      // console.log(`Data for date ${selectedDate}:`, filteredData);
       this.populateSalesTable(filteredData);
 
-      await logDatesSince();
+      // await logDatesSince();
       await displayerSold();
       await displayerIncome();
+      await displayerWeather();
+      await displayerHolidays();
     } catch (error) {
       console.error("Error filtering data:", error);
     }
@@ -115,6 +111,7 @@ const Sales = {
   async displaySalesData() {
     await displayerSold();
     await displayerIncome();
+    await displayerWeather();
     await this.filterDataByDate(
       document.getElementById("dataDatePicker").value
     );
@@ -224,6 +221,11 @@ const Sales = {
 
         await this.displaySalesData();
         closeModal(modal);
+
+        //
+        // Sesuaikan Nilai Terjual di Prediciton
+        //
+        await syncSoldToPrediction(date);
       } catch (error) {
         console.error("An error occurred while updating data:", error);
       }
@@ -261,6 +263,11 @@ const Sales = {
         console.log("Sale data successfully deleted:", result);
 
         await this.displaySalesData();
+
+        //
+        // Sesuaikan Nilai Terjual di Prediciton
+        //
+        await syncSoldToPrediction(date);
       } catch (error) {
         console.error("An error occurred while deleting data:", error);
       }

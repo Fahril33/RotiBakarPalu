@@ -1,6 +1,9 @@
 import generateID from "./generateID";
 import RBPsource from "../../../data/source";
 import { datePickerValue } from "../datePicker";
+import { stockConverter } from "../../../data/utils/stockHandler";
+import { allPredictionDataByDate } from "../../../data/allData";
+import { isPredictionDataExist, putPredictionData, syncSoldToPrediction } from "../../../data/utils/predictionHandler";
 
 export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
   // Ambil nilai dari input form
@@ -31,6 +34,14 @@ export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
   //   time: time,
   //   day: day,
   // };
+  let totalMerchantIncome = 0; 
+  let totalOutletIncome = 0; 
+
+  if (lokasi === "outlet") {
+    totalOutletIncome = income;
+  } else if (lokasi === "merchant") {
+    totalMerchantIncome = income; 
+  }
 
   const salesData = {
     id: id, // Ganti dengan ID yang sesuai
@@ -47,6 +58,8 @@ export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
     ],
     totalQuantity: jumlah, // Total jumlah yang terjual
     totalIncome: income, // Total pendapatan
+    totalMerchantIncome: totalMerchantIncome,
+    totalOutletIncome: totalOutletIncome,
   };
   console.log("Data penjualan:", salesData);
 
@@ -94,6 +107,12 @@ export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
 
       // Perbarui tampilan tabel dengan data terbaru
       salesInstance.populateSalesTable(updatedSalesData);
+
+      //
+      // Sesuaikan Nilai Terjual di Prediciton
+      //
+
+      await syncSoldToPrediction(formattedDate);
     } catch (error) {
       console.error("Terjadi kesalahan saat memperbarui data:", error);
     }
@@ -124,6 +143,23 @@ export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
 
       // Perbarui tampilan tabel dengan data terbaru
       salesInstance.populateSalesTable(updatedSalesData);
+
+      const soldConvertedValue = await stockConverter(jumlah);
+      const predicitionData = {
+        terjual: soldConvertedValue,
+      };
+
+      const isPredictionShellAvailable = (
+        await allPredictionDataByDate(formattedDate)
+      ).filteredData;
+      if (isPredictionShellAvailable === `none`) {
+        await isPredictionDataExist(formattedDate);
+        console.log("shell predicition dibuat dibuat, lanjut put");
+        await putPredictionData(predicitionData, formattedDate);
+      } else {
+        console.log("shell prediction sudah ada, skip ke put");
+        await putPredictionData(predicitionData, formattedDate);
+      }
     } catch (error) {
       console.error("Terjadi kesalahan saat menyimpan data:", error);
     }

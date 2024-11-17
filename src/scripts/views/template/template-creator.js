@@ -54,28 +54,32 @@ const createSalesTemplate = () => `
         <h2>Prediksi Penjualan hari ini : $hasilPrediksi</h2>
       </div>
       <div class="dataInfo">
-        <div class="cuaca">
+      <div class="cuaca">
+          <h4>Cuca Hari Ini</h4>
           <img id="imgCuaca" alt="weatherIcon" />
           <div class="textInfo">
-            <h5>Cuaca Hari Ini Mendung</h5>
+            <h5 id="todayWeather"></h5>
           </div>
         </div>
         <div class="cuaca">
+          <h4>Cuca Besok</h4>
           <img id="imgCuaca" alt="tomorowWeatherIcon" />
           <div class="textInfo">
-            <h5>Cuaca Besok Cerah</h5>
+            <h5 id="tomorrowWeather"></h5>
           </div>
         </div>
         <div class="weekend">
+          <h4>Weekend</h4>
           <img id="imgDays" alt="weekendIcon" />
           <div class="textInfo">
-            <h5>Weekend</h5>
+            <h5 id="weekend"></h5>
           </div>
         </div>
         <div class="event">
+          <h4>Hari Raya</h4>
           <img id="imgDays" alt="eventIcon" />
           <div class="textInfo">
-            <h5>Hari Raya Idul Fitri</h5>
+            <h5 id="rayaEvent"></h5>
           </div>
         </div>
       </div>
@@ -209,6 +213,7 @@ const createFinanceTemplate = (datetime) => `
   <!-- pembelian -->
   <div class="card">
     <div class="containerShopping">
+      <h2> Show Warning, 3 Hari lagi ada EVENT/RAYA</h2> 
       <h2>Pembelian ${datetime} (pertimbangkan hapus tgl ini)</h2>
       <p id="purchase_Name">Roti</p>
       <div class="shoppingItemQuantity">
@@ -466,6 +471,7 @@ const createFinanceTemplate = (datetime) => `
               <th width="20%">Harga Satuan</th>
               <th width="10%">Quantity</th>
               <th width="20%">Total Harga</th>
+              <th width="20%">Pembayaran</th>
             </tr>
           </thead>
           <tbody id="shoppingListTable">

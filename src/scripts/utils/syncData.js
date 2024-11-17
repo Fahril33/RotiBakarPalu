@@ -1,6 +1,19 @@
 // import { minusOneDayStockData } from "../../data/allData";
-import { allSalesDataByDate, allShoplistDataByDate, allStockDataByDate } from "../../data/allData";
-import { isAnyStockDataShell, putNewStockData } from "../../data/utils/stockHandler";
+import {
+  allFinanceDataByDate,
+  allSalesDataByDate,
+  allShoplistDataByDate,
+  allStockDataByDate,
+} from "../../data/allData";
+import {
+  createNewFinanceDataShell,
+  putFinanceData,
+} from "../../data/utils/financeHandler";
+import { syncSoldToPrediction } from "../../data/utils/predictionHandler";
+import {
+  isAnyStockDataShell,
+  putNewStockData,
+} from "../../data/utils/stockHandler";
 import { datePickerValue } from "./datePicker";
 
 // Tambahkan fungsi ini di luar logDatesSince
@@ -36,11 +49,13 @@ export async function logDatesSince() {
 
       const formattedDateMinusOne = await subtractOneDay(formattedDate);
 
-      // 
+      //
       // Sync Stock
-      // 
-      let initialStock = (await allStockDataByDate(formattedDateMinusOne)).remainingStock;
-      let additionalStock =  (await allShoplistDataByDate(formattedDate)).rotiQuantity;
+      //
+      let initialStock = (await allStockDataByDate(formattedDateMinusOne))
+        .remainingStock;
+      let additionalStock = (await allShoplistDataByDate(formattedDate))
+        .rotiQuantity;
       let spoiledStock = (await allStockDataByDate(formattedDate)).spoiledStock;
       let soldStock = (await allSalesDataByDate(formattedDate)).soldTotal;
       let totalStock = initialStock + additionalStock;
@@ -48,24 +63,90 @@ export async function logDatesSince() {
 
       let stockData = {
         initial_stock: initialStock,
-        additional_stock: additionalStock,  
+        additional_stock: additionalStock,
         spoiled_stock: spoiledStock,
         sold_stock: soldStock,
         total_stock: totalStock,
         remaining_stock: remainingStock,
-      }
-      
-      let isAvailable = (await allStockDataByDate(formattedDate)).filteredData;
-      if (isAvailable === `none`) {
+      };
+
+      let isStockShellAvailable = (await allStockDataByDate(formattedDate))
+        .filteredData;
+      if (isStockShellAvailable === `none`) {
         console.log("gaada bang, wait ditambahin");
-        await isAnyStockDataShell(formattedDate)
+        await isAnyStockDataShell(formattedDate);
+        console.log("oke udah ditambahin, lanjut sinkron data stock");
         await putNewStockData(formattedDate, stockData);
-        console.log("oke udah ditambahin");
-        
+        console.log(
+          "Data stok untuk",
+          formattedDate,
+          "sinkron dengan",
+          formattedDateMinusOne
+        );
       } else {
         await putNewStockData(formattedDate, stockData);
-        console.log("ada bang");
-        console.log("ini bang", isAvailable);
+        console.log("ada, ini bang", isStockShellAvailable);
+      }
+
+      //
+      // Sync Stock To Prediction
+      //
+      await syncSoldToPrediction(formattedDate);
+
+      //
+      // Sync Finance
+      //
+
+      let inCash = (await allSalesDataByDate(formattedDate)).totalOutletIncome;
+      let inDebit = (await allSalesDataByDate(formattedDate))
+        .totalMerchantIncome;
+      let outCash = (await allShoplistDataByDate(formattedDate)).totalShopCash;
+      let outDebit = (await allShoplistDataByDate(formattedDate))
+        .totalShopDebit;
+      let ydayTotalCash = (await allFinanceDataByDate(formattedDateMinusOne))
+        .totalCash;
+      let ydayTotalDebit = (await allFinanceDataByDate(formattedDateMinusOne))
+        .totalDebit;
+      let cashToDebit = (await allFinanceDataByDate(formattedDate)).cashToDebit;
+      let debitToCash = (await allFinanceDataByDate(formattedDate)).debitToCash;
+
+      let financeData = {
+        in_cash: inCash,
+        in_debit: inDebit,
+        out_cash: outCash,
+        out_debit: outDebit,
+        total_cash: ydayTotalCash + inCash - outCash - cashToDebit,
+        total_debit: ydayTotalDebit + inDebit - outDebit - debitToCash,
+      };
+
+      console.log("calon data", financeData);
+
+      let isFinanceShellAvailable = (await allFinanceDataByDate(formattedDate))
+        .filteredData;
+      if (isFinanceShellAvailable === `none`) {
+        console.log("gaada shell bang, wait ditambahin dulu");
+        await createNewFinanceDataShell(formattedDate);
+        console.log("oke udah ditambahin, lanjut sinkron data finance");
+        await putFinanceData(financeData, formattedDate);
+        console.log(
+          "Data finance untuk",
+          formattedDate,
+          "sinkron dengan",
+          formattedDateMinusOne
+        );
+      } else {
+        console.log(
+          "shell ada nih bang:",
+          isFinanceShellAvailable,
+          "skip ke sinkron data"
+        );
+        await putFinanceData(financeData, formattedDate);
+        console.log(
+          "Data finance untuk",
+          formattedDate,
+          "sinkron dengan",
+          formattedDateMinusOne
+        );
       }
 
       // Tambahkan jeda sebelum melanjutkan ke tanggal berikutnya

@@ -1,5 +1,6 @@
 import UrlParser from "../routes/url-parser";
 import routes from "../routes/routes";
+// import { isStocksDataExist } from "../../data/utils/stockHandler";
 
 class App {
   constructor({ content }) {
@@ -12,7 +13,8 @@ class App {
     this._content.innerHTML = await page.render(); // Render halaman
     await page.afterRender(); // Panggil afterRender jika ada logika tambahan
 
-    
+    // Fill Today Stock Data
+    // await isStocksDataExist();
   }
 }
 

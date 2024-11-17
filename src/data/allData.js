@@ -10,18 +10,23 @@ export async function allSalesDataByDate(date) {
   const todaySales = allSalesDatas.find((sale) => sale.date === date) || {};
   const soldTotal = todaySales.totalQuantity || 0;
   const incomeTotal = todaySales.totalIncome || 0;
+  const totalMerchantIncome = todaySales.totalMerchantIncome || 0;
+  const totalOutletIncome = todaySales.totalOutletIncome || 0;
 
   return {
     todaySales,
     soldTotal,
     incomeTotal,
+    totalMerchantIncome,
+    totalOutletIncome,
   };
 }
 
 export async function allStockDataByDate(date) {
   const allStockDatas = await RBPsource.getStocks();
   // console.log("all stock bang", allStockDatas);
-  const filteredData = allStockDatas.find((stock) => stock.date === date) || `none`;
+  const filteredData =
+    allStockDatas.find((stock) => stock.date === date) || `none`;
 
   const {
     initial_stock: initialStock = 0,
@@ -48,6 +53,11 @@ export async function allStockDataByDate(date) {
 export async function allShoplistDataByDate(date) {
   const shoppingListData = await RBPsource.getDaftarBelanja();
   // console.log("date", date);
+  const todayShoplist =
+    shoppingListData.find((item) => item.tanggal === date) || {};
+  const totalShopCash = todayShoplist.totalCash || 0;
+  const totalShopDebit = todayShoplist.totalDebit || 0;
+  const totalBelanja = todayShoplist.totalBelanja || 0;
 
   const rotiData = shoppingListData.find(
     (entry) =>
@@ -60,18 +70,70 @@ export async function allShoplistDataByDate(date) {
     const rotiItem = rotiData.barang.find((item) => item.namaBahan === "Roti");
     const rotiQuantity = rotiItem ? rotiItem.jumlah : 0;
     console.log("roti segini", rotiQuantity);
-    
-    return { rotiQuantity };
+
+    return { rotiQuantity, totalShopCash, totalShopDebit, totalBelanja };
   }
-  return { rotiQuantity:0 };
+  return { rotiQuantity: 0, totalShopCash, totalShopDebit, totalBelanja };
+}
+
+export async function allFinanceDataByDate(date) {
+  const allFinanceData = await RBPsource.getFinances();
+  const filteredData =
+    allFinanceData.find((item) => item.date === date) || `none`;
+
+  const {
+    in_cash: inCash = 0,
+    in_debit: inDebit = 0,
+    out_cash: outCash = 0,
+    out_debit: outDebit = 0,
+    total_cash: totalCash = 0,
+    total_debit: totalDebit = 0,
+    cash_to_debit: cashToDebit = 0,
+    debit_to_cash: debitToCash = 0,
+  } = filteredData;
+
+  return {
+    filteredData,
+    inCash,
+    inDebit,
+    outCash,
+    outDebit,
+    totalCash,
+    totalDebit,
+    cashToDebit,
+    debitToCash,
+  };
+}
+
+export async function allPredictionDataByDate(date) {
+  const allPredictionData = await RBPsource.getPredictions();
+  const filteredData =
+    allPredictionData.find((data) => data.date === date) || `none`;
+
+  const {
+    cuaca_besok: cuacaBesok = "none",
+    cuaca: cuaca = "none",
+    weekend: weekend = "none",
+    libur: libur = "none",
+    event_raya: raya = "untracked",
+  } = filteredData;
+
+  return {
+    filteredData,
+    cuaca,
+    cuacaBesok,
+    weekend,
+    libur,
+    raya
+  };
 }
 
 export async function allStocksData() {
   const stocks = await RBPsource.getStocks();
   const datePicked = (await datePickerValue()).dateValue;
-  const minusOneDayDateStock = (await minusOneDayDate()).resultDate;
+  const minusOneDayDateValue = (await minusOneDayDate()).resultDate;
   const minusOneDateValueStock =
-    stocks.find((stock) => stock.date === minusOneDayDateStock) || 0;
+    stocks.find((stock) => stock.date === minusOneDayDateValue) || 0;
   const todayStock = stocks.find((stock) => stock.date === datePicked) || 0;
   const yesterdayStock =
     stocks.find((stock) => stock.date === getYesterdayDate().yesterday) || {};

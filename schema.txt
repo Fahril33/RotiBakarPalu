@@ -1,0 +1,23 @@
+date: "", => today date (sync)
+in_cash: 500000, 	=>	sales(totalOutletIncome)
+in_debit: 250000, 	=> 	sales(totalMerchantIncome)
+out_cash: 100000,	=>	daftarBelanja(totalCash)
+out_debit: 50000,	=>	daftarBelanja(totalDebit)
+
+total_cash: 600000,	=>	finance(yesterday/total_cash) + in_cash - out_cash - cash_to_debit
+
+total_debit: 300000,	=>	finance(yesterday/total_debit) + in_debit - out_debit - debit_to_cash
+
+cash_to_debit: 20000,	=>	input
+debit_to_cash: 15000	=>	input
+
+TODO:
+tambahkan listener server realtime
+
+date: String        => auto
+weekend: Boolean    => API calendar
+libur: Boolean      => API holiday
+cuaca: String       => API cuaca BMKG
+event_raya: String  => API holiday
+terjual: String,    => convert from sales.totaQuantity
+hasil: String,      => result

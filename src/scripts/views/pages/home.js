@@ -1,5 +1,5 @@
-// home.js
-import RBPsource from "../../../data/source";
+
+import RBPsource, { bacaHariLibur, getHolidays } from "../../../data/source";
 
 const Home = {
   async render() {
@@ -12,6 +12,10 @@ const Home = {
   },
 
   async afterRender() {
+
+    // await getHolidays()
+    // await bacaHariLibur()
+    
     try {
       // Ambil data stok
       let stockData = await RBPsource.getStocks();
