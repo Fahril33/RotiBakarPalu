@@ -1,6 +1,7 @@
 import RBPsource from "./source";
 import {
   datePickerValue,
+  getCurrentDate,
   getYesterdayDate,
   minusOneDayDate,
 } from "../scripts/utils/datePicker";
@@ -81,6 +82,29 @@ export async function allFinanceDataByDate(date) {
   const filteredData =
     allFinanceData.find((item) => item.date === date) || `none`;
 
+  const filteredDataThisMonth = allFinanceData.filter((item) => {
+    const itemDate = new Date(item.date);
+    const itemMonth = itemDate.getMonth() + 1; // Menambahkan 1 karena getMonth() mulai dari 0
+    const itemYear = itemDate.getFullYear();
+    const monthToFilter = parseInt(getCurrentDate().month, 10);
+    const yearToFilter = parseInt(getCurrentDate().year, 10);
+
+    return itemMonth === monthToFilter && itemYear === yearToFilter;
+  });
+
+  // Inisialisasi total
+  let totalIncome = 0;
+  let totalExpense = 0;
+
+  // Hitung total pemasukan dan pengeluaran
+  filteredDataThisMonth.forEach((item) => {
+    totalIncome += item.in_cash + item.in_debit; // Total pemasukan
+    totalExpense += item.out_cash + item.out_debit; // Total pengeluaran
+  });
+
+  // Hitung keuntungan
+  const profit = totalIncome - totalExpense;
+
   const {
     in_cash: inCash = 0,
     in_debit: inDebit = 0,
@@ -93,6 +117,10 @@ export async function allFinanceDataByDate(date) {
   } = filteredData;
 
   return {
+    filteredDataThisMonth,
+    totalIncome,
+    totalExpense,
+    profit,
     filteredData,
     inCash,
     inDebit,
@@ -105,10 +133,10 @@ export async function allFinanceDataByDate(date) {
   };
 }
 
-export async function allPredictionDataByDate(date) {
+export async function allPredictionDataByDate(dates) {
   const allPredictionData = await RBPsource.getPredictions();
   const filteredData =
-    allPredictionData.find((data) => data.date === date) || `none`;
+    allPredictionData.find((data) => data.date === dates) || `none`;
 
   const {
     cuaca_besok: cuacaBesok = "none",
@@ -116,6 +144,8 @@ export async function allPredictionDataByDate(date) {
     weekend: weekend = "none",
     libur: libur = "none",
     event_raya: raya = "untracked",
+    hasil_prediksi: hasilPrediksi = "none",
+    operasional: operasional = "none",
   } = filteredData;
 
   return {
@@ -124,7 +154,9 @@ export async function allPredictionDataByDate(date) {
     cuacaBesok,
     weekend,
     libur,
-    raya
+    raya,
+    hasilPrediksi,
+    operasional,
   };
 }
 

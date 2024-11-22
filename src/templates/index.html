@@ -4,6 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RotiBakar Palu</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <header>
@@ -33,7 +42,14 @@
 
       <!-- Header -->
       <div class="container-profile">
-        <div class="date"></div>
+        <div class="toggle-button-cover">
+          <div id="button-3" class="button r">
+            <input class="checkbox" type="checkbox" />
+            <div class="knobs"></div>
+            <div class="layer"></div>
+          </div>
+        </div>
+
         <div class="profile-container">
           <img
             src="https://via.placeholder.com/40"
@@ -49,6 +65,46 @@
       </div>
     </header>
 
+    <div class="tooltip-container">
+      <div class="button-content">
+        <img
+          class="share-icon"
+          alt="Navigation Icon"
+          viewBox="0 0 24 24"
+          width="24"
+          height="24"
+        >
+      </div>
+      <div class="tooltip-content">
+        <div class="item-icons">
+          <a href="#/home" class="social-icon home">
+            <img
+              alt="Beranda Icon"
+              viewBox="0 0 24 24"
+              width="24"
+              height="24"
+            />
+          </a>
+          <a href="#/sales" class="social-icon sales">
+            <img
+              alt="Penjualan Icon"
+              viewBox="0 0 24 24"
+              width="24"
+              height="24"
+            />
+          </a>
+          <a href="#/finance" class="social-icon finance">
+            <img
+              alt="Keuangan Icon"
+              viewBox="0 0 24 24"
+              width="24"
+              height="24"
+            />
+          </a>
+        </div>
+      </div>
+    </div>
+
     <div class="overlay" style="display: none"></div>
     <div class="custom-loader" style="display: none">
       <div class="loader-icon"></div>
@@ -56,10 +112,6 @@
     </div>
 
     <main id="mainContent"></main>
-
-    
-
-    
   </body>
   <footer></footer>
 </html>

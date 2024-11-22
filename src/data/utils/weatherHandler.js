@@ -6,7 +6,7 @@ import { allPredictionDataByDate } from "../allData";
 import { getCuacaJam17 } from "../source";
 import { postPredictionData, putPredictionData } from "./predictionHandler";
 
-export async function weatherData() {
+async function weatherData() {
   const { cuacaData1, cuacaData2, cuacaData3 } = await getCuacaJam17();
 
   console.log("1", cuacaData1);
@@ -33,7 +33,7 @@ export async function weatherData() {
   const filteredTomorrowData = cuacaDataArray.filter((data) => {
     if (data && data.local_datetime) {
       const localDate = data.local_datetime.split(" ")[0]; // Ambil hanya bagian tanggal
-      console.log("localDate", localDate);
+      // console.log("localDate", localDate);
       return localDate === tomorrowString; // Bandingkan dengan tanggal besok
     }
     return false; // Jika data tidak ada, kembalikan false
@@ -106,11 +106,8 @@ export async function weatherData() {
 
 export async function checkWeatherData() {
   const data = await weatherData();
-  console.log("dayta", data);
+  const { todayWeather, tomorrowWeather } = data;
 
-  // await weatherData()
-  const todayWeather = (await weatherData()).todayWeather;
-  const tomorrowWeather = (await weatherData()).tomorrowWeather;
   console.log("tdw", todayWeather);
   console.log("tmw", tomorrowWeather);
 
@@ -122,6 +119,7 @@ export async function checkWeatherData() {
   //
 
   const isAnyToday = (await allPredictionDataByDate(currentDate)).filteredData;
+  console.log('isAnyToday', isAnyToday);
   if (isAnyToday === `none`) {
     const weatherPredictionDataPost = {
       date: currentDate,
@@ -139,7 +137,7 @@ export async function checkWeatherData() {
   } else {
     const todayWeatherValue = (await allPredictionDataByDate(currentDate))
       .cuaca;
-      console.log('twv', todayWeatherValue);
+    console.log("twv", todayWeatherValue);
     if (todayWeatherValue === "none" || todayWeatherValue === "") {
       const weatherPredictionDataPutNone = {
         cuaca: todayWeather,
@@ -170,7 +168,7 @@ export async function checkWeatherData() {
 
   const isAnyTomorrow = (await allPredictionDataByDate(tomorrowDate))
     .filteredData;
-  if (isAnyTomorrow === `none`) {     
+  if (isAnyTomorrow === `none`) {
     console.log("tmtom gada");
     const tomorrowWeatherPredictionDataPost = {
       date: tomorrowDate,
@@ -181,6 +179,7 @@ export async function checkWeatherData() {
       event_raya: "",
       terjual: "",
       manual_update: false,
+      operasional: false,
       hasil_prediksi: "",
     };
     await postPredictionData(tomorrowWeatherPredictionDataPost);

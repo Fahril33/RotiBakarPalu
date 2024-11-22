@@ -5,11 +5,17 @@ export function getCurrentDate() {
   const month = String(now.getMonth() + 1).padStart(2, "0");
   const year = String(now.getFullYear());
   const formattedDate = `${year}-${month}-${day}`;
-  document.getElementById("dataDatePicker").value = formattedDate;
-
+  
+  var datePicker = document.getElementById("dataDatePicker");
+  if (datePicker) {
+    datePicker.value = formattedDate;
+  } else {
+    console.log("Elemen dengan ID 'dataDatePicker' tidak ditemukan.");
+  }
   return {
     pickedDate: formattedDate,
     pickedDaten: `${year}-${month}-${dayn}`,
+    month: month,
     year: year,
     // pickedDate: "2024-10-31",
     reFormattedDate: `${day}-${month}-${year}`,
@@ -31,11 +37,11 @@ export function getTomorrowDate() {
   };
 }
 
-export async function datePickerValue () {
+export async function datePickerValue() {
   const dateValue = document.getElementById("dataDatePicker").value;
-  return {dateValue};
+  return { dateValue };
 }
-  
+
 export function getYesterdayDate() {
   const now = new Date();
   const yesterdayDate = new Date(now);
@@ -67,7 +73,7 @@ export async function minusOneDayDate() {
 
   // console.log("Tanggal -1 hari:", resultDate);
 
-  return{
+  return {
     resultDate,
-  }
+  };
 }

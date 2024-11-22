@@ -40,7 +40,7 @@ export async function getHolidayValue() {
   }
 }
 
-function isWeekend(pickedDate) {
+export function isWeekend(pickedDate) {
   // Mengubah string tanggal (YYYY-MM-DD) menjadi objek Date
   const dateParts = pickedDate.split("-");
   const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]); // Bulan dimulai dari 0

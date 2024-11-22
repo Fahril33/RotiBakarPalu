@@ -45,7 +45,8 @@ export async function logDatesSince() {
       ).padStart(2, "0")}-${String(currentDate.getDate()).padStart(2, "0")}`;
 
       // Menampilkan loader
-      showLoader(true, formattedDate);
+      const syncText = `Sinkronisasi data: ${formattedDate}`
+      showLoader(true, syncText);
 
       const formattedDateMinusOne = await subtractOneDay(formattedDate);
 
@@ -163,7 +164,7 @@ export async function logDatesSince() {
   }
 }
 
-function showLoader(isLoading, date) {
+export function showLoader(isLoading, text) {
   const loader = document.querySelector(".custom-loader");
   const overlay = document.querySelector(".overlay");
   const loaderText = document.querySelector(".loader-text");
@@ -171,9 +172,10 @@ function showLoader(isLoading, date) {
   if (isLoading) {
     overlay.style.display = "block"; // Tampilkan overlay
     loader.style.display = "flex"; // Tampilkan loader
-    loaderText.textContent = `Sinkronasi Data: ${date}`; // Tampilkan tanggal yang sedang diproses
+    loaderText.textContent = `${text}`; // Tampilkan tanggal yang sedang diproses
   } else {
     overlay.style.display = "none"; // Sembunyikan overlay
     loader.style.display = "none"; // Sembunyikan loader
   }
 }
+

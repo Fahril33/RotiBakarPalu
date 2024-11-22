@@ -15,6 +15,9 @@ class App {
 
     // Fill Today Stock Data
     // await isStocksDataExist();
+
+    
+    
   }
 }
 

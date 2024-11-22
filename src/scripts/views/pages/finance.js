@@ -2,7 +2,8 @@ import { createFinanceTemplate } from "../template/template-creator";
 import RBPsource from "../../../data/source";
 import API_ENDPOINT from "../../../config/config";
 import { updateRotiStock } from "../../utils/finance/rotiStockUpdater"; // Import the new function
-import { isStocksDataExist } from "../../../data/utils/stockHandler";
+import { displayFinance } from "../../utils/finance/financialDisplayer";
+// import { isStocksDataExist } from "../../../data/utils/stockHandler";
 // import { minusOneDayDate } from "../../utils/datePicker";
 // import { resetAdditionalStockData } from "../../../data/utils/stockHandler";
 // import { datePickerValue } from "../../utils/datePicker";
@@ -56,7 +57,6 @@ const Finance = {
 
     // Storage to cache quantity values
     const quantityCache = {};
-    
 
     function updateShoppingListTable() {
       // Save current quantities to cache before clearing the table
@@ -85,18 +85,26 @@ const Finance = {
           const rotiQuantity = quantityCache["roti"] || 15; // Use cached value or default to 1
           const rotiTotalPrice = itemData["roti"].price * rotiQuantity; // Calculate total price for Roti
           rotiRow.innerHTML = `
-        <td>${itemCount++}</td>
-        <td>${itemData["roti"].name}</td>
-        <td>Rp. ${itemData["roti"].price.toLocaleString("id-ID")}</td>
-        <td><input type="number" value="${rotiQuantity}" min="1" id="quantity-roti" class="quantity-input"></td>
-        <td>Rp. ${rotiTotalPrice.toLocaleString("id-ID")}</td>
-        <td>
-          <div class="payment-options">
-            <input type="radio" name="payment-roti" value="cash" checked>Cash
-            <input type="radio" name="payment-roti" value="debit">Debit
-          </div>
-        </td>
-      `;
+            <td>${itemCount++}</td>
+            <td>${itemData["roti"].name}</td>
+            <td>Rp. ${itemData["roti"].price.toLocaleString("id-ID")}</td>
+            <td><input type="number" value="${rotiQuantity}" min="1" id="quantity-roti" class="quantity-input"></td>
+            <td>Rp. ${rotiTotalPrice.toLocaleString("id-ID")}</td>
+            <td>
+              <div class="radio-input">
+                <label>
+                  <input value="cash" name="payment-roti" id="payment-roti-cash" type="radio" checked/>
+                  <span>Cash</span>
+                </label>
+                <label>
+                  <input value="debit" name="payment-roti" id="payment-roti-debit" type="radio" />
+                  <span>Debit</span>
+                </label>
+                <span class="selection"></span>
+              </div>
+            </td>
+          `;
+
           tableBody.appendChild(rotiRow);
         }
         // Loop through all checkboxes
@@ -118,11 +126,18 @@ const Finance = {
             <td><input type="number" value="${cachedQuantity}" min="1" id="quantity-${itemId}" class="quantity-input"></td>
             <td>Rp. ${totalPrice.toLocaleString("id-ID")}</td>
             <td>
-              <div class="payment-options">
-                <input type="radio" name="payment-${itemId}" value="cash" checked>Cash
-                <input type="radio" name="payment-${itemId}" value="debit">Debit
+              <div class="radio-input">
+                <label>
+                  <input value="cash" name="payment-${itemId}" id="cash" type="radio" checked/>
+                  <span>Cash</span>
+                </label>
+                <label>
+                  <input value="debit" name="payment-${itemId}" id="debit" type="radio" />
+                  <span>Debit</span>
+                </label>
+                <span class="selection"></span>
               </div>
-            </td>
+            </td> 
           `;
 
               // Add event listener to update total price when quantity changes
@@ -183,6 +198,7 @@ const Finance = {
 
       // Filter and display data based on the selected date
       filterDataByDate(formattedDate);
+      displayFinance(formattedDate);
     }
 
     // Function to handle the date increment or decrement
@@ -218,6 +234,7 @@ const Finance = {
       displayData(filteredData);
     }
 
+    //
     // Event listeners for the buttons
     document
       .getElementById("incrementDate")
@@ -278,15 +295,15 @@ const Finance = {
     </tbody>
     <tfoot>
       <tr>
-        <td colspan="4" style="font-weight: bold; text-align: center;">Total Cash Out</td>
+        <td colspan="4" style="font-weight: bold; text-align: left;">Total Pengeluaran Tunai</td>
         <td colspan="3" id="totalBelanjaCash" style="font-weight: bold;">Rp. 0</td>
       </tr>
       <tr>
-        <td colspan="4" style="font-weight: bold; text-align: center;">Total Debit Out</td>
+        <td colspan="4" style="font-weight: bold; text-align: left;">Total Pengeluaran Kredit</td>
         <td colspan="3" id="totalBelanjaDebit" style="font-weight: bold;">Rp. 0</td>
       </tr>
       <tr>
-        <td colspan="4" style="font-weight: bold; text-align: center;">Total</td>
+        <td colspan="4" style="font-weight: bold; text-align: left;">Total Pengeluaran</td>
         <td colspan="3" id="totalBelanja" style="font-weight: bold;">Rp. 0</td>
       </tr>
     </tfoot>
@@ -304,13 +321,25 @@ const Finance = {
 
           // Tambahkan radio button untuk pembayaran
           const paymentRadioHtml = `
-        <div class="payment-options">
-          <input type="radio" name="payment-${item._id}" value="cash" ${
+        
+        <div class="radio-input">
+          <label>
+            <input value="cash" name="payment-${
+              item._id
+            }" id="cash" type="radio" ${
             item.payment === "cash" ? "checked" : ""
-          }>Cash
-          <input type="radio" name="payment-${item._id}" value="debit" ${
+          }/>
+            <span>Cash</span>
+          </label>
+          <label>
+            <input value="debit" name="payment-${
+              item._id
+            }" id="debit" type="radio" ${
             item.payment === "debit" ? "checked" : ""
-          }>Debit
+          }/>
+            <span>Debit</span>
+          </label>
+          <span class="selection"></span>
         </div>
       `;
 
@@ -797,7 +826,7 @@ const Finance = {
               tanggal: selectedDate,
               barang: newItems, // Ensure this matches the expected structure
               totalBelanja: totalBelanja, // Gunakan total belanja terbaru
-              totalCash: totalCash, 
+              totalCash: totalCash,
               totalDebit: totalDebit,
             }),
           });
@@ -836,7 +865,7 @@ const Finance = {
       });
     setTodayDate();
     // Fill Today Stock Data
-    await isStocksDataExist();
+    // await isStocksDataExist();
     // updateShoppingListTable();
   },
 };

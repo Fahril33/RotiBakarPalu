@@ -91,9 +91,33 @@ ItemsContainer
   width: 40px;
 }
 .hasilPrediksi {
+  display: flex;
+  flex-wrap: nowrap;
   width: 100%;
+  background-color: #c16904;
+  border-radius: 8px;
   box-shadow: 0 4px 8px 0 rgba(230, 230, 230, 0.2),
     0 6px 20px 0 rgba(201, 200, 200, 0.19);
+}
+.hasilPrediksi h3 {
+  width: 90%;
+  margin: 10px;
+  color: #fceeb4;
+}
+.hasilPrediksi button {
+  width: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: none; /* Menghapus background */
+  border: none; /* Menghapus border */
+  padding: 0; /* Menghapus padding */
+  cursor: pointer; /* Menunjukkan bahwa ini adalah elemen yang dapat diklik */
+  outline: none; /* Menghapus outline saat tombol diklik */
+}
+.editBtnImg {
+  width: fit-content;
+  display: block;
 }
 
 .dataInfo {
@@ -132,6 +156,13 @@ ItemsContainer
 @media (max-width: 575.98px) {
   body {
     margin-bottom: 100px;
+  }
+
+  .tooltip-container,
+  .button-content,
+  .tooltip-content {
+    visibility: hidden;
+    display: none;
   }
 
   nav {
@@ -266,7 +297,7 @@ ItemsContainer
 form {
   display: flex;
   flex-wrap: wrap;
-  min-width: 400px;
+  min-width: 300px;
   height: max-content;
   /* margin: 20px 20px 0 20px; */
   padding: 20px;
@@ -344,7 +375,7 @@ tr:nth-child(even) {
 
 @media (min-width: 575.98px) {
   nav {
-    /* display: none; */
+    visibility: hidden;
     position: fixed;
     bottom: 0;
     right: 0;
@@ -472,4 +503,475 @@ tr:nth-child(even) {
   .modal-content {
     overflow-y: auto;
   }
+}
+
+/*
+:::: Outlet Operation Status
+*/
+
+.toggle-button-cover {
+  display: table-cell;
+  position: relative;
+  width: 100px;
+  height: 30px;
+  box-sizing: border-box;
+}
+
+.button-cover {
+  height: 100px;
+  margin: 20px;
+  background-color: #fff;
+  box-shadow: 0 10px 20px -8px #c5d6d6;
+  border-radius: 4px;
+}
+
+.button-cover:before {
+  counter-increment: button-counter;
+  content: counter(button-counter);
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  color: #d7e3e3;
+  font-size: 12px;
+  line-height: 1;
+  padding: 5px;
+}
+
+.button-cover,
+.knobs,
+.layer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.button {
+  position: relative;
+  top: 50%;
+  width: 74px;
+  height: 36px;
+  margin: -20px auto 0 auto;
+  overflow: hidden;
+}
+
+.checkbox {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 3;
+}
+
+.knobs {
+  z-index: 2;
+}
+
+.layer {
+  width: 100%;
+  background-color: #ebf7fc;
+  transition: 0.3s ease all;
+  z-index: 1;
+}
+
+.button.r,
+.button.r .layer {
+  border-radius: 100px;
+}
+
+#button-3 .knobs:before {
+  content: "Close";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 27px;
+  height: 10px;
+  color: #fff;
+  font-size: 10px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 1;
+  padding: 9px 4px;
+  background-color: #f44336;
+  border-radius: 50%;
+  transition: 0.3s ease all, left 0.3s cubic-bezier(0.18, 0.89, 0.35, 1.15);
+}
+
+#button-3 .checkbox:active + .knobs:before {
+  width: 46px;
+  border-radius: 100px;
+}
+
+#button-3 .checkbox:checked:active + .knobs:before {
+  margin-left: -26px;
+}
+
+#button-3 .checkbox:checked + .knobs:before {
+  content: "Open";
+  left: 35px;
+  background-color: #2bd96b;
+}
+
+#button-3 .checkbox:checked ~ .layer {
+  background-color: #fcebeb;
+}
+
+/*
+:::: Navigation Desktop
+*/
+
+/* Container Styles */
+.tooltip-container {
+  position: relative;
+
+  display: inline-block;
+  font-family: "Arial", sans-serif;
+  overflow: visible;
+}
+
+/* Button Styles */
+.button-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ff6600, #e48240);
+  color: white;
+  padding: 14px 28px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+    transform 0.3s ease, box-shadow 0.4s ease;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  right: 10px;
+  bottom: 10px;
+  width: 50px;
+
+  z-index: 101;
+  overflow: hidden;
+}
+
+.button-content::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(251, 178, 110, 0.4),
+    rgba(227, 164, 119, 0.4)
+  );
+  filter: blur(15px);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  z-index: -1;
+}
+
+.button-content::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 0, 0, 0.3) 0%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  transform: scale(0);
+  transition: transform 0.6s ease-out;
+  z-index: -1;
+}
+
+.button-content:hover::before {
+  opacity: 1;
+}
+
+.button-content:hover::after {
+  transform: scale(1);
+}
+
+.button-content:hover {
+  background: linear-gradient(135deg, #e39977, #eb6130);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+  transform: translateY(-4px) scale(1.03);
+}
+
+.button-content:active {
+  transform: translateY(-2px) scale(0.98);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+}
+
+.text {
+  font-size: 18px;
+  font-weight: 600;
+  margin-right: 12px;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: letter-spacing 0.3s ease;
+}
+
+.button-content:hover .text {
+  letter-spacing: 1px;
+}
+
+.share-icon {
+  fill: white;
+  transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    fill 0.3s ease;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.button-content:hover .share-icon {
+  transform: rotate(315deg) scale(1.1);
+  fill: #ffffff;
+}
+
+/* Tooltip Styles */
+.tooltip-content {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  transform: translateY(35%) translateX(5%) scale(0.1);
+  background: #ff6600;
+  border-radius: 15px;
+  padding: 22px;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  visibility: visible;
+  transition: opacity 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55), visibility 0.5s ease;
+  z-index: 100;
+  pointer-events: none;
+  backdrop-filter: blur(10px);
+  /* background: rgba(255, 255, 255, 0.9); */
+}
+
+.tooltip-container:hover .tooltip-content {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(13%) translateX(11px) scale(0.7);
+  pointer-events: auto;
+  padding-bottom: 100px;
+}
+
+/* Social Icons Styles */
+.item-icons {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.social-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    background 0.3s ease, box-shadow 0.4s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.social-icon::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.social-icon:hover::before {
+  opacity: 1;
+}
+
+.social-icon img {
+  width: 24px;
+  height: 24px;
+  fill: #333;
+  transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    fill 0.3s ease;
+  z-index: 1;
+}
+
+.social-icon:hover {
+  transform: translateY(-5px) scale(1.1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.social-icon:active {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+}
+
+.social-icon:hover img {
+  transform: scale(1.2);
+  fill: white;
+}
+
+.social-icon.home:hover {
+  background: linear-gradient(135deg, #c16904, #dd8c2e);
+}
+
+.social-icon.sales:hover {
+  background: linear-gradient(135deg, #c16904, #c16904);
+}
+
+.social-icon.finance:hover {
+  background: linear-gradient(135deg, #c16904, #c16904);
+}
+
+/* Animation for Pulse Effect */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(230, 92, 33, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 20px rgba(251, 190, 110, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(251, 169, 110, 0);
+  }
+}
+
+.button-content {
+  animation: pulse 3s infinite;
+}
+
+/* Hover Ripple Effect */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.button-content::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: inherit;
+  transform: scale(0);
+  opacity: 0;
+}
+
+.button-content:active::before {
+  animation: ripple 0.6s linear;
+}
+
+/* Accessibility */
+.button-content:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(251, 178, 110, 0.5), 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.button-content:focus:not(:focus-visible) {
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .button-content {
+    padding: 12px 24px;
+    border-radius: 40px;
+  }
+
+  .text {
+    font-size: 16px;
+  }
+
+  .tooltip-content {
+    /* width: 240px; */
+    padding: 18px;
+  }
+
+  /* .social-icon {
+    width: 44px;
+    height: 44px;
+  } */
+
+  .social-icon img {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .tooltip-content {
+    background: whitesmoke;
+    color: rgb(138, 66, 66);
+  }
+
+  .tooltip-content::before {
+    border-color: transparent transparent rgba(30, 30, 30, 0.9) transparent;
+  }
+
+  .social-icon {
+    background: #ff6600;
+  }
+
+  .social-icon img {
+    fill: #e0e0e0;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .tooltip-container {
+    display: none;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .button-content,
+  .share-icon,
+  .social-icon,
+  .tooltip-content {
+    transition: none;
+  }
+
+  .button-content {
+    animation: none;
+  }
+}
+
+/* Custom Scrollbar for Tooltip Content */
+.tooltip-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tooltip-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.tooltip-content::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.tooltip-content::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }

@@ -119,3 +119,15 @@ function showHolidaysData(week, raya) {
   const todayHolidayText = document.querySelector("#rayaEvent");
   todayHolidayText.textContent = `${raya}`;
 }
+
+export async function displayerPredictionData() {
+  const dateValue = (await datePickerValue()).dateValue;
+  let todayPredData = (await allPredictionDataByDate(dateValue)).hasilPrediksi;
+
+  const todayPredictionText = document.querySelector("#todayPredictionResult");
+  if (todayPredData === "none" || todayPredData === "") {
+    todayPredictionText.textContent = `Tidak ada data hari ini`;
+  } else {
+    todayPredictionText.textContent = `Prediksi penjualan hari ini : ${todayPredData}`;
+  }
+}

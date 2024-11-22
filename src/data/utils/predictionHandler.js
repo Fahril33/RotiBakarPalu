@@ -1,5 +1,6 @@
 import API_ENDPOINT from "../../config/config";
 import { allPredictionDataByDate, allSalesDataByDate } from "../allData";
+import { isWeekend } from "./holidayHandler";
 import { stockConverter } from "./stockHandler";
 
 export async function postPredictionData(predictionData) {
@@ -70,10 +71,11 @@ export async function deletePredictionData(date) {
 
 export async function isPredictionDataExist(date) {
   const isAnyToday = (await allPredictionDataByDate(date)).filteredData;
+  const weekendValue = isWeekend(date);
   if (isAnyToday === `none`) {
     const PredictionData = {
       date: date,
-      weekend: false,
+      weekend: weekendValue,
       libur: false,
       cuaca: "",
       cuaca_besok: "",
@@ -100,7 +102,9 @@ export async function createNewPredictionDataShell(date) {
     cuaca_besok: "",
     event_raya: "",
     terjual: "",
-    hasil: "",
+    manual_update: false,
+    operasional: false,
+    hasil_prediksi: "",
   };
   postPredictionData(emptyData);
   const newPredictionData = (await allPredictionDataByDate(date)).filteredData;

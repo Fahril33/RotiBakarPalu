@@ -4,21 +4,29 @@ import "../styles/style.css"; // Import stylesheet utama
 import "../styles/loader.css";
 import "../styles/finance.css"; // Import stylesheet utama
 import "../styles/responsive.css"; // Import stylesheet responsif
-import {
-  homeIcon,
-  activityIcon,
-  walletIcon,
-} from "./utils/icons";
+import { homeIcon, activityIcon, walletIcon, navigationIcon } from "./utils/icons";
+import { getCurrentDate } from "./utils/datePicker";
+import { allPredictionDataByDate } from "../data/allData";
+import { putPredictionData } from "../data/utils/predictionHandler";
 
-document.querySelector('.container-item img[alt="Beranda Icon"]').src =
+document.querySelector('.item-icons img[alt="Beranda Icon"]').src =
   homeIcon;
-document.querySelector('.container-item img[alt="Penjualan Icon"]').src =
+document.querySelector('.item-icons img[alt="Penjualan Icon"]').src =
   activityIcon;
-document.querySelector('.container-item img[alt="Keuangan Icon"]').src =
+document.querySelector('.item-icons img[alt="Keuangan Icon"]').src =
+  walletIcon;
+document.querySelector('.button-content img[alt="Navigation Icon"]').src =
+  navigationIcon;
+  
+document.querySelector('.item-icon img[alt="Beranda Icon"]').src =
+  homeIcon;
+document.querySelector('.item-icon img[alt="Penjualan Icon"]').src =
+  activityIcon;
+document.querySelector('.item-icon img[alt="Keuangan Icon"]').src =
   walletIcon;
 
 // Event listener untuk DOMContentLoaded
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
   const profileContainer = document.querySelector(".profile-container"); // Ambil elemen profile-container
   const profileIcon = document.querySelector(".profile-icon"); // Ambil elemen profile-icon
 
@@ -33,7 +41,31 @@ document.addEventListener("DOMContentLoaded", function () {
       profileContainer.classList.remove("open");
     }
   });
+
+  const todayDate = getCurrentDate().pickedDate;
+  let isOpen = (await allPredictionDataByDate(todayDate)).operasional;
+  console.log("isopen", isOpen);
+  // Set nilai dari button-3 berdasarkan nilai variabel
+  const checkbox = document.querySelector("#button-3 .checkbox");
+  checkbox.checked = isOpen;
+
+  // Event listener untuk menangkap perubahan kondisi
+  let debounceTimeout;
+  checkbox.addEventListener("change", async function () {
+    clearTimeout(debounceTimeout);
+    debounceTimeout = setTimeout(async () => {
+      if (this.checked) {
+        console.log("Open");
+        await putPredictionData({ operasional: true }, todayDate);
+      } else {
+        console.log("Close");
+        await putPredictionData({ operasional: false }, todayDate);
+      }
+    }, 300); // Tunggu 300ms sebelum mengirim permintaan
+  });
 });
+
+
 
 // Inisialisasi objek App
 const app = new App({

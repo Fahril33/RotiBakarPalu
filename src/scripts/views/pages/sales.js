@@ -7,19 +7,25 @@ import API_ENDPOINT from "../../../config/config";
 import {
   displayerHolidays,
   displayerIncome,
+  displayerPredictionData,
   displayerSold,
   displayerWeather,
 } from "../../utils/sales/displayerData";
 import { handleFormSubmit } from "../../utils/sales/form-handler";
 import { showModal, closeModal } from "../../utils/sales/modal-handler";
 import { getCurrentDate } from "../../utils/datePicker";
-import { bagIcon, soldIcon } from "../../utils/icons";
+import { bagIcon, soldIcon, editIcon } from "../../utils/icons";
 
-import { syncSoldToPrediction } from "../../../data/utils/predictionHandler";
+import { isPredictionDataExist, syncSoldToPrediction } from "../../../data/utils/predictionHandler";
 
-import { fetchDataAndTrainModel, usePrediction } from "../../utils/algorithm";
-import { getHolidayValue } from "../../../data/utils/holidayHandler";
+// import { usePrediction } from "../../utils/algorithm";
+import { showPredictionModal } from "../../utils/sales/prediction-modal";
+import { logDatesSince, showLoader } from "../../utils/syncData";
 import { checkWeatherData } from "../../../data/utils/weatherHandler";
+import { usePrediction } from "../../utils/algorithm";
+import { allPredictionDataByDate } from "../../../data/allData";
+// import { logDatesSince } from "../../utils/syncData";
+
 const Sales = {
   async render() {
     return `
@@ -32,12 +38,24 @@ const Sales = {
   },
 
   async afterRender() {
+    showLoader(true, "Memuat data penjualan...");
     // image render
     document.getElementById("imgPredict").src = bagIcon;
     document.querySelector('img[alt="soldIcon"]').src = soldIcon;
+    document.querySelector('img[alt="editIcon"]').src = editIcon;
 
     this.initializeDatePicker();
-    await this.displaySalesData();
+
+    // Tampilkan loader sebelum memuat data
+
+    try {
+      await this.displaySalesData();
+    } catch (error) {
+      console.error("Error loading sales data:", error);
+    } finally {
+      // Sembunyikan loader setelah semua data dimuat
+      showLoader(false);
+    }
 
     // FormHandler-Input
     const form = document.querySelector(".purchase-form form");
@@ -47,13 +65,22 @@ const Sales = {
       await this.displaySalesData();
     });
 
-    // await getHolidayValue();
-    // await checkWeatherData();
-    // await fetchDataAndTrainModel();
+    document
+      .getElementById("editPrediction")
+      .addEventListener("click", async () => {
+        await showPredictionModal();
+      });
 
-    await usePrediction()
-   
+      
+      // const currentDate = getCurrentDate().pickedDate;
+      // await isPredictionDataExist(currentDate)
+      // console.log('curddate', currentDate);
+      // const todaydata = (await allPredictionDataByDate("2024-11-22")).filteredData
+      // console.log('todayData', todaydata);
+
+
   },
+
 
   initializeDatePicker() {
     const currentDate = getCurrentDate();
@@ -98,20 +125,25 @@ const Sales = {
       // console.log(`Data for date ${selectedDate}:`, filteredData);
       this.populateSalesTable(filteredData);
 
-      // await logDatesSince();
+      await logDatesSince();
       await displayerSold();
       await displayerIncome();
       await displayerWeather();
       await displayerHolidays();
+      await displayerPredictionData();
     } catch (error) {
       console.error("Error filtering data:", error);
     }
   },
-
+// buat hndler displayer data
   async displaySalesData() {
+    await checkWeatherData();
     await displayerSold();
     await displayerIncome();
     await displayerWeather();
+    await displayerPredictionData();
+    await usePrediction(); 
+
     await this.filterDataByDate(
       document.getElementById("dataDatePicker").value
     );

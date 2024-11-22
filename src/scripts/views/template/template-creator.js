@@ -51,7 +51,8 @@ const createSalesTemplate = () => `
         </div>
       </div>
       <div class="hasilPrediksi">
-        <h2>Prediksi Penjualan hari ini : $hasilPrediksi</h2>
+        <h3 id="todayPredictionResult">Data Kosong</h3>
+        <button id="editPrediction"><img class="editBtnImg" alt="editIcon"></button>
       </div>
       <div class="dataInfo">
       <div class="cuaca">
@@ -76,7 +77,7 @@ const createSalesTemplate = () => `
           </div>
         </div>
         <div class="event">
-          <h4>Hari Raya</h4>
+          <h4>Event/Hari Raya</h4>
           <img id="imgDays" alt="eventIcon" />
           <div class="textInfo">
             <h5 id="rayaEvent"></h5>
@@ -164,48 +165,56 @@ const createModalTemplate = ({ date, time, price, quantity, place }) => `
 `;
 
 const createFinanceTemplate = (datetime) => `
-  <div class="containerAllBalance">
-    <div class="containerBalance">
-      <div class="balanceContainer">
-        <label for="cash">Saldo</label>
-        <input
-          type="text"
-          name="cash"
-          id="cash"
-          disabled
-          value="Cash : Rp. 123.000"
-        />
-      </div>
-      <div class="balanceContainer">
-        <input
-          type="text"
-          name="Kredit"
-          id="Kredit"
-          disabled
-          value="Kredit : Rp. 124.000"
-        />
-      </div>
-      <div class="balanceContainer">
-        <input
-          type="text"
-          name="Total"
-          id="Total"
-          disabled
-          value="Total : Rp. 125.000"
-        />
-      </div>
+  <div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Status Keuangan</h1>
     </div>
-
-    <div class="containerKeluarMasuk">
-      <div class="keluarMasukContainer">
-        <label for="">In/Out Bulan ini</label>
-        <input type="text" disabled value="In : Rp. 123.000" />
+    <div class="dashboard-grid">
+      <div>
+        <div class="dashboard-card">
+            <i class="fas fa-money-bill-wave"></i>
+            <div class="details">
+              <p class="value" id="TodayCash"></p>
+              <p class="title">Saldo Tunai Hari Ini</p>
+            </div>
+        </div>
+        <div class="dashboard-card">
+            <i class="fas fa-credit-card"></i>
+            <div class="details">
+              <p class="value" id="todayCredit"></p>
+              <p class="title">Saldo Kredit Hari Ini</p>
+            </div>
+        </div>
+        <div class="dashboard-card">
+            <i class="fas fa-wallet"></i>
+            <div class="details">
+              <p class="value" id="todayTotal"></p>
+              <p class="title">Total Saldo Hari Ini</p>
+            </div>
+        </div>
       </div>
-      <div class="keluarMasukContainer">
-        <input type="text" disabled value="Out : Rp. 123.000" />
-      </div>
-      <div class="keluarMasukContainer">
-        <input type="text" disabled value="Profit : Rp. 123.000" />
+      <div>
+        <div class="dashboard-card">
+            <i class="fas fa-arrow-up"></i>
+            <div class="details">
+              <p class="value" id="incomeTM"></p>
+              <p class="title">Pemasukan Bulan Ini</p>
+            </div>
+        </div>
+        <div class="dashboard-card">
+            <i class="fas fa-arrow-down"></i>
+            <div class="details">
+              <p class="value" id="expenseTM"></p>
+              <p class="title">Pengeluaran Bulan Ini</p>
+            </div>
+        </div>
+        <div class="dashboard-card">
+            <i class="fas fa-chart-line"></i>
+            <div class="details">
+              <p class="value" id="profitTM"></p>
+              <p class="title">Keuntungan Bulan Ini</p>
+            </div>
+        </div>
       </div>
     </div>
   </div>
@@ -214,7 +223,7 @@ const createFinanceTemplate = (datetime) => `
   <div class="card">
     <div class="containerShopping">
       <h2> Show Warning, 3 Hari lagi ada EVENT/RAYA</h2> 
-      <h2>Pembelian ${datetime} (pertimbangkan hapus tgl ini)</h2>
+      <h2>Tambah Daftar Belanja ${datetime} (pertimbangkan hapus tgl ini)</h2>
       <p id="purchase_Name">Roti</p>
       <div class="shoppingItemQuantity">
         <div class="radioOption">
@@ -466,12 +475,12 @@ const createFinanceTemplate = (datetime) => `
         <table class="shoppingTable">
           <thead class"tableHead">
             <tr>
-              <th width="3%">No</th>
-              <th width="40%">Nama Bahan</th>
+              <th width="">No</th>
+              <th width="20%">Nama Bahan</th>
               <th width="20%">Harga Satuan</th>
               <th width="10%">Quantity</th>
               <th width="20%">Total Harga</th>
-              <th width="20%">Pembayaran</th>
+              <th width="170px">Pembayaran</th>
             </tr>
           </thead>
           <tbody id="shoppingListTable">
@@ -502,4 +511,31 @@ const createFinanceTemplate = (datetime) => `
   </div>
 `;
 
-export { createModalTemplate, createSalesTemplate, createFinanceTemplate };
+const createShoppingRowTemplate = (item) => `
+  <tr>
+    <td>${item.no}</td>
+    <td>${item.namaBahan}</td>
+    <td>Rp. ${item.harga}</td>
+    <td>${item.quantity}</td>
+    <td>Rp. ${item.totalHarga}</td>
+    <td>
+      <div class="radioOption">
+        <input type="radio" id="cash-${item.id}" name="payment-${
+  item.id
+}" value="cash" ${item.payment === "cash" ? "checked" : ""}>
+        <label for="cash-${item.id}">Cash</label>
+        <input type="radio" id="debit-${item.id}" name="payment-${
+  item.id
+}" value="debit" ${item.payment === "debit" ? "checked" : ""}>
+        <label for="debit-${item.id}">Debit</label>
+      </div>
+    </td>
+  </tr>
+`;
+
+export {
+  createModalTemplate,
+  createSalesTemplate,
+  createFinanceTemplate,
+  createShoppingRowTemplate,
+};

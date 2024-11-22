@@ -1,7 +1,5 @@
-import {
-  allFinanceDataByDate,
-  allPredictionDataByDate,
-} from "../../data/allData";
+import { allPredictionDataByDate } from "../../data/allData";
+import { putPredictionData } from "../../data/utils/predictionHandler";
 import { getCurrentDate, getTomorrowDate } from "./datePicker";
 
 const C45 = require("c4.5");
@@ -78,16 +76,40 @@ export async function usePrediction() {
     cuaca: tomorrowCuaca,
   } = tomorrowData;
 
+  const processedCurrentRaya = currentRaya === "" ? "none" : currentRaya;
+  const processedTomorrowRaya = tomorrowRaya === "" ? "none" : tomorrowRaya;
+
   const tesData = [
-    [currentRaya, currentWeekend, currentLibur, currentCuaca],
-    [tomorrowRaya, tomorrowWeekend, tomorrowLibur, tomorrowCuaca],
+    [processedCurrentRaya, currentWeekend, currentLibur, currentCuaca],
+    [processedTomorrowRaya, tomorrowWeekend, tomorrowLibur, tomorrowCuaca],
   ];
+
+  console.log("tesData", tesData);
 
   try {
     const catchedData = await fetchDataAndTrainModel(tesData);
     console.log("Prediksi Hari Ini:", catchedData.predictTodayData);
     console.log("Prediksi Besok:", catchedData.predictTomorrowData);
+    const resultToday = catchedData.predictTodayData;
+    const resultTomorrow = catchedData.predictTomorrowData;
+    await catchPrediction(resultToday, resultTomorrow);
   } catch (error) {
     console.error("Error during prediction:", error);
   }
+}
+
+async function catchPrediction(resultToday, resultTomorrow) {
+  console.log("RTD", resultToday);
+  console.log("RTM", resultTomorrow);
+
+  const todayDate = getCurrentDate().pickedDate;
+  const tomorrowDate = getTomorrowDate().tomorrowDate;
+  const todayData = {
+    hasil_prediksi: resultToday,
+  };
+  const tomorrowData = {
+    hasil_prediksi: resultTomorrow,
+  };
+  await putPredictionData(todayData, todayDate);
+  await putPredictionData(tomorrowData, tomorrowDate);
 }
