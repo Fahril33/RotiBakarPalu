@@ -9,12 +9,15 @@ import {
   createNewFinanceDataShell,
   putFinanceData,
 } from "../../data/utils/financeHandler";
+import { getHolidayValue } from "../../data/utils/holidayHandler";
 import { syncSoldToPrediction } from "../../data/utils/predictionHandler";
 import {
   isAnyStockDataShell,
   putNewStockData,
 } from "../../data/utils/stockHandler";
-import { datePickerValue } from "./datePicker";
+import { checkWeatherData } from "../../data/utils/weatherHandler";
+import { usePrediction } from "./algorithm";
+import { datePickerValue, getCurrentDate } from "./datePicker";
 
 // Tambahkan fungsi ini di luar logDatesSince
 async function subtractOneDay(dateString) {
@@ -26,8 +29,10 @@ async function subtractOneDay(dateString) {
   )}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
-export async function logDatesSince() {
-  let dateValue = (await datePickerValue()).dateValue;
+export async function logDatesSince(pickedDate, longSince = false) {
+  // let dateValue = (await datePickerValue()).dateValue;
+  let dateValue = pickedDate;
+  console.log("dateValue", dateValue);
 
   const [year, month, day] = dateValue.split("-").map(Number);
   const startDate = new Date(year, month - 1, day); // Bulan dimulai dari 0
@@ -45,8 +50,13 @@ export async function logDatesSince() {
       ).padStart(2, "0")}-${String(currentDate.getDate()).padStart(2, "0")}`;
 
       // Menampilkan loader
-      const syncText = `Sinkronisasi data: ${formattedDate}`
-      showLoader(true, syncText);
+      if(longSince){
+        let syncText = `Sinkronisasi data: ${formattedDate}`;
+        showLoader(true, syncText);
+      }else{
+        let syncText = `Mengolah Pesanan`;
+        showLoader(true, syncText);
+      }
 
       const formattedDateMinusOne = await subtractOneDay(formattedDate);
 
@@ -179,3 +189,11 @@ export function showLoader(isLoading, text) {
   }
 }
 
+export async function callDataShell() {
+  const currDate = getCurrentDate().pickedDate;
+  console.log('currDate', currDate);
+  await logDatesSince(currDate)
+  // await checkWeatherData();
+  // await getHolidayValue();
+  // await usePrediction();
+}

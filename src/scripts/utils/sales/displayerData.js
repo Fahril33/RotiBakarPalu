@@ -13,7 +13,9 @@ import {
 } from "../icons";
 
 export async function displayerSold() {
-  const stockData = (await allStocksData()).totalStock;
+  const totalStock = (await allStocksData()).totalStock;
+  const spoiledStock = (await allStocksData()).spoiledStock;
+  const stockData = totalStock - spoiledStock
   const nowRemainingStock = (await allStocksData()).remainingStock;
   const salesData = (await allSalesData()).soldTotal;
   let remainingStock = stockData - salesData;

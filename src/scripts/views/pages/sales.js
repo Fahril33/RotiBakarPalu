@@ -16,11 +16,14 @@ import { showModal, closeModal } from "../../utils/sales/modal-handler";
 import { getCurrentDate } from "../../utils/datePicker";
 import { bagIcon, soldIcon, editIcon } from "../../utils/icons";
 
-import { isPredictionDataExist, syncSoldToPrediction } from "../../../data/utils/predictionHandler";
+import {
+  isPredictionDataExist,
+  syncSoldToPrediction,
+} from "../../../data/utils/predictionHandler";
 
 // import { usePrediction } from "../../utils/algorithm";
 import { showPredictionModal } from "../../utils/sales/prediction-modal";
-import { logDatesSince, showLoader } from "../../utils/syncData";
+import { callDataShell, logDatesSince, showLoader } from "../../utils/syncData";
 import { checkWeatherData } from "../../../data/utils/weatherHandler";
 import { usePrediction } from "../../utils/algorithm";
 import { allPredictionDataByDate } from "../../../data/allData";
@@ -71,16 +74,14 @@ const Sales = {
         await showPredictionModal();
       });
 
-      
-      // const currentDate = getCurrentDate().pickedDate;
-      // await isPredictionDataExist(currentDate)
-      // console.log('curddate', currentDate);
-      // const todaydata = (await allPredictionDataByDate("2024-11-22")).filteredData
-      // console.log('todayData', todaydata);
+    // const currentDate = getCurrentDate().pickedDate;
+    // await isPredictionDataExist(currentDate)
+    // console.log('curddate', currentDate);
+    // const todaydata = (await allPredictionDataByDate("2024-11-22")).filteredData
+    // console.log('todayData', todaydata);
 
-
+    // await callDataShell();
   },
-
 
   initializeDatePicker() {
     const currentDate = getCurrentDate();
@@ -125,7 +126,7 @@ const Sales = {
       // console.log(`Data for date ${selectedDate}:`, filteredData);
       this.populateSalesTable(filteredData);
 
-      await logDatesSince();
+      // await logDatesSince();
       await displayerSold();
       await displayerIncome();
       await displayerWeather();
@@ -135,14 +136,13 @@ const Sales = {
       console.error("Error filtering data:", error);
     }
   },
-// buat hndler displayer data
+  // buat hndler displayer data
   async displaySalesData() {
     await checkWeatherData();
     await displayerSold();
     await displayerIncome();
     await displayerWeather();
     await displayerPredictionData();
-    await usePrediction(); 
 
     await this.filterDataByDate(
       document.getElementById("dataDatePicker").value
@@ -162,8 +162,16 @@ const Sales = {
             <td>${soldItem.quantity}</td>
             <td>${soldItem.place}</td>
             <td>
-              <button class="edit-button">Edit</button>
-              <button class="delete-button">Delete</button>
+              <div class="actions">
+                  <div class="button edit">
+                      <i class="fas fa-edit"></i>
+                      <span>Edit</span>
+                  </div>
+                  <div class="button delete">
+                      <i class="fas fa-trash-alt"></i>
+                      <span>Delete</span>
+                  </div>
+              </div>
             </td>
           </tr>
         `;
@@ -182,14 +190,14 @@ const Sales = {
   },
 
   attachEditListeners() {
-    const editButtons = document.querySelectorAll(".edit-button");
+    const editButtons = document.querySelectorAll(".button.edit");
     editButtons.forEach((button) => {
       button.addEventListener("click", (e) => this.handleEdit(e));
     });
   },
 
   attachDeleteListeners() {
-    const deleteButtons = document.querySelectorAll(".delete-button");
+    const deleteButtons = document.querySelectorAll(".button.delete");
     deleteButtons.forEach((button) => {
       button.addEventListener("click", (e) => this.handleDelete(e));
     });
@@ -251,8 +259,10 @@ const Sales = {
         const result = await response.json();
         console.log("Sale data successfully updated:", result);
 
-        await this.displaySalesData();
+        
         closeModal(modal);
+        await logDatesSince(date);
+        await this.displaySalesData();
 
         //
         // Sesuaikan Nilai Terjual di Prediciton
@@ -293,6 +303,8 @@ const Sales = {
 
         const result = await response.json();
         console.log("Sale data successfully deleted:", result);
+
+        await logDatesSince(date);
 
         await this.displaySalesData();
 

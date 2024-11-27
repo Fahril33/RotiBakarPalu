@@ -77,7 +77,7 @@ const createSalesTemplate = () => `
           </div>
         </div>
         <div class="event">
-          <h4>Event/Hari Raya</h4>
+          <h4>Event/Raya</h4>
           <img id="imgDays" alt="eventIcon" />
           <div class="textInfo">
             <h5 id="rayaEvent"></h5>
@@ -119,8 +119,8 @@ const createSalesTemplate = () => `
 
 const createModalTemplate = ({ date, time, price, quantity, place }) => `
   <div class="modal-content">
-  <span class="close">&times;</span>
   <h2>Update Data Penjualan</h2>
+  <span class="close">&times;</span>
     <form>
       <div class="form-group">
         <label for="date">Tanggal</label>
@@ -159,41 +159,40 @@ const createModalTemplate = ({ date, time, price, quantity, place }) => `
           }>Merchant</option>
         </select>
       </div>
-      <button type="submit">Update</button>
+      <div class="form-group">
+        <button type="submit">Update</button>
+      </div>
     </form>
   </div>
 `;
 
-const createFinanceTemplate = (datetime) => `
+const createFinanceTemplate = () => `
   <div class="dashboard-container">
-    <div class="dashboard-header">
-        <h1>Status Keuangan</h1>
-    </div>
     <div class="dashboard-grid">
-      <div>
+      <div class="dashboard-child-1">
         <div class="dashboard-card">
             <i class="fas fa-money-bill-wave"></i>
             <div class="details">
               <p class="value" id="TodayCash"></p>
-              <p class="title">Saldo Tunai Hari Ini</p>
+              <p class="title">Saldo Tunai</p>
             </div>
         </div>
         <div class="dashboard-card">
             <i class="fas fa-credit-card"></i>
             <div class="details">
               <p class="value" id="todayCredit"></p>
-              <p class="title">Saldo Kredit Hari Ini</p>
+              <p class="title">Saldo Kredit</p>
             </div>
         </div>
         <div class="dashboard-card">
             <i class="fas fa-wallet"></i>
             <div class="details">
               <p class="value" id="todayTotal"></p>
-              <p class="title">Total Saldo Hari Ini</p>
+              <p class="title">Total Saldo</p>
             </div>
         </div>
       </div>
-      <div>
+      <div class="dashboard-child-2">
         <div class="dashboard-card">
             <i class="fas fa-arrow-up"></i>
             <div class="details">
@@ -216,14 +215,26 @@ const createFinanceTemplate = (datetime) => `
             </div>
         </div>
       </div>
+      <div class="dashboard-child-3">
+        <div class="dashboard-card">
+          <div class="details">
+            <p class="valueEventRaya">Event/Raya Mendatang</p>
+            <div class="activity-container">
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="dashboard-grid">
+      
     </div>
   </div>
 
   <!-- pembelian -->
   <div class="card">
     <div class="containerShopping">
-      <h2> Show Warning, 3 Hari lagi ada EVENT/RAYA</h2> 
-      <h2>Tambah Daftar Belanja ${datetime} (pertimbangkan hapus tgl ini)</h2>
+      <h2>Tambah Daftar Belanja</h2>
       <p id="purchase_Name">Roti</p>
       <div class="shoppingItemQuantity">
         <div class="radioOption">
@@ -533,7 +544,125 @@ const createShoppingRowTemplate = (item) => `
   </tr>
 `;
 
+const createHomeTemplate = () => `
+    <div class="overview-bar">
+      <p>Rincian</p>
+      <div class="overview-navigator">
+        <a href="#finance-charts">Keuangan</a>
+        <a href="#stocks-charts">Stok</a>
+        <a href="#financialFlow-charts">Arus Kas</a>
+      </div>
+    </div>
+
+    <div class="home-content">
+      <div class="section-overview">
+        <div class="card financial">
+          <span>Total Saldo</span><br>
+          <p4>Rp. 100.000</p4>
+          <div class="profit-icon">
+            <i class="fas fa-arrow-up" id="arrUp"><span>12,69%</span></i>
+            <span> berdasarkan kemarin</span>
+          </div>
+        </div>
+        <div class="card financial">
+          <span>Total Keuntungan</span><br>
+          <p4>Rp. 100.000</p4>
+          <div class="profit-icon">
+            <i class="fas fa-arrow-up" id="arrUp"><span>12,69%</span></i>
+            <i class="fas fa-arrow-down" id="arrDown"><span>12,69%</span></i>
+            <span> berdasarkan bulan ini</span>
+          </div>
+        </div>
+        <div class="card financial">
+          <span>Total Belanja</span><br>
+          <p4>Rp. 100.000</p4>
+          <div class="profit-icon">
+            <i class="fas fa-arrow-up" id="arrUp"><span>12,69%</span></i>
+            <span> berdasarkan bulan ini</span>
+          </div>
+        </div>
+        <div class="card financial">
+          <span>Stok Roti (bulanan)</span>
+          <div class="financial-bread">
+            <div class="profit-icon">
+              <p4>125 terjual</p4><br>
+              <i class="fas fa-arrow-up" id="arrUp"><span>12,69%</span></i>
+            </div>
+            <div class="profit-icon">
+              <p4>10 rusak</p4>
+              <i class="fas fa-arrow-up" id="arrUp"><span>12,69%</span></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="section-charts">
+        <div class="card finance-charts" id="finance-charts">
+          <div class="chart-headers">
+            <p4>Historis Keuangan</p4>
+            <div class="filters">
+              <i class="fas fa-filter mr-2"></i>
+              <select name="finance-filter" id="finance-filter">
+                <option value="daily" selected>Harian</option>
+                <option value="weekly">Mingguan</option>
+                <option value="monthly">Bulanan</option>
+                <!-- <option value="yearly">pertahun</option> -->
+              </select>
+              <select name="finance-filter-week" id="finance-filter-week" style="display: unset;">
+                <option value="semua" selected>semua</option>
+                <option value="1">minggu 1</option>
+                <option value="2">minggu 2</option>
+                <option value="3">minggu 3</option>
+                <option value="4">minggu 4</option>
+                <option value="5">minggu 5</option>
+              </select>
+              <input type="month" name="s" id="finance-filter-my" style="display: unset;">
+              <input type="number" min="2024" max="2030" step="1" value="2024" id="finance-filter-year" style="display: none;"/>
+            </div>
+          </div>
+          <div class="chart-body">
+            <div style="width: 100%;"><canvas id="acquisitions"></canvas></div>
+          </div>
+        </div>
+        <div class="card stocks-charts" id="stocks-charts">
+          <div class="chart-headers" >
+            <p4>Historis Stok</p4>
+            <div class="filters">
+              <i class="fas fa-filter mr-2"></i>
+              <select name="stocks-filter" id="stocks-filter">
+                <option value="daily">Harian</option>
+                <option value="weekly" selected>Mingguan</option>
+                <option value="monthly">Bulanan</option>
+                <!-- <option value="yearly">pertahun</option> -->
+              </select>
+            </div>
+          </div>
+          <div class="chart-body">
+            <img src="./images/chart.png" alt="" />
+          </div>
+        </div>
+        <div class="card financialFlow-charts" id="financialFlow-charts">
+          <div class="chart-headers">
+            <p4>Historis Arus Kas</p4>
+            <div class="filters">
+              <i class="fas fa-filter mr-2"></i>
+              <select name="financialFlow-filter" id="financialFlow-filter">
+                <option value="daily">Harian</option>
+                <option value="weekly" selected>Mingguan</option>
+                <option value="monthly">Bulanan</option>
+                <!-- <option value="yearly">pertahun</option> -->
+              </select>
+            </div>
+          </div>
+          <div class="chart-body">
+            <img id="chartsimage" src="./images/chart.png" alt="" />
+          </div>
+        </div>
+      </div>
+    </div>
+`;
+
 export {
+  createHomeTemplate,
   createModalTemplate,
   createSalesTemplate,
   createFinanceTemplate,

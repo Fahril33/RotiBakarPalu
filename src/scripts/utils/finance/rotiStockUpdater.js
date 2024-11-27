@@ -5,6 +5,7 @@ import {
 } from "../../../data/utils/stockHandler";
 import RBPsource from "../../../data/source";
 import { allSalesData, allStocksData } from "../../../data/allData";
+import { displayFinance } from "./financialDisplayer";
 // import API_ENDPOINT from "../../../config/config";
 
 export async function updateRotiStock() {
@@ -51,4 +52,5 @@ export async function updateRotiStock() {
 
     await putNewStockData(todayDate, stockData);
   }
+  displayFinance()
 }

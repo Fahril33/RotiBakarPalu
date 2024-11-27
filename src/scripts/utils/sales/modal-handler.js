@@ -1,5 +1,8 @@
 // import RBPsource from "../../data/source";
 
+import { getCurrentDate } from "../datePicker";
+import { logDatesSince } from "../syncData";
+
 export const showModal = (content) => {
   const modal = document.createElement("div");
   modal.classList.add("modal");
@@ -69,8 +72,9 @@ export function handleModalSubmit (
 
       const result = await response.json();
       console.log("Data penjualan berhasil diperbarui:", result);
+      const currDate = getCurrentDate().pickedDate
+      await logDatesSince(currDate);
 
-      
 
       // Perbarui tampilan tabel
       const row = document.querySelector(`tr[data-id="${saleMongoId}"]`);

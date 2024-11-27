@@ -5,12 +5,12 @@ export function getCurrentDate() {
   const month = String(now.getMonth() + 1).padStart(2, "0");
   const year = String(now.getFullYear());
   const formattedDate = `${year}-${month}-${day}`;
-  
+
   var datePicker = document.getElementById("dataDatePicker");
   if (datePicker) {
     datePicker.value = formattedDate;
   } else {
-    console.log("Elemen dengan ID 'dataDatePicker' tidak ditemukan.");
+    // console.log("Elemen dengan ID 'dataDatePicker' tidak ditemukan.");
   }
   return {
     pickedDate: formattedDate,

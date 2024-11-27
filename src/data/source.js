@@ -12,7 +12,7 @@ class RBPsource {
       // Jika API mengembalikan object dengan key 'data' berisi array, akses dengan benar
       return responseJson.data || responseJson; // pastikan mengembalikan array
     } catch (error) {
-        console.error("Error fetching sales data:", error);
+      console.error("Error fetching sales data:", error);
       return [];
     }
   }
@@ -25,7 +25,7 @@ class RBPsource {
 
       return responseJson;
     } catch (error) {
-        console.error("Error fetching daftarBelanja:", error);
+      console.error("Error fetching daftarBelanja:", error);
       return [];
     }
   }
@@ -39,7 +39,7 @@ class RBPsource {
 
       return responseJson;
     } catch (error) {
-        console.error("Error fetching stocks:", error);
+      console.error("Error fetching stocks:", error);
       return [];
     }
   }
@@ -67,7 +67,7 @@ class RBPsource {
 
       return responseJson;
     } catch (error) {
-        console.error("Error fetching predictions:", error);
+      console.error("Error fetching predictions:", error);
       return [];
     }
   }
@@ -160,17 +160,17 @@ export async function convertGtoH() {
   };
 }
 
-export async function bacaHariLibur(tanggalHariIni) {
-  const now = new Date();
-  const nowYear = String(now.getFullYear());
-
+export async function bacaHariLibur(tanggalHariIni, year) {
+  
+  // console.log("nyr", year);
   try {
     // const nowYear = "2023"
     // Fetch data dari API
     const response = await fetch(
-      `https://api-harilibur.vercel.app/api?&year=${nowYear}`
+      `https://api-harilibur.vercel.app/api?&year=${year}`
     );
     const semuaHariLibur = await response.json();
+    // console.log("smwa hari libur", semuaHariLibur);
 
     // Filter hari libur spesifik berdasarkan nama
     const hariLiburSpesifik = [
@@ -261,11 +261,12 @@ export async function bacaHariLibur(tanggalHariIni) {
 
 // Jalankan analisis
 export async function getHolidays(date) {
-  const hasilHariLibur = await bacaHariLibur(date);
-  console.log('hasil', hasilHariLibur);
+  const now = new Date();
+  const nowYear = String(now.getFullYear());
+  const hasilHariLibur = await bacaHariLibur(date, nowYear);
+  // console.log("hasil", hasilHariLibur);
 
   if (hasilHariLibur) {
-
     // tampilkanDaftarHariLibur(hasilHariLibur.semuaHariLibur)
     // Daftar hari libur spesifik
     const hariLiburSpesifik = [

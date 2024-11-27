@@ -2,7 +2,12 @@ import { createFinanceTemplate } from "../template/template-creator";
 import RBPsource from "../../../data/source";
 import API_ENDPOINT from "../../../config/config";
 import { updateRotiStock } from "../../utils/finance/rotiStockUpdater"; // Import the new function
-import { displayFinance } from "../../utils/finance/financialDisplayer";
+import {
+  displayFinance,
+  displayUpcomingEvent,
+} from "../../utils/finance/financialDisplayer";
+import { callDataShell, logDatesSince } from "../../utils/syncData";
+import { getCurrentDate } from "../../utils/datePicker";
 // import { isStocksDataExist } from "../../../data/utils/stockHandler";
 // import { minusOneDayDate } from "../../utils/datePicker";
 // import { resetAdditionalStockData } from "../../../data/utils/stockHandler";
@@ -13,7 +18,7 @@ const Finance = {
     return `
       <div class="content">
         <div class="loading" style="display: none;">Loading...</div> <!-- Elemen loading -->
-        <div id="sales-content">
+        <div id="finance-content">
           ${createFinanceTemplate(currentDate)}
         </div>
       </div>
@@ -21,8 +26,9 @@ const Finance = {
   },
 
   async afterRender() {
-    const daftarBelanja = await RBPsource.getDaftarBelanja();
-    console.log("Daftar belanja:", daftarBelanja);
+    await displayUpcomingEvent();
+    await callDataShell();
+    await displayFinance();
 
     //
     // Handler untuk input daftar belanja
@@ -182,14 +188,8 @@ const Finance = {
     // Date Picker & Show data
     //
 
-    // Function to get today's date in 'YYYY-MM-DD' format and set it in the date picker
-    function setTodayDate() {
-      const today = new Date();
-      setDatePickerValue(today);
-    }
-
     // Function to format the date and set it as the value of the date picker
-    function setDatePickerValue(date) {
+    async function setDatePickerValue(date) {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0"); // months are zero-based
       const day = String(date.getDate()).padStart(2, "0");
@@ -197,8 +197,12 @@ const Finance = {
       document.getElementById("dataDatePicker").value = formattedDate;
 
       // Filter and display data based on the selected date
-      filterDataByDate(formattedDate);
-      displayFinance(formattedDate);
+      await filterDataByDate(formattedDate);
+    }
+
+    function setTodayDate() {
+      const today = new Date();
+      setDatePickerValue(today);
     }
 
     // Function to handle the date increment or decrement
@@ -228,7 +232,7 @@ const Finance = {
         (entry) => entry.tanggal === selectedDate
       );
 
-      console.log(`Data for date ${selectedDate}:`, filteredData);
+      // console.log(`Data for date ${selectedDate}:`, filteredData);
 
       // Display the filtered data in the template
       displayData(filteredData);
@@ -266,7 +270,7 @@ const Finance = {
     }
 
     // Function to display the filtered data in the HTML template
-    function displayData(data) {
+    async function displayData(data) {
       const tableContainer = document.querySelector("#ShoppingList");
       tableContainer.innerHTML = ""; // Clear previous data
 
@@ -324,17 +328,13 @@ const Finance = {
         
         <div class="radio-input">
           <label>
-            <input value="cash" name="payment-${
-              item._id
-            }" id="cash" type="radio" ${
+            <input value="cash" name="payment-${item._id}" type="radio" ${
             item.payment === "cash" ? "checked" : ""
           }/>
             <span>Cash</span>
           </label>
           <label>
-            <input value="debit" name="payment-${
-              item._id
-            }" id="debit" type="radio" ${
+            <input value="debit" name="payment-${item._id}" type="radio" ${
             item.payment === "debit" ? "checked" : ""
           }/>
             <span>Debit</span>
@@ -353,9 +353,12 @@ const Finance = {
         <td>Rp. ${item.totalHarga.toLocaleString("id-ID")}</td>
         <td>${paymentRadioHtml}</td>
         <td>
-          <button class="delete-button" data-nama="${
-            item.namaBahan
-          }">Delete</button>
+          <div class="actions">
+              <div class="button delete" data-nama="${item.namaBahan}">
+                  <i class="fas fa-trash-alt"></i>
+                  <span>Delete</span>
+              </div>
+          </div>
         </td>
       `;
 
@@ -386,6 +389,70 @@ const Finance = {
 
       tableContainer.appendChild(table);
 
+      // Fungsi untuk memperbarui metode pembayaran dan mengambil data
+      async function updatePaymentMethod(selectedDate, itemId, payment) {
+        try {
+          const existingData = await RBPsource.getDaftarBelanja();
+          const currentDateData = existingData.find(
+            (data) => data.tanggal === selectedDate
+          );
+
+          if (!currentDateData) {
+            console.error("No data found for the selected date.");
+            return;
+          }
+
+          // Update item dengan metode pembayaran baru
+          const updatedItems = currentDateData.barang.map((item) => {
+            if (item._id === itemId) {
+              return { ...item, payment };
+            }
+            return item;
+          });
+
+          // Hitung ulang total cash dan debit
+          const totalCash = updatedItems
+            .filter((item) => item.payment === "cash")
+            .reduce((total, item) => total + item.totalHarga, 0);
+          console.log("totalCash", totalCash);
+
+          const totalDebit = updatedItems
+            .filter((item) => item.payment === "debit")
+            .reduce((total, item) => total + item.totalHarga, 0);
+          console.log("totalDebit", totalDebit);
+
+          const totalBelanja = totalCash + totalDebit;
+
+          // Kirim update ke server
+          const response = await fetch(
+            `${API_ENDPOINT.DAFTARBELANJA}/${currentDateData._id}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                tanggal: selectedDate,
+                barang: updatedItems,
+                totalCash,
+                totalDebit,
+                totalBelanja,
+              }),
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("Failed to update payment method");
+          }
+
+          await logDatesSince(getCurrentDate().pickedDate);
+          await displayFinance();
+          setTodayDate();
+        } catch (error) {
+          console.error("Error updating payment method:", error);
+        }
+      }
+
       const paymentRadios = document.querySelectorAll(
         'input[name^="payment-"]'
       );
@@ -396,63 +463,8 @@ const Finance = {
           const itemId = row.getAttribute("data-id");
           const payment = event.target.value;
 
-          try {
-            const existingData = await RBPsource.getDaftarBelanja();
-            const currentDateData = existingData.find(
-              (data) => data.tanggal === selectedDate
-            );
-
-            if (!currentDateData) {
-              console.error("No data found for the selected date.");
-              return;
-            }
-
-            // Update item dengan metode pembayaran baru
-            const updatedItems = currentDateData.barang.map((item) => {
-              if (item._id === itemId) {
-                return { ...item, payment };
-              }
-              return item;
-            });
-
-            // Hitung ulang total cash dan debit
-            const totalCash = updatedItems
-              .filter((item) => item.payment === "cash")
-              .reduce((total, item) => total + item.totalHarga, 0);
-
-            const totalDebit = updatedItems
-              .filter((item) => item.payment === "debit")
-              .reduce((total, item) => total + item.totalHarga, 0);
-
-            const totalBelanja = totalCash + totalDebit;
-
-            // Kirim update ke server
-            const response = await fetch(
-              `${API_ENDPOINT.DAFTARBELANJA}/${currentDateData._id}`,
-              {
-                method: "PUT",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  tanggal: selectedDate,
-                  barang: updatedItems,
-                  totalCash,
-                  totalDebit,
-                  totalBelanja,
-                }),
-              }
-            );
-
-            if (!response.ok) {
-              throw new Error("Failed to update payment method");
-            }
-
-            // Refresh tampilan
-            setTodayDate();
-          } catch (error) {
-            console.error("Error updating payment method:", error);
-          }
+          // Panggil fungsi untuk memperbarui metode pembayaran
+          await updatePaymentMethod(selectedDate, itemId, payment);
         });
       });
 
@@ -587,6 +599,8 @@ const Finance = {
 
           console.log("Data updated successfully:", data);
 
+          await logDatesSince(getCurrentDate().pickedDate);
+
           await updateRotiStock();
           setTodayDate();
         } catch (error) {
@@ -605,7 +619,7 @@ const Finance = {
       // DELETE HISTORI BELANJA
       //
 
-      const deleteButtons = document.querySelectorAll(".delete-button");
+      const deleteButtons = document.querySelectorAll(".button.delete");
       deleteButtons.forEach((button) => {
         button.addEventListener("click", async (event) => {
           const namaBahan = event.target.getAttribute("data-nama");
@@ -684,6 +698,7 @@ const Finance = {
                 )}`;
               }
 
+              await logDatesSince(getCurrentDate().pickedDate);
               await updateRotiStock();
               setTodayDate();
               console.log(`Bahan ${namaBahan} berhasil dihapus.`);
@@ -806,10 +821,11 @@ const Finance = {
             );
             tableBody.innerHTML = "";
 
-            setTodayDate();
-
             // Call the new function to update Roti stock
+            await logDatesSince(getCurrentDate().pickedDate);
+
             await updateRotiStock();
+            setTodayDate();
 
             console.log("Data updated successfully");
           } catch (error) {
@@ -833,6 +849,7 @@ const Finance = {
           tableBody.innerHTML = "";
 
           // Call the new function to update Roti stock
+          await logDatesSince(getCurrentDate().pickedDate);
           await updateRotiStock();
           setTodayDate();
           console.log("New data added successfully");

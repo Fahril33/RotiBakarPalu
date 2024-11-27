@@ -1,29 +1,32 @@
-import "regenerator-runtime"; // Import regenerator-runtime untuk mendukung async/await
-import App from "./views/app"; // Import kelas App
-import "../styles/style.css"; // Import stylesheet utama
+import "regenerator-runtime";
+import App from "./views/app";
+import "../styles/style.css";
 import "../styles/loader.css";
-import "../styles/finance.css"; // Import stylesheet utama
-import "../styles/responsive.css"; // Import stylesheet responsif
-import { homeIcon, activityIcon, walletIcon, navigationIcon } from "./utils/icons";
+import "../styles/finance.css";
+import "../styles/responsive.css";
+import "../styles/home.css";
+
+import {
+  homeIcon,
+  activityIcon,
+  walletIcon,
+  navigationIcon,
+} from "./utils/icons";
 import { getCurrentDate } from "./utils/datePicker";
 import { allPredictionDataByDate } from "../data/allData";
 import { putPredictionData } from "../data/utils/predictionHandler";
 
-document.querySelector('.item-icons img[alt="Beranda Icon"]').src =
-  homeIcon;
+document.querySelector('.item-icons img[alt="Beranda Icon"]').src = homeIcon;
 document.querySelector('.item-icons img[alt="Penjualan Icon"]').src =
   activityIcon;
-document.querySelector('.item-icons img[alt="Keuangan Icon"]').src =
-  walletIcon;
+document.querySelector('.item-icons img[alt="Keuangan Icon"]').src = walletIcon;
 document.querySelector('.button-content img[alt="Navigation Icon"]').src =
   navigationIcon;
-  
-document.querySelector('.item-icon img[alt="Beranda Icon"]').src =
-  homeIcon;
+
+document.querySelector('.item-icon img[alt="Beranda Icon"]').src = homeIcon;
 document.querySelector('.item-icon img[alt="Penjualan Icon"]').src =
   activityIcon;
-document.querySelector('.item-icon img[alt="Keuangan Icon"]').src =
-  walletIcon;
+document.querySelector('.item-icon img[alt="Keuangan Icon"]').src = walletIcon;
 
 // Event listener untuk DOMContentLoaded
 document.addEventListener("DOMContentLoaded", async function () {
@@ -64,8 +67,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     }, 300); // Tunggu 300ms sebelum mengirim permintaan
   });
 });
-
-
 
 // Inisialisasi objek App
 const app = new App({

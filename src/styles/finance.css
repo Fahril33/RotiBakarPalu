@@ -1,3 +1,9 @@
+.content{
+  margin: 0;
+  width: 100%;
+  
+}
+
 /* Page Keuangan */
 /*
 :::: Financial Dashboard
@@ -24,21 +30,11 @@
   grid-template-columns: 1fr;
   gap: 20px;
 }
-@media (min-width: 426px) {
-  .dashboard-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-  }
-}
-@media (max-width: 767px) {
-  .dashboard-container {
-    width: 100%;
-  }
-}
+
 .dashboard-card {
   background-color: white;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.153);
   padding: 20px;
   margin: 15px 0 0 0;
   display: flex;
@@ -61,8 +57,158 @@
 .dashboard-card .details .title {
   margin: 5px 0 0;
   color: #777;
+  word-wrap: break-word;
 }
 
+@media (min-width: 426px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+}
+@media (min-width: 768.09px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+  }
+  .dashboard-container {
+    width: 100%;
+  }
+}
+@media (max-width: 768.1px) {
+  .dashboard-container {
+    width: 100%;
+  }
+  .dashboard-child-3 {
+    grid-column: span 2;
+  }
+}
+@media (max-width: 557px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .dashboard-child-3 {
+    grid-column: span 2;
+  }
+  .dashboard-card {
+    padding: 10px;
+  }
+  .dashboard-card i {
+    font-size: 1.8em;
+  }
+  .dashboard-card .details .value {
+    font-size: 1.1em;
+    font-weight: 400;
+  }
+}
+@media (max-width: 375.9px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .dashboard-child-3 {
+    grid-column: span 1;
+  }
+}
+
+/*
+:::: Incoming Event/Raya List
+*/
+
+.dashboard-child-3 .dashboard-card {
+  height: 96%;
+  width: 100%;
+  margin: 15px 0 0 0;
+  display: flex;
+  align-items: flex-start;
+}
+.dashboard-child-3 .dashboard-card .details {
+  width: 100%;
+  height: 100%;
+}
+.dashboard-card .details .valueEventRaya {
+  margin-bottom: 15px;
+  text-align: left;
+  font-size: 1.2em;
+  font-weight: 450;
+  color: #333;
+}
+
+.activity-container {
+  max-width: 600px;
+  margin: 0 auto;
+  position: relative;
+  /* height: 200px; */
+  max-height: 240px;
+  overflow-y: auto;
+}
+.activity-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  position: relative;
+  line-height: 1.5;
+}
+.activity-item:last-child {
+  margin-bottom: 0;
+}
+.activity-item .activity-circle {
+  min-width: 24px;
+  min-height: 24px;
+  background-color: #ff6600;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  position: relative;
+  z-index: 1;
+}
+.activity-item .activity-line {
+  position: absolute;
+  left: 11px;
+  top: 24px;
+  width: 2px;
+  height: 140%;
+  background-color: #973c00;
+  z-index: 0;
+}
+.activity-item .activity-text {
+  text-align: left;
+  margin-left: 16px;
+  font-size: 14px;
+  /* white-space: nowrap; */
+  text-overflow: ellipsis;
+}
+.bg-red {
+  background-color: red;
+  color: white; /* Optional: untuk membuat teks lebih terlihat */
+}
+/* scrollbar */
+
+/* Gaya untuk scrollbar di WebKit (Chrome, Safari, Edge) */
+.activity-container::-webkit-scrollbar {
+  width: 3px; /* Lebar scrollbar */
+}
+
+.activity-container::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Warna latar belakang track scrollbar */
+  border-radius: 10px; /* Membuat track scrollbar dengan sudut melengkung */
+}
+
+.activity-container::-webkit-scrollbar-thumb {
+  background: #888; /* Warna thumb scrollbar */
+  border-radius: 10px; /* Membuat thumb scrollbar dengan sudut melengkung */
+}
+
+.activity-container::-webkit-scrollbar-thumb:hover {
+  background: #555; /* Warna thumb scrollbar saat hover */
+}
+
+/* 
 /*
 :::: 
 */
@@ -271,22 +417,25 @@
 h2 {
   width: 100%;
   height: 50px;
-  padding-top: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* padding-top: 5px; */
   border-radius: 8px 8px 0 0;
-  text-align: center;
-  align-self: center;
   background-color: #c16904;
   color: #fceeb4;
 }
 h4 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
-  height: 40px;
+  height: 27%;
+  padding: 5px 5px;
   border-radius: 8px 8px 0 0;
-  text-align: center;
-  align-self: center;
-  padding-top: 5%;
   background-color: #c16904;
   color: #fceeb4;
+  transition: 0.3s ease all;
 }
 
 .containerShopping p {

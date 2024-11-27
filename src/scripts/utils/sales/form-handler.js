@@ -4,6 +4,7 @@ import { datePickerValue } from "../datePicker";
 import { stockConverter } from "../../../data/utils/stockHandler";
 import { allPredictionDataByDate } from "../../../data/allData";
 import { isPredictionDataExist, putPredictionData, syncSoldToPrediction } from "../../../data/utils/predictionHandler";
+import { logDatesSince } from "../syncData";
 
 export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
   // Ambil nilai dari input form
@@ -113,6 +114,7 @@ export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
       //
 
       await syncSoldToPrediction(formattedDate);
+      await logDatesSince(formattedDate)
     } catch (error) {
       console.error("Terjadi kesalahan saat memperbarui data:", error);
     }
@@ -140,6 +142,8 @@ export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
 
       // Ambil data terbaru dari server setelah berhasil menyimpan
       const updatedSalesData = await RBPsource.salesData();
+      await logDatesSince(formattedDate);
+
 
       // Perbarui tampilan tabel dengan data terbaru
       salesInstance.populateSalesTable(updatedSalesData);

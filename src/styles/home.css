@@ -1,0 +1,216 @@
+
+.overview-bar {
+  width: 100%;
+  height: 40px;
+  background-color: white;
+  border-width: 1.8px 0;
+  border-style: solid;
+  border-color: rgb(240, 239, 239);
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  justify-content: space-between;
+  margin-top: -25px;
+}
+
+.overview-bar p {
+  font-weight: 500;
+  font-size: large;
+}
+
+.overview-navigator {
+  display: flex;
+  gap: 10px;
+}
+.overview-navigator a {
+  color: black;
+}
+.overview-navigator a:hover {
+  font-weight: 600;
+}
+
+/*
+:::: Home Content
+*/
+
+.home-content {
+  width: 100%;
+  padding: 20px;
+  background-color: whitesmoke;
+  display: grid;
+  gap: 20px;
+}
+
+.section-overview .card,
+.section-charts .card {
+  width: 100%;
+  background-color: white; /* Use a more specific color code */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Define the shadow */
+  border-radius: 10px;
+  padding: 10px;
+  margin: 0;
+}
+.card span {
+  font-size: small;
+  color: gray;
+}
+
+/*
+:::: Overview Section 
+*/
+.section-overview {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.fas {
+  padding: 3px;
+  border-radius: 5px;
+}
+#arrUp {
+  color: rgb(6, 169, 0);
+  background-color: rgba(172, 255, 47, 0.285);
+}
+#arrUp span::before {
+  content: " +";
+  font-size: x-small;
+}
+#arrDown {
+  /* display: none; */
+  color: rgb(190, 0, 0);
+  background-color: rgba(255, 0, 0, 0.315);
+  /* display: ; */
+}
+#arrDown span::before {
+  content: "-";
+}
+.profit-icon i {
+  font-size: x-small;
+}
+.profit-icon i span {
+  font-weight: 400;
+}
+.profit-icon span {
+  font-size: x-small;
+}
+
+/* khusus */
+.financial-bread {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+p4{
+  font-size: larger;
+  font-weight: 620;
+}
+
+/*
+:::: Charts
+*/
+.section-charts {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  gap: 20px;
+}
+.card.finance-charts,
+.card.stocks-charts,
+.card.financialFlow {
+  display: grid;
+  gap: 15px;
+}
+.chart-headers {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(to right, #e2780d63, #f1a96063);
+  color: rgb(120, 54, 0);
+  margin: -10px -10px 0 -10px;
+  padding: 10px;
+  border-radius: 10px 10px 0 0;
+}
+
+.filters {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 5px;
+}
+.filters i {
+  transform: translateX(33px);
+  /* z-index: 10; */
+}
+.filters select {
+  width: auto;
+  margin: 0;
+  height: 35px;
+  padding: 5px 5px 5px 25px;
+  border-color: rgb(194, 194, 194);
+  border-radius: 10px;
+  cursor: pointer;
+}
+/* Financial */
+#finance-filter-year{
+  margin: 0;
+  border-radius: 10px;
+  height: 35px;
+}
+#finance-filter-my{
+  margin: 0;
+  height: 35px;
+  width: auto;
+  border-style: none;
+  padding: 5px;
+}
+#finance-filter-my:hover{
+  cursor: pointer;
+}
+#finance-filter-week{
+    padding-left: 5px;
+}
+
+/* ChartBody */
+.chart-body {
+  width: 100%;
+  /* border-style: inset; */
+  display: flex;
+  justify-content: center;
+}
+.chart-body img {
+  object-fit: contain;
+  max-width: 100%;
+  max-height: 100%;
+}
+#chartsimage {
+  object-fit: contain;
+  /* width: 50%; */
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/*
+:::: Responsive Home
+*/
+
+@media (min-width: 1440.99px) {
+  .home-content,
+  .overview-bar {
+    padding-left: 15%;
+    padding-right: 15%;
+    transition: 0.3s ease all;
+  }
+}
+@media (max-width: 1300.99px) {
+  .chart-body {
+    padding: 0 10%;
+    transition: 0.3s ease all;
+  }
+}
+
+@media (max-width: 768.99px) {
+  .section-overview {
+    grid-template-columns: 1fr 1fr;
+  }
+}

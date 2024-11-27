@@ -1,16 +1,19 @@
-import { getCurrentDate, getTomorrowDate } from "../../scripts/utils/datePicker";
+import {
+  getCurrentDate,
+  getTomorrowDate,
+} from "../../scripts/utils/datePicker";
 import { allPredictionDataByDate } from "../allData";
 import { bacaHariLibur, getHolidays } from "../source";
 import { postPredictionData, putPredictionData } from "./predictionHandler";
 
 export async function getHolidayValue() {
-  const currentDate = getCurrentDate().pickedDate
+  const currentDate = getCurrentDate().pickedDate;
   const currentDaten = getCurrentDate().pickedDaten;
-  const tomorrowDate = getTomorrowDate().tomorrowDate
-  const tomorrowDaten = getTomorrowDate().pickedDaten
+  const tomorrowDate = getTomorrowDate().tomorrowDate;
+  const tomorrowDaten = getTomorrowDate().pickedDaten;
   try {
     const result = await getHolidays(currentDaten);
-    console.log('hasil ini', result);
+    console.log("hasil ini", result);
     if (result && result.liburValue !== undefined) {
       const resultValue = result.liburValue;
 
@@ -25,7 +28,7 @@ export async function getHolidayValue() {
   }
   try {
     const result = await getHolidays(tomorrowDaten);
-    console.log('hasil itu', result);
+    console.log("hasil itu", result);
     if (result && result.liburValue !== undefined) {
       const resultValue = result.liburValue;
 
@@ -59,7 +62,9 @@ async function HolidayData(rayaValue, daten, currentDate) {
   //
   // const currentDate = getCurrentDate().pickedDate;
   const weekendValue = isWeekend(currentDate);
-  const isTodayHoliday = await bacaHariLibur(daten);
+  const now = new Date();
+  const nowYear = String(now.getFullYear());
+  const isTodayHoliday = await bacaHariLibur(daten, nowYear);
   const liburValue = isTodayHoliday.isTodayHoliday;
   console.log("LIBURRR VALUE", liburValue);
 
@@ -89,4 +94,3 @@ async function HolidayData(rayaValue, daten, currentDate) {
     await putPredictionData(weatherPredictionDataPut, currentDate);
   }
 }
-

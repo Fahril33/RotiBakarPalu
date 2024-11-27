@@ -10,6 +10,7 @@ import { datePickerValue } from "../datePicker";
 import {
   displayerHolidays,
   displayerPredictionData,
+  displayerSold,
   displayerWeather,
 } from "./displayerData";
 import { showModal, closeModal } from "./modal-handler";
@@ -74,8 +75,10 @@ export async function showPredictionModal() {
           <label for="todaySpoiledStock">Roti rusak</label>
           <input type="number" id="todaySpoiledStock" name="todaySpoiled" min="0" value="${spoiledStock}" />
         </div>
+        <div class="form-group">
+          <button type="submit">Update</button>
+        </div>
         
-        <button type="submit">Update</button>
       </form>
     </div>
   `;
@@ -115,6 +118,7 @@ export async function showPredictionModal() {
           spoiled_stock: updatedSpoiledStock,
         });
         await usePrediction();
+        await displayerSold();
         await displayerWeather();
         await displayerHolidays();
         await displayerPredictionData();
