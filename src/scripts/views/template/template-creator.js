@@ -596,6 +596,34 @@ const createHomeTemplate = () => `
         </div>
       </div>
       <div class="section-charts">
+        <div class="card stocks-charts" id="stocks-charts">
+          <div class="chart-headers" >
+            <p4>Historis Stok</p4>
+            <div class="filters">
+              <i class="fas fa-filter mr-2"></i>
+              <select name="stocks-filter" id="stocks-filter">
+                <option value="daily" selected>Harian</option>
+                <option value="weekly">Mingguan</option>
+                <option value="monthly">Bulanan</option>
+                <!-- <option value="yearly">pertahun</option> -->
+              </select>
+              <select name="stocks-filter-week" id="stocks-filter-week" style="display: unset;">
+                <option value="semua" selected>semua</option>
+                <option value="1">minggu 1</option>
+                <option value="2">minggu 2</option>
+                <option value="3">minggu 3</option>
+                <option value="4">minggu 4</option>
+                <option value="5">minggu 5</option>
+              </select>
+              <input type="month" name="s" id="stocks-filter-my" style="display: unset;">
+              <input type="number" min="2024" max="2030" step="1" value="2024" id="stocks-filter-year" style="display: none;"/>
+            </div>
+          </div>
+          <div class="chart-body">
+            <div style="width: 100%;"><canvas id="stockChartData"></canvas></div>
+          </div>
+        </div>
+
         <div class="card finance-charts" id="finance-charts">
           <div class="chart-headers">
             <p4>Historis Keuangan</p4>
@@ -620,26 +648,10 @@ const createHomeTemplate = () => `
             </div>
           </div>
           <div class="chart-body">
-            <div style="width: 100%;"><canvas id="acquisitions"></canvas></div>
+            <div style="width: 100%;"><canvas id="financialChartData"></canvas></div>
           </div>
         </div>
-        <div class="card stocks-charts" id="stocks-charts">
-          <div class="chart-headers" >
-            <p4>Historis Stok</p4>
-            <div class="filters">
-              <i class="fas fa-filter mr-2"></i>
-              <select name="stocks-filter" id="stocks-filter">
-                <option value="daily">Harian</option>
-                <option value="weekly" selected>Mingguan</option>
-                <option value="monthly">Bulanan</option>
-                <!-- <option value="yearly">pertahun</option> -->
-              </select>
-            </div>
-          </div>
-          <div class="chart-body">
-            <img src="./images/chart.png" alt="" />
-          </div>
-        </div>
+        
         <div class="card financialFlow-charts" id="financialFlow-charts">
           <div class="chart-headers">
             <p4>Historis Arus Kas</p4>
@@ -654,7 +666,7 @@ const createHomeTemplate = () => `
             </div>
           </div>
           <div class="chart-body">
-            <img id="chartsimage" src="./images/chart.png" alt="" />
+            <img id="chartsimage" alt="" />
           </div>
         </div>
       </div>

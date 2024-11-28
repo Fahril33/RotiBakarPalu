@@ -80,7 +80,7 @@ const Sales = {
     // const todaydata = (await allPredictionDataByDate("2024-11-22")).filteredData
     // console.log('todayData', todaydata);
 
-    // await callDataShell();
+    await callDataShell();
   },
 
   initializeDatePicker() {
