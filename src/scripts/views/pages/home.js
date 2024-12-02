@@ -1,7 +1,12 @@
 // import RBPsource, { bacaHariLibur, getHolidays } from "../../../data/source";
 
+import {
+  allFinanceDataByDate,
+  allFinanceDataThisMonth,
+  allStockDataThisMonth,
+} from "../../../data/allData";
 import RBPsource from "../../../data/source";
-import { getCurrentDate } from "../../utils/datePicker";
+import { getCurrentDate, getYesterdayDate } from "../../utils/datePicker";
 import { createHomeTemplate } from "../template/template-creator";
 import Chart from "chart.js/auto";
 
@@ -16,7 +21,9 @@ const Home = {
 
   async afterRender() {
     const defaultYear = getCurrentDate().year;
+    console.log("defaultY", defaultYear);
     const defaultMonth = getCurrentDate().month;
+    console.log("defaultmongth", defaultMonth);
 
     //
     // Stock Chart
@@ -33,7 +40,7 @@ const Home = {
     const stockMYValue = stockFilterMY.value;
     const MYsplited = stockMYValue.split("-").map(Number);
     const stockYear = MYsplited[0];
-    console.log("splity", stockYear);
+    // console.log("splity", stockYear);
 
     stockFilter.addEventListener("change", function () {
       const selectedValue = this.value; // Mendapatkan nilai yang dipilih
@@ -75,7 +82,7 @@ const Home = {
     });
 
     const allStocksData = await RBPsource.getStocks();
-    console.log("allstoData", allStocksData);
+    // console.log("allstoData", allStocksData);
 
     // Fungsi untuk memfilter data berdasarkan tahun, bulan, dan minggu untuk stock
     function filterStockData(
@@ -85,13 +92,16 @@ const Home = {
       targetMonth,
       targetWeek
     ) {
-      const filteredByYearAndMonth = data.filter((item) => {
-        const itemDate = new Date(item.date);
-        return (
-          itemDate.getFullYear() === targetYear &&
-          itemDate.getMonth() === targetMonth
-        );
-      });
+      // Filter berdasarkan tahun dan bulan
+      const filteredByYearAndMonth = data
+        .filter((item) => {
+          const itemDate = new Date(item.date);
+          return (
+            itemDate.getFullYear() === targetYear &&
+            itemDate.getMonth() === targetMonth
+          );
+        })
+        .sort((a, b) => new Date(a.date) - new Date(b.date)); // Tambahkan sorting di sini
 
       const weeks = {};
       const months = {};
@@ -116,15 +126,25 @@ const Home = {
 
       if (filterType === "daily") {
         if (targetWeek === "semua") {
+          // Pastikan setiap minggu juga diurutkan
+          Object.keys(weeks).forEach((week) => {
+            weeks[week] = weeks[week].sort(
+              (a, b) => new Date(a.date) - new Date(b.date)
+            );
+          });
           return weeks;
         } else {
-          return weeks[targetWeek] || [];
+          return (weeks[targetWeek] || []).sort(
+            (a, b) => new Date(a.date) - new Date(b.date)
+          );
         }
       } else if (filterType === "weekly") {
         const weeklyData = Object.keys(weeks)
           .slice(-5)
           .map((week) => {
-            const weekItems = weeks[week];
+            const weekItems = weeks[week].sort(
+              (a, b) => new Date(a.date) - new Date(b.date)
+            );
             const aggregatedData = weekItems.reduce(
               (acc, current) => {
                 acc.additional_stock += current.additional_stock;
@@ -133,21 +153,24 @@ const Home = {
                 return acc;
               },
               {
+                total_stock: 0,
                 additional_stock: 0,
                 sold_stock: 0,
                 spoiled_stock: 0,
               }
             );
 
-            // Tambahkan properti week untuk pelabelan
             return {
               week: week,
+              date: weekItems[weekItems.length - 1].date, // Gunakan tanggal terakhir di minggu itu
               ...aggregatedData,
             };
-          });
+          })
+          .sort((a, b) => new Date(a.date) - new Date(b.date)); // Urutkan weekly data
 
         return weeklyData;
       } else if (filterType === "monthly") {
+        // Proses untuk data bulanan
         const monthlyData = [];
         const months = {};
 
@@ -167,16 +190,24 @@ const Home = {
                 additional_stock: 0,
                 sold_stock: 0,
                 spoiled_stock: 0,
+                latestDate: null,
               };
             }
 
             months[monthKey].additional_stock += item.additional_stock;
             months[monthKey].sold_stock += item.sold_stock;
             months[monthKey].spoiled_stock += item.spoiled_stock;
+
+            // Simpan tanggal terbaru
+            if (
+              !months[monthKey].latestDate ||
+              new Date(item.date) > new Date(months[monthKey].latestDate)
+            ) {
+              months[monthKey].latestDate = item.date;
+            }
           }
         });
 
-        // Konversi objek bulan menjadi array dengan menambahkan label bulan
         Object.keys(months).forEach((monthKey) => {
           const [year, month] = monthKey.split("-").map(Number);
           const monthName = new Date(year, month).toLocaleString("default", {
@@ -185,7 +216,10 @@ const Home = {
 
           monthlyData.push({
             month: monthName,
-            ...months[monthKey],
+            date: months[monthKey].latestDate,
+            additional_stock: months[monthKey].additional_stock,
+            sold_stock: months[monthKey].sold_stock,
+            spoiled_stock: months[monthKey].spoiled_stock,
           });
         });
 
@@ -211,7 +245,6 @@ const Home = {
         return monthlyData;
       }
     }
-
     // Fungsi untuk menampilkan grafik stock
     let stockChart;
     async function displayStockCharts() {
@@ -242,6 +275,7 @@ const Home = {
       console.log("filtrdt", filteredData);
 
       // Siapkan data untuk Chart.js
+      let alltotalStockData = [];
       let totalAdditionalStockData = [];
       let totalSoldStockData = [];
       let totalSpoiledStockData = [];
@@ -252,6 +286,7 @@ const Home = {
           for (const week in filteredData) {
             const weekData = filteredData[week];
             weekData.forEach((item) => {
+              alltotalStockData.push(item.total_stock);
               totalAdditionalStockData.push(item.additional_stock);
               totalSoldStockData.push(item.sold_stock);
               totalSpoiledStockData.push(item.spoiled_stock);
@@ -281,6 +316,7 @@ const Home = {
       } else {
         // Jika targetWeek bukan 'semua', ambil data dari minggu yang dipilih
         const weekData = filteredData || [];
+        alltotalStockData = weekData.map((item) => item.total_stock);
         totalAdditionalStockData = weekData.map(
           (item) => item.additional_stock
         );
@@ -298,6 +334,7 @@ const Home = {
       // console.log("totalSpoiledStockData", totalSpoiledStockData);
       callStockChart(
         labels,
+        alltotalStockData,
         totalAdditionalStockData,
         totalSoldStockData,
         totalSpoiledStockData
@@ -307,21 +344,35 @@ const Home = {
     // Fungsi untuk memanggil grafik stock
     function callStockChart(
       labels,
+      alltotalStockData,
       totalAdditionalStockData,
       totalSoldStockData,
       totalSpoiledStockData
     ) {
-      console.log("======================");
-      console.log("labels", labels);
-      console.log("totalAdditionalStockData", totalAdditionalStockData);
-      console.log("totalSoldStockData", totalSoldStockData);
-      console.log("totalSpoiledStockData", totalSpoiledStockData);
+      // console.log("======================");
+      // console.log("labels", labels);
+      // console.log("totalAdditionalStockData", totalAdditionalStockData);
+      // console.log("totalSoldStockData", totalSoldStockData);
+      // console.log("totalSpoiledStockData", totalSpoiledStockData);
+      const filterType = stockFilter.value;
       const ctx = document.getElementById("stockChartData").getContext("2d");
       stockChart = new Chart(ctx, {
         type: "line", // Jenis grafik
         data: {
           labels: labels,
           datasets: [
+            ...(filterType === "daily"
+              ? [
+                  {
+                    label: "Total Stock",
+                    data: alltotalStockData,
+                    borderColor: "rgba(54, 162, 235, 1)",
+                    backgroundColor: "rgba(54, 162, 235, 0.2)",
+                    fill: true,
+                  },
+                ]
+              : []), // Menyertakan dataset "Total Stock" jika filterType adalah "daily"
+
             {
               label: "Additional Stock",
               data: totalAdditionalStockData,
@@ -358,7 +409,7 @@ const Home = {
 
     // Menambahkan event listener untuk filter stock
     stockFilter.addEventListener("change", async function () {
-      stockFilterWeek.value = `semua`
+      stockFilterWeek.value = `semua`;
       await displayStockCharts();
     });
 
@@ -439,7 +490,7 @@ const Home = {
     // Finance Chart Data Handler
 
     const allFinanceData = await RBPsource.getFinances();
-    console.log("alfidata", allFinanceData);
+    // console.log("alfidata", allFinanceData);
 
     // Fungsi untuk memfilter data berdasarkan tahun, bulan, dan minggu
     function filterFinanceData(
@@ -720,6 +771,773 @@ const Home = {
         await displayFinancialCharts(); // Panggil tanpa parameter jika tidak monthly
       }
     });
+
+    //
+    // Cash Flow Chart
+    //
+
+    const cashFlowFilter = document.getElementById("cash-flow-filter");
+    const cashFlowFilterWeek = document.getElementById("cash-flow-filter-week");
+    const cashFlowFilterMY = document.getElementById("cash-flow-filter-my");
+    const cashFlowFilterY = document.getElementById("cash-flow-filter-year");
+
+    cashFlowFilterMY.value = `${defaultYear}-${defaultMonth}`;
+    cashFlowFilterY.value = `${defaultYear}`;
+
+    const allCashFlowData = await RBPsource.getFinances(); // Pastikan method ini tersedia di source
+
+    // Fungsi untuk memfilter data arus kas
+    function filterCashFlowData(
+      filterType,
+      data,
+      targetYear,
+      targetMonth,
+      targetWeek
+    ) {
+      // Implementasi serupa dengan filterFinanceData
+      const filteredByYearAndMonth = data.filter((item) => {
+        const itemDate = new Date(item.date);
+        return (
+          itemDate.getFullYear() === targetYear &&
+          itemDate.getMonth() === targetMonth
+        );
+      });
+
+      const weeks = {};
+      // const months = {};
+
+      filteredByYearAndMonth.forEach((item) => {
+        const itemDate = new Date(item.date);
+        const weekNumber = getWeekNumberInMonth(itemDate);
+        // const monthKey = `${itemDate.getFullYear()}-${itemDate.getMonth()}`;
+
+        if (!weeks[weekNumber]) {
+          weeks[weekNumber] = [];
+        }
+        weeks[weekNumber].push(item);
+      });
+
+      if (filterType === "daily") {
+        return targetWeek === "semua" ? weeks : weeks[targetWeek] || [];
+      } else if (filterType === "weekly") {
+        const weeklyData = Object.keys(weeks)
+          .slice(-5)
+          .map((week) => {
+            const weekItems = weeks[week];
+            const aggregatedData = weekItems.reduce(
+              (acc, current) => {
+                acc.in_cash += current.in_cash;
+                acc.in_debit += current.in_debit;
+                acc.out_cash += current.out_cash;
+                acc.out_debit += current.out_debit;
+                acc.cash_to_debit += current.cash_to_debit;
+                acc.debit_to_cash += current.debit_to_cash;
+                return acc;
+              },
+              {
+                in_cash: 0,
+                in_debit: 0,
+                out_cash: 0,
+                out_debit: 0,
+                cash_to_debit: 0,
+                debit_to_cash: 0,
+              }
+            );
+
+            return {
+              week: week,
+              ...aggregatedData,
+            };
+          });
+
+        return weeklyData;
+      } else if (filterType === "monthly") {
+        const monthlyData = [];
+        const months = {};
+
+        const selectedYear = parseInt(
+          document.getElementById("cash-flow-filter-year").value,
+          10
+        );
+
+        data.forEach((item) => {
+          const itemDate = new Date(item.date);
+          const itemYear = itemDate.getFullYear();
+          const monthKey = `${itemYear}-${itemDate.getMonth()}`;
+
+          if (itemYear === selectedYear) {
+            if (!months[monthKey]) {
+              months[monthKey] = {
+                in_cash: 0,
+                in_debit: 0,
+                out_cash: 0,
+                out_debit: 0,
+                cash_to_debit: 0,
+                debit_to_cash: 0,
+              };
+            }
+
+            months[monthKey].in_cash += item.in_cash;
+            months[monthKey].in_debit += item.in_debit;
+            months[monthKey].out_cash += item.out_cash;
+            months[monthKey].out_debit += item.out_debit;
+            months[monthKey].cash_to_debit += item.cash_to_debit;
+            months[monthKey].debit_to_cash += item.debit_to_cash;
+          }
+        });
+
+        Object.keys(months).forEach((monthKey) => {
+          const [year, month] = monthKey.split("-").map(Number);
+          const monthName = new Date(year, month).toLocaleString("default", {
+            month: "long",
+          });
+
+          monthlyData.push({
+            month: monthName,
+            ...months[monthKey],
+          });
+        });
+
+        monthlyData.sort((a, b) => {
+          const monthOrder = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+          ];
+          return monthOrder.indexOf(a.month) - monthOrder.indexOf(b.month);
+        });
+
+        return monthlyData;
+      }
+    }
+
+    let cashFlowChart;
+    async function displayCashFlowCharts() {
+      if (cashFlowChart) {
+        cashFlowChart.destroy();
+      }
+
+      const selectedWeek = document.getElementById(
+        "cash-flow-filter-week"
+      ).value;
+      const selectedMonth = document.getElementById(
+        "cash-flow-filter-my"
+      ).value;
+      const [year, month] = selectedMonth.split("-").map(Number);
+      const yearInputValue = document.getElementById(
+        "cash-flow-filter-year"
+      ).value;
+
+      const filterType = cashFlowFilter.value;
+      const targetYear =
+        filterType === "monthly" ? parseInt(yearInputValue, 10) : year;
+      const targetMonth = month - 1;
+      const targetWeek = selectedWeek;
+
+      const filteredData = filterCashFlowData(
+        filterType,
+        allCashFlowData,
+        targetYear,
+        targetMonth,
+        targetWeek
+      );
+
+      // console.log("Filtered Cash Flow Data:", filteredData);
+
+      // Persiapan data untuk chart
+      let inCashData = [];
+      let inDebitData = [];
+      let outCashData = [];
+      let outDebitData = [];
+      let cashToDebitData = [];
+      let debitToCashData = [];
+      let labels = [];
+
+      // Logika untuk mengisi data
+      if (targetWeek === "semua") {
+        if (filterType === "daily") {
+          for (const week in filteredData) {
+            const weekData = filteredData[week];
+            weekData.forEach((item) => {
+              inCashData.push(item.in_cash);
+              inDebitData.push(item.in_debit);
+              outCashData.push(item.out_cash);
+              outDebitData.push(item.out_debit);
+              cashToDebitData.push(item.cash_to_debit);
+              debitToCashData.push(item.debit_to_cash);
+              labels.push(item.date);
+            });
+          }
+        } else if (filterType === "weekly") {
+          filteredData.forEach((item) => {
+            inCashData.push(item.in_cash);
+            inDebitData.push(item.in_debit);
+            outCashData.push(item.out_cash);
+            outDebitData.push(item.out_debit);
+            cashToDebitData.push(item.cash_to_debit);
+            debitToCashData.push(item.debit_to_cash);
+            labels.push(`Week ${item.week}`);
+          });
+        } else if (filterType === "monthly") {
+          filteredData.forEach((item) => {
+            inCashData.push(item.in_cash);
+            inDebitData.push(item.in_debit);
+            outCashData.push(item.out_cash);
+            outDebitData.push(item.out_debit);
+            cashToDebitData.push(item.cash_to_debit);
+            debitToCashData.push(item.debit_to_cash);
+            labels.push(item.month);
+          });
+        }
+      } else {
+        // Jika targetWeek bukan 'semua', ambil data dari minggu yang dipilih
+        const weekData = filteredData || [];
+        inCashData = weekData.map((item) => item.in_cash);
+        inDebitData = weekData.map((item) => item.in_debit);
+        outCashData = weekData.map((item) => item.out_cash);
+        outDebitData = weekData.map((item) => item.out_debit);
+        cashToDebitData = weekData.map((item) => item.cash_to_debit);
+        debitToCashData = weekData.map((item) => item.debit_to_cash);
+        labels = weekData.map((item) => item.date);
+      }
+
+      // Log data untuk debugging
+      // console.log("Labels:", labels);
+      // console.log("In Cash Data:", inCashData);
+      // console.log("In Debit Data:", inDebitData);
+      // console.log("Out Cash Data:", outCashData);
+      // console.log("Out Debit Data:", outDebitData);
+      // console.log("Cash to Debit Data:", cashToDebitData);
+      // console.log("Debit to Cash Data:", debitToCashData);
+
+      // Panggil fungsi untuk membuat chart
+      callCashFlowChart(
+        labels,
+        inCashData,
+        inDebitData,
+        outCashData,
+        outDebitData,
+        cashToDebitData,
+        debitToCashData
+      );
+    }
+
+    function callCashFlowChart(
+      labels,
+      inCashData,
+      inDebitData,
+      outCashData,
+      outDebitData,
+      cashToDebitData,
+      debitToCashData
+    ) {
+      const ctx = document.getElementById("cashFlowChartData").getContext("2d");
+      cashFlowChart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: "Pemasukan Cash",
+              data: inCashData,
+              borderColor: "rgba(75, 192, 192, 1)",
+              backgroundColor: "rgba(75, 192, 192, 0.2)",
+              fill: true,
+            },
+            {
+              label: "Pemasukan Debit",
+              data: inDebitData,
+              borderColor: "rgba(255, 99, 132, 1)",
+              backgroundColor: "rgba(255, 99, 132, 0.2)",
+              fill: true,
+            },
+            {
+              label: "Pengeluaran Cash",
+              data: outCashData,
+              borderColor: "rgba(255, 206, 86, 1)",
+              backgroundColor: "rgba(255, 206, 86, 0.2)",
+              fill: true,
+            },
+            {
+              label: "Pengeluaran Debit",
+              data: outDebitData,
+              borderColor: "rgba(54, 162, 235, 1)",
+              backgroundColor: "rgba(54, 162, 235, 0.2)",
+              fill: true,
+            },
+            {
+              label: "Cash to Debit",
+              data: cashToDebitData,
+              borderColor: "rgba(153, 102, 255, 1)",
+              backgroundColor: "rgba(153, 102, 255, 0.2)",
+              fill: true,
+            },
+            {
+              label: "Debit to Cash",
+              data: debitToCashData,
+              borderColor: "rgba(255, 159, 64, 1)",
+              backgroundColor: "rgba(255, 159, 64, 0.2)",
+              fill: true,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+            },
+          },
+        },
+      });
+    }
+
+    // Event listeners untuk filter
+    cashFlowFilter.addEventListener("change", function () {
+      const selectedValue = this.value;
+      cashFlowFilterWeek.value = `semua`;
+
+      switch (selectedValue) {
+        case "daily":
+          cashFlowFilterWeek.style.display = "block";
+          cashFlowFilterMY.style.display = "block";
+          cashFlowFilterY.style.display = "none";
+          cashFlowFilterY.value = year;
+          break;
+        case "weekly":
+          cashFlowFilterWeek.style.display = "none";
+          cashFlowFilterMY.style.display = "block";
+          cashFlowFilterY.style.display = "none";
+          cashFlowFilterY.value = year;
+          break;
+        case "monthly":
+          cashFlowFilterWeek.style.display = "none";
+          cashFlowFilterMY.style.display = "none";
+          cashFlowFilterY.style.display = "block";
+          break;
+      }
+      displayCashFlowCharts();
+    });
+
+    cashFlowFilterWeek.addEventListener("change", async function () {
+      await displayCashFlowCharts();
+    });
+
+    cashFlowFilterMY.addEventListener("change", async function () {
+      const [selectedYear] = this.value.split("-");
+      await displayCashFlowCharts();
+      cashFlowFilterY.value = selectedYear;
+    });
+
+    cashFlowFilterY.addEventListener("change", async function () {
+      const selectedYearValue = this.value;
+      const year = parseInt(selectedYearValue, 10);
+      const filterType = cashFlowFilter.value;
+
+      if (filterType === "monthly") {
+        await displayCashFlowCharts(year);
+      } else {
+        await displayCashFlowCharts();
+      }
+    });
+
+    // Panggil saat halaman pertama kali dimuat
+    displayCashFlowCharts();
+
+    //
+    // displayer
+    //
+
+    const totalCashValue = document.getElementById("total-cash");
+    const totalProfitValue = document.getElementById("total-profit");
+    const totalSoldValue = document.getElementById("sold-stocks");
+    const totalSpoiledValue = document.getElementById("spoiled-stocks");
+
+    const currDate = getCurrentDate().pickedDate;
+    const yesterdayDate = getYesterdayDate().yesterday;
+    console.log("currdate", currDate);
+    console.log("ystdd", yesterdayDate);
+
+    function profitShowHideHandler(idToHide, idToShow) {
+      idToHide.style.display = "none";
+      idToShow.style.display = "unset";
+    }
+
+    function persentaseSelisih(dataBaru, dataSebelumnya) {
+      // Validasi input
+      if (dataBaru === undefined || dataSebelumnya === undefined) {
+        console.log("Error: Data tidak lengkap");
+        return {
+          hasilSelisih: null,
+          pesan: "Data tidak lengkap",
+        };
+      }
+
+      // Konversi ke tipe numerik jika diperlukan
+      dataBaru = Number(dataBaru);
+      dataSebelumnya = Number(dataSebelumnya);
+
+      // Cek apakah input valid numerik
+      if (isNaN(dataBaru) || isNaN(dataSebelumnya)) {
+        console.log("Error: Input harus berupa angka");
+        return {
+          hasilSelisih: null,
+          pesan: "Input harus berupa angka",
+        };
+      }
+
+      // Penanganan kasus pembagi nol
+      if (dataSebelumnya === 0) {
+        // Jika data sebelumnya 0, tapi data baru tidak 0
+        if (dataBaru !== 0) {
+          console.log("Pertumbuhan 100%");
+          return {
+            hasilSelisih: "100.00",
+            pesan: "Pertumbuhan 100%",
+          };
+        }
+
+        // Jika keduanya 0
+        return {
+          hasilSelisih: "0.00",
+          pesan: "Tidak ada perubahan",
+        };
+      }
+
+      // Hitung selisih dan persentase
+      const hitungSelisih = dataBaru - dataSebelumnya;
+      console.log("HITUNGSELISIH", hitungSelisih);
+
+      // Perhitungan persentase selisih berdasarkan data sebelumnya
+      const prosesSelisih = (hitungSelisih / dataSebelumnya) * 100;
+
+      // Pembulatan dengan 2 desimal
+      const hasilSelisih = prosesSelisih.toFixed(2);
+
+      console.log("Data Baru:", dataBaru);
+      console.log("Data Sebelumnya:", dataSebelumnya);
+      console.log("Selisih:", hitungSelisih);
+      console.log("Persentase Selisih:", hasilSelisih);
+
+      return {
+        hasilSelisih: hasilSelisih,
+        pesan: "Berhasil menghitung persentase selisih",
+      };
+    }
+
+    //
+    // Financsial Cashes
+    const cashValue = document.getElementById("cash");
+    const debitValue = document.getElementById("debit");
+
+    const { totalCash, totalDebit } = await allFinanceDataByDate(currDate);
+
+    const totalCashY = (await allFinanceDataByDate(yesterdayDate)).totalCash;
+    const totalDebitY = (await allFinanceDataByDate(yesterdayDate)).totalDebit;
+
+    const totalFinance = totalCash + totalDebit;
+    const totalFinanceY = totalCashY + totalDebitY;
+    const selisihFinanceD = persentaseSelisih(
+      totalFinance,
+      totalFinanceY
+    ).hasilSelisih;
+
+    totalCashValue.textContent = `Rp. ${totalFinance.toLocaleString("ID")}`;
+    cashValue.textContent = `Cash : Rp. ${totalCash.toLocaleString("ID")}`;
+    debitValue.textContent = `Kredit : Rp. ${totalDebit.toLocaleString("ID")}`;
+
+    const todayCashStatusArrUp = document.querySelector(
+      "#todayCashStatus #arrUp"
+    );
+    const todayCashStatusArrUpArrDown = document.querySelector(
+      "#todayCashStatus #arrDown"
+    );
+    const todayCashStatusArrUpText = document.querySelector(
+      "#todayCashStatus #arrUp span"
+    );
+    const todayCashStatusArrDownText = document.querySelector(
+      "#todayCashStatus #arrDown span"
+    );
+
+    if (selisihFinanceD > 0) {
+      profitShowHideHandler(todayCashStatusArrUpArrDown, todayCashStatusArrUp);
+      todayCashStatusArrUpText.textContent = selisihFinanceD;
+    } else {
+      profitShowHideHandler(todayCashStatusArrUp, todayCashStatusArrUpArrDown);
+      todayCashStatusArrDownText.textContent = selisihFinanceD;
+    }
+
+    //
+    // weekly monthly
+    async function updateCashStatus(allCashFlowData) {
+      const currDate = getCurrentDate().pickedDate; // Ambil tanggal hari ini
+      const today = new Date(currDate);
+
+      // Hitung tanggal untuk minggu lalu (7 hari yang lalu)
+      const lastWeekDate = new Date(today);
+      lastWeekDate.setDate(today.getDate() - 7); // 7 hari yang lalu
+      // console.log("lastWeekDate", lastWeekDate);
+
+      // Hitung tanggal untuk bulan lalu (tanggal terakhir bulan lalu)
+      const lastMonthDate = new Date(today.getFullYear(), today.getMonth(), 0); // Akhir bulan lalu
+      // console.log("lastmodate", lastMonthDate);
+
+      // Filter data untuk minggu lalu
+      const lastWeekData = allCashFlowData.filter((item) => {
+        const itemDate = new Date(item.date);
+        return itemDate.toDateString() === lastWeekDate.toDateString(); // Ambil data tepat pada tanggal minggu lalu
+      });
+      // console.log("lastweekdata", lastWeekData);
+
+      // Filter data untuk bulan lalu
+      const lastMonthData = allCashFlowData.filter((item) => {
+        const itemDate = new Date(item.date);
+        return (
+          itemDate.getFullYear() === lastMonthDate.getFullYear() &&
+          itemDate.getMonth() === lastMonthDate.getMonth() &&
+          itemDate.getDate() === lastMonthDate.getDate()
+        ); // Ambil data tepat pada tanggal terakhir bulan lalu
+      });
+      // console.log("lastmonthdata", lastMonthData);
+
+      // Hitung total untuk hari ini
+      const totalTodayCombined = totalFinance;
+      // console.log("totalTodayCombined", totalTodayCombined);
+
+      // Hitung total untuk minggu lalu
+      const totalLastWeekCombined = lastWeekData.reduce((acc, item) => {
+        return acc + item.total_cash + item.total_debit; // Jumlahkan total_cash dan total_debit
+      }, 0);
+      // console.log("totalLastWeekCombined", totalLastWeekCombined);
+
+      // Hitung total untuk bulan lalu
+      const totalLastMonthCombined = lastMonthData.reduce((acc, item) => {
+        return acc + item.total_cash + item.total_debit; // Jumlahkan total_cash dan total_debit
+      }, 0);
+      // console.log("totalLastMonthCombined", totalLastMonthCombined);
+
+      // Hitung persentase selisih untuk minggu lalu
+      const percentageChangeWeek = persentaseSelisih(
+        totalTodayCombined,
+        totalLastWeekCombined
+      ).hasilSelisih;
+      // console.log("percentageChangeWeek", percentageChangeWeek);
+
+      // Hitung persentase selisih untuk bulan lalu
+      const percentageChangeMonth = persentaseSelisih(
+        totalTodayCombined,
+        totalLastMonthCombined
+      ).hasilSelisih;
+      // console.log("percentageChangeMonth", percentageChangeMonth);
+
+      // Update tampilan untuk minggu lalu
+      const weekCashStatusArrUp = document.querySelector(
+        "#tweekCashStatus #arrUp"
+      );
+      const weekCashStatusArrDown = document.querySelector(
+        "#tweekCashStatus #arrDown"
+      );
+      const weekCashStatusArrUpText = document.querySelector(
+        "#tweekCashStatus #arrUp span"
+      );
+      const weekCashStatusArrDownText = document.querySelector(
+        "#tweekCashStatus #arrDown span"
+      );
+
+      if (percentageChangeWeek > 0) {
+        profitShowHideHandler(weekCashStatusArrDown, weekCashStatusArrUp);
+        weekCashStatusArrUpText.textContent = percentageChangeWeek;
+      } else {
+        profitShowHideHandler(weekCashStatusArrUp, weekCashStatusArrDown);
+        weekCashStatusArrDownText.textContent = percentageChangeWeek;
+      }
+
+      // Update tampilan untuk bulan lalu
+      const monthCashStatusArrUp = document.querySelector(
+        "#tmonthCashStatus #arrUp"
+      );
+      const monthCashStatusArrDown = document.querySelector(
+        "#tmonthCashStatus #arrDown"
+      );
+      const monthCashStatusArrUpText = document.querySelector(
+        "#tmonthCashStatus #arrUp span"
+      );
+      const monthCashStatusArrDownText = document.querySelector(
+        "#tmonthCashStatus #arrDown span"
+      );
+
+      if (percentageChangeMonth > 0) {
+        profitShowHideHandler(monthCashStatusArrDown, monthCashStatusArrUp);
+        monthCashStatusArrUpText.textContent = percentageChangeMonth;
+      } else {
+        profitShowHideHandler(monthCashStatusArrUp, monthCashStatusArrDown);
+        monthCashStatusArrDownText.textContent = percentageChangeMonth;
+      }
+    }
+
+    // Panggil fungsi ini setelah data cash flow diambil
+    updateCashStatus(allCashFlowData);
+
+    //
+    // Financial Profits
+
+    // CURRENT MONTH FINANCIAL DATA
+    const currMonthData = await allFinanceDataThisMonth(
+      defaultMonth,
+      defaultYear
+    );
+    const currTotalIn = currMonthData.totalInCash + currMonthData.totalInDebit;
+    const currTotalOut =
+      currMonthData.totalOutCash + currMonthData.totalOutDebit;
+    const currMonthProfit = currTotalIn - currTotalOut;
+
+    // PREVIOUS MONTH DATA
+    const prevMonthData = await allFinanceDataThisMonth(
+      defaultMonth - 1,
+      defaultYear
+    );
+    const prevTotalIn = prevMonthData.totalInCash + prevMonthData.totalInDebit;
+    const prevTotalOut =
+      prevMonthData.totalOutCash + prevMonthData.totalOutDebit;
+    const prevMonthProfit = prevTotalIn - prevTotalOut;
+
+    // SHOW PROFITs
+    totalProfitValue.textContent = `Rp. ${currMonthProfit.toLocaleString(
+      "ID"
+    )}`;
+
+    const currIncomeText = document.getElementById("currIncome");
+    currIncomeText.textContent = `In : Rp. ${currTotalIn.toLocaleString("ID")}`;
+    const currExpenseText = document.getElementById("currExpense");
+    currExpenseText.textContent = `Out : Rp. ${currTotalOut.toLocaleString(
+      "ID"
+    )}`;
+
+    const prevIncomeText = document.getElementById("prevIncome");
+    prevIncomeText.textContent = `In : Rp. ${prevTotalIn.toLocaleString("ID")}`;
+    const prevExpenseText = document.getElementById("prevExpense");
+    prevExpenseText.textContent = `Out : Rp. ${prevTotalOut.toLocaleString(
+      "ID"
+    )}
+    `;
+    // PERCENTAGE HANDLER
+    const percentageChangeProfit = persentaseSelisih(
+      currMonthProfit,
+      prevMonthProfit
+    ).hasilSelisih;
+
+    const todayProfitStatusArrUp = document.querySelector(
+      "#todayProfitStatus #arrUp"
+    );
+    const todayProfitStatusArrDown = document.querySelector(
+      "#todayProfitStatus #arrDown"
+    );
+    const todayProfitStatusArrUpText = document.querySelector(
+      "#todayProfitStatus #arrUp span"
+    );
+    const todayProfitStatusArrDownText = document.querySelector(
+      "#todayProfitStatus #arrDown span"
+    );
+
+    if (percentageChangeProfit > 0) {
+      profitShowHideHandler(todayProfitStatusArrDown, todayProfitStatusArrUp);
+      todayProfitStatusArrUpText.textContent = percentageChangeProfit;
+    } else {
+      profitShowHideHandler(todayProfitStatusArrUp, todayProfitStatusArrDown);
+      todayProfitStatusArrDownText.textContent = percentageChangeProfit;
+    }
+
+    //
+    // STOCKS CONTROL
+
+    // CURRENT MONTH STOCK DATA
+    const currMonthStockData = await allStockDataThisMonth(
+      defaultMonth,
+      defaultYear
+    );
+
+    const currSoldStockData = currMonthStockData.totalSoldStock;
+    const currSpoiledStockData = currMonthStockData.totalSpoiledStock;
+    console.log("currSSD", currSoldStockData, currSpoiledStockData);
+
+    // PREVIOUS MONTH STOCK DATA
+    const prevMonthStockData = await allStockDataThisMonth(
+      defaultMonth - 1,
+      defaultYear
+    );
+
+    const prevSoldStockData = prevMonthStockData.totalSoldStock;
+    const prevSpoiledStockData = prevMonthStockData.totalSpoiledStock;
+    console.log("prevSSD", prevSoldStockData, prevSpoiledStockData);
+
+    // DISPLAY STOCK DATA
+    totalSoldValue.textContent = `${currSoldStockData} terjual`;
+    totalSpoiledValue.textContent = `${currSpoiledStockData} rusak`;
+
+    // SOLD STOCKS PERCENTAGE HANDLER
+    const stockPercentageChangeSold = persentaseSelisih(
+      currSoldStockData,
+      prevSoldStockData
+    ).hasilSelisih;
+
+    const todaySoldStockStatusArrUp = document.querySelector(
+      "#soldStockStatus #arrUp"
+    );
+    const todaySoldStockStatusArrDown = document.querySelector(
+      "#soldStockStatus #arrDown"
+    );
+    const todaySoldStockStatusArrUpText = document.querySelector(
+      "#soldStockStatus #arrUp span"
+    );
+    const todaySoldStockStatusArrDownText = document.querySelector(
+      "#soldStockStatus #arrDown span"
+    );
+
+    if (stockPercentageChangeSold > 0) {
+      profitShowHideHandler(todaySoldStockStatusArrDown, todaySoldStockStatusArrUp)
+      todaySoldStockStatusArrUpText.textContent = stockPercentageChangeSold;
+    }else{
+      profitShowHideHandler(todaySoldStockStatusArrUp, todaySoldStockStatusArrDown)
+      todaySoldStockStatusArrDownText.textContent = stockPercentageChangeSold;
+    }
+
+    // SPOILED STOCKS PERCENTAGE HANDLER
+    const stockPercentageChangeSpoiled = persentaseSelisih(currSpoiledStockData, prevSpoiledStockData).hasilSelisih;
+
+    const todaySpoiledtockStatusArrUp = document.querySelector(
+      "#spoiledStockStatus #arrUp"
+    );
+    const todaySpoiledtockStatusArrDown = document.querySelector(
+      "#spoiledStockStatus #arrDown"
+    );
+    const todaySpoiledtockStatusArrUpText = document.querySelector(
+      "#spoiledStockStatus #arrUp span"
+    );
+    const todaySpoiledtockStatusArrDownText = document.querySelector(
+      "#spoiledStockStatus #arrDown span"
+    );
+
+    if (stockPercentageChangeSpoiled > 0) {
+      profitShowHideHandler(todaySpoiledtockStatusArrUp, todaySpoiledtockStatusArrDown)
+      todaySpoiledtockStatusArrDownText.textContent = `+${Math.abs(
+        stockPercentageChangeSpoiled
+      )}`;
+    }else{
+      profitShowHideHandler(todaySpoiledtockStatusArrDown, todaySpoiledtockStatusArrUp)
+      todaySpoiledtockStatusArrUpText.textContent = Math.abs(
+        stockPercentageChangeSpoiled
+      );
+    }
+
   },
 };
 

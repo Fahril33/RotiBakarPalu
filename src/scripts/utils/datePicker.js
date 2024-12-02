@@ -77,3 +77,28 @@ export async function minusOneDayDate() {
     resultDate,
   };
 }
+
+export function extractDateDetails(dateString) {
+  // Buat objek Date dari string
+  const date = new Date(dateString);
+
+  // Ekstrak year, month, dan day
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1; // +1 karena bulan dimulai dari 0
+  const day = date.getDate();
+
+  // Hitung minggu
+  const firstDayOfMonth = new Date(year, month - 1, 1);
+  const firstWeekDay = firstDayOfMonth.getDay(); // Hari pertama bulan (0-6)
+
+  // Hitung minggu ke-
+  const week = Math.ceil((day + firstWeekDay) / 7);
+
+  return {
+    year,
+    month,
+    day,
+    week,
+    fullDate: date,
+  };
+}

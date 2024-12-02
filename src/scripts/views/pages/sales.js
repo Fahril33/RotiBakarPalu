@@ -13,7 +13,7 @@ import {
 } from "../../utils/sales/displayerData";
 import { handleFormSubmit } from "../../utils/sales/form-handler";
 import { showModal, closeModal } from "../../utils/sales/modal-handler";
-import { getCurrentDate } from "../../utils/datePicker";
+import { datePickerValue, getCurrentDate } from "../../utils/datePicker";
 import { bagIcon, soldIcon, editIcon } from "../../utils/icons";
 
 import {
@@ -126,7 +126,7 @@ const Sales = {
       // console.log(`Data for date ${selectedDate}:`, filteredData);
       this.populateSalesTable(filteredData);
 
-      // await logDatesSince();
+      // await logDatesSince((await datePickerValue()).dateValue, true);
       await displayerSold();
       await displayerIncome();
       await displayerWeather();

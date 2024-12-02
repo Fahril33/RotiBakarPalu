@@ -9,15 +9,12 @@ import {
   createNewFinanceDataShell,
   putFinanceData,
 } from "../../data/utils/financeHandler";
-import { getHolidayValue } from "../../data/utils/holidayHandler";
 import { syncSoldToPrediction } from "../../data/utils/predictionHandler";
 import {
   isAnyStockDataShell,
   putNewStockData,
 } from "../../data/utils/stockHandler";
-import { checkWeatherData } from "../../data/utils/weatherHandler";
-import { usePrediction } from "./algorithm";
-import { datePickerValue, getCurrentDate } from "./datePicker";
+import { getCurrentDate } from "./datePicker";
 
 // Tambahkan fungsi ini di luar logDatesSince
 async function subtractOneDay(dateString) {
@@ -29,7 +26,7 @@ async function subtractOneDay(dateString) {
   )}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
-export async function logDatesSince(pickedDate, longSince = false) {
+export async function logDatesSince(pickedDate, logsince = false) {
   // let dateValue = (await datePickerValue()).dateValue;
   let dateValue = pickedDate;
   console.log("dateValue", dateValue);
@@ -50,7 +47,7 @@ export async function logDatesSince(pickedDate, longSince = false) {
       ).padStart(2, "0")}-${String(currentDate.getDate()).padStart(2, "0")}`;
 
       // Menampilkan loader
-      if(longSince){
+      if(logsince){
         let syncText = `Sinkronisasi data: ${formattedDate}`;
         showLoader(true, syncText);
       }else{
@@ -161,7 +158,7 @@ export async function logDatesSince(pickedDate, longSince = false) {
       }
 
       // Tambahkan jeda sebelum melanjutkan ke tanggal berikutnya
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // jeda 1 detik
+      await new Promise((resolve) => setTimeout(resolve, 0)); // jeda 1 detik
       // console.log(`Processing date: ${formattedDate}`);
 
       // Sembunyikan loader setelah selesai

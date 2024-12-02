@@ -548,8 +548,8 @@ const createHomeTemplate = () => `
     <div class="overview-bar">
       <p>Rincian</p>
       <div class="overview-navigator">
-        <a href="#finance-charts">Keuangan</a>
         <a href="#stocks-charts">Stok</a>
+        <a href="#finance-charts">Keuangan</a>
         <a href="#financialFlow-charts">Arus Kas</a>
       </div>
     </div>
@@ -558,39 +558,68 @@ const createHomeTemplate = () => `
       <div class="section-overview">
         <div class="card financial">
           <span>Total Saldo</span><br>
-          <p4>Rp. 100.000</p4>
-          <div class="profit-icon">
-            <i class="fas fa-arrow-up" id="arrUp"><span>12,69%</span></i>
-            <span> berdasarkan kemarin</span>
+          <p4 id="total-cash">Memuat..</p4>
+          <div class="tooltip">
+            <span class="tooltiptext">
+              <p id="cash">Memuat saldo cash..</p>
+              <p id="debit">Memuat saldo kredit..</p>
+            </span>
+            <i class="fas fa-circle-info"></i>
+          </div>
+          <div class="tooltip">
+            <span class="tooltiptext" id="totalCashTootltip">
+              <div class="profit-icon" id="tweekCashStatus">
+                <i class="fas fa-arrow-up" id="arrUp" style="display: none;"><span>0%</span></i>
+                <i class="fas fa-arrow-down" id="arrDown" style="display: none;"><span>0%</span></i>
+                <span> dari minggu lalu</span>
+              </div>
+              <div class="profit-icon" id="tmonthCashStatus">
+                <i class="fas fa-arrow-up" id="arrUp" style="display: none;"><span>0%</span></i>
+                <i class="fas fa-arrow-down" id="arrDown" style="display: none;"><span>0%</span></i>
+                <span> dari bulan lalu</span>
+              </div>
+            </span>
+            <div class="profit-icon" id="todayCashStatus">
+              <i class="fas fa-arrow-up" id="arrUp" style="display: none;"><span>0%</span></i>
+              <i class="fas fa-arrow-down" id="arrDown" style="display: none;"><span>0%</span></i>
+              <span> berdasarkan kemarin</span>
+            </div>
           </div>
         </div>
         <div class="card financial">
-          <span>Total Keuntungan</span><br>
-          <p4>Rp. 100.000</p4>
-          <div class="profit-icon">
+          <span>Keuntungan bulan ini</span><br>
+          <p4 id="total-profit">Memuat..</p4>
+          <div class="tooltip">
+            <span class="tooltiptext">
+              <p id="profitText">Bulan ini :</p>
+              <p id="currIncome">Memuat data pemasukan..</p>
+              <p id="currExpense">Memuat data pengeluaran..</p>
+              <p id="profitText">Bulan sebelumnya :</p>
+              <p id="prevIncome">Memuat data pemasukan..</p>
+              <p id="prevExpense">Memuat data pengeluaran..</p>
+            </span>
+            <i class="fas fa-circle-info"></i>
+          </div>
+          <div class="profit-icon" id="todayProfitStatus">
             <i class="fas fa-arrow-up" id="arrUp"><span>12,69%</span></i>
             <i class="fas fa-arrow-down" id="arrDown"><span>12,69%</span></i>
-            <span> berdasarkan bulan ini</span>
+            <span> berdasarkan bulan lalu</span>
           </div>
         </div>
-        <div class="card financial">
-          <span>Total Belanja</span><br>
-          <p4>Rp. 100.000</p4>
-          <div class="profit-icon">
-            <i class="fas fa-arrow-up" id="arrUp"><span>12,69%</span></i>
-            <span> berdasarkan bulan ini</span>
-          </div>
-        </div>
-        <div class="card financial">
-          <span>Stok Roti (bulanan)</span>
+        <div class="card financial" id="breadStockCard">
+          <span>Stok bulan ini</span>
           <div class="financial-bread">
-            <div class="profit-icon">
-              <p4>125 terjual</p4><br>
-              <i class="fas fa-arrow-up" id="arrUp"><span>12,69%</span></i>
+            <div class="profit-icon" id="soldStockStatus">
+              <p4 id="sold-stocks">Memuat..</p4><br>
+              <i class="fas fa-arrow-up" id="arrUp"><span>4</span></i>
+              <i class="fas fa-arrow-down" id="arrDown"><span>3</span></i>
+              <span> dari bulan lalu</span>
             </div>
-            <div class="profit-icon">
-              <p4>10 rusak</p4>
-              <i class="fas fa-arrow-up" id="arrUp"><span>12,69%</span></i>
+            <div class="profit-icon" id="spoiledStockStatus">
+              <p4 id="spoiled-stocks">Memuat..</p4><br>
+              <i class="fas fa-arrow-up" id="arrUp"><span>3</span></i>
+              <i class="fas fa-arrow-down" id="arrDown"><span>2</span></i>
+              <span> dari bulan lalu</span>
             </div>
           </div>
         </div>
@@ -616,7 +645,7 @@ const createHomeTemplate = () => `
                 <option value="5">minggu 5</option>
               </select>
               <input type="month" name="s" id="stocks-filter-my" style="display: unset;">
-              <input type="number" min="2024" max="2030" step="1" value="2024" id="stocks-filter-year" style="display: none;"/>
+              <input type="number" min="2020" max="2030" step="1" value="2024" id="stocks-filter-year" style="display: none;"/>
             </div>
           </div>
           <div class="chart-body">
@@ -644,7 +673,7 @@ const createHomeTemplate = () => `
                 <option value="5">minggu 5</option>
               </select>
               <input type="month" name="s" id="finance-filter-my" style="display: unset;">
-              <input type="number" min="2024" max="2030" step="1" value="2024" id="finance-filter-year" style="display: none;"/>
+              <input type="number" min="2020" max="2030" step="1" value="2024" id="finance-filter-year" style="display: none;"/>
             </div>
           </div>
           <div class="chart-body">
@@ -657,16 +686,27 @@ const createHomeTemplate = () => `
             <p4>Historis Arus Kas</p4>
             <div class="filters">
               <i class="fas fa-filter mr-2"></i>
-              <select name="financialFlow-filter" id="financialFlow-filter">
-                <option value="daily">Harian</option>
-                <option value="weekly" selected>Mingguan</option>
+              <select name="cash-flow-filter" id="cash-flow-filter">
+                <option value="daily" selected>Harian</option>
+                <option value="weekly">Mingguan</option>
                 <option value="monthly">Bulanan</option>
                 <!-- <option value="yearly">pertahun</option> -->
               </select>
+              <select name="cash-flow-filter-week" id="cash-flow-filter-week" style="display: unset;">
+                <option value="semua" selected>semua</option>
+                <option value="1">minggu 1</option>
+                <option value="2">minggu 2</option>
+                <option value="3">minggu 3</option>
+                <option value="4">minggu 4</option>
+                <option value="5">minggu 5</option>
+              </select>
+              <input type="month" name="s" id="cash-flow-filter-my" style="display: unset;">
+              <input type="number" min="2020" max="2030" step="1" value="2024" id="cash-flow-filter-year" style="display: none;"/>
             </div>
           </div>
+          
           <div class="chart-body">
-            <img id="chartsimage" alt="" />
+            <div style="width: 100%;"><canvas id="cashFlowChartData"></canvas></div>
           </div>
         </div>
       </div>

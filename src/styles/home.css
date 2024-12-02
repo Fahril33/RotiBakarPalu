@@ -49,9 +49,83 @@
   padding: 10px;
   margin: 0;
 }
-.card span {
+.section-overview .card span,
+.section-charts .card span {
   font-size: small;
   color: gray;
+}
+
+/*
+:::: Tooltip
+*/
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.tooltip i {
+  color: #8b8b8b;
+  font-size: small;
+}
+
+#cash,
+#debit,
+#profitText,
+#currIncome,
+#currExpense,
+#prevIncome,
+#prevExpense {
+  color: white;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 150px;
+  background-color: #555;
+  color: #fff;
+  text-align: left;
+  border-radius: 6px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  top: 125%; /* Position the tooltip above the text */
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltiptext#totalCashTootltip {
+  background-color: #f9f9ee;
+  width: 100%;
+}
+
+.tooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent #555 transparent;
+}
+.tooltiptext#totalCashTootltip::after {
+  content: "";
+  position: absolute;
+  top: -18%; /* At the bottom of the tooltip */
+  left: 20%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent #f9f9ee transparent;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
 }
 
 /*
@@ -61,7 +135,7 @@
   width: 100%;
   height: 100%;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: 1.25fr 1.25fr 1.5fr;
   gap: 20px;
 }
 .fas {
@@ -70,20 +144,28 @@
 }
 #arrUp {
   color: rgb(6, 169, 0);
-  background-color: rgba(172, 255, 47, 0.285);
+  background-color: rgba(172, 255, 47, 0.21);
 }
 #arrUp span::before {
   content: " +";
-  font-size: x-small;
+  font-size: small;
+}
+#arrUp span::after {
+  content: "%";
+  font-size: small;
 }
 #arrDown {
   /* display: none; */
   color: rgb(190, 0, 0);
-  background-color: rgba(255, 0, 0, 0.315);
+  background-color: rgba(255, 0, 0, 0.21);
   /* display: ; */
 }
 #arrDown span::before {
-  content: "-";
+  content: "";
+}
+#arrDown span::after {
+  content: "%";
+  font-size: small;
 }
 .profit-icon i {
   font-size: x-small;
@@ -111,7 +193,8 @@ p4 {
 .section-charts {
   width: 100%;
   height: 100%;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 20px;
 }
 .card.finance-charts,
@@ -119,9 +202,12 @@ p4 {
 .card.financialFlow {
   display: grid;
   gap: 15px;
+  overflow-x:scroll;
 }
 .chart-headers {
+  /* width: 100%; */
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   background: linear-gradient(to right, #e2780d63, #f1a96063);
@@ -133,6 +219,7 @@ p4 {
 
 .filters {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   gap: 5px;
@@ -152,13 +239,15 @@ p4 {
 }
 /* Financial */
 #finance-filter-year,
-#stocks-filter-year {
+#stocks-filter-year,
+#cash-flow-filter-year {
   margin: 0;
   border-radius: 10px;
   height: 35px;
 }
 #finance-filter-my,
-#stocks-filter-my {
+#stocks-filter-my,
+#cash-flow-filter-my {
   margin: 0;
   height: 35px;
   width: auto;
@@ -166,11 +255,13 @@ p4 {
   padding: 5px;
 }
 #finance-filter-my:hover,
-#finance-filter-my:hover {
+#finance-filter-my:hover,
+#cash-flow-filter-my:hover {
   cursor: pointer;
 }
 #finance-filter-week,
-#stocks-filter-week {
+#stocks-filter-week,
+#cash-flow-filter-week {
   padding-left: 5px;
 }
 
@@ -216,4 +307,17 @@ p4 {
   .section-overview {
     grid-template-columns: 1fr 1fr;
   }
+  #breadStockCard{
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 600.99px) {
+  .section-overview {
+    grid-template-columns: 1fr ;
+  }
+  #breadStockCard{
+    grid-column:unset;
+  }
+  
 }
