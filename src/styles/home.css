@@ -1,3 +1,7 @@
+
+/*
+:::: Home
+*/
 .overview-bar {
   width: 100%;
   height: 40px;
@@ -190,6 +194,14 @@ p4 {
 /*
 :::: Charts
 */
+
+.chart-body {
+  width: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+}
 .section-charts {
   width: 100%;
   height: 100%;
@@ -200,9 +212,10 @@ p4 {
 .card.finance-charts,
 .card.stocks-charts,
 .card.financialFlow {
-  display: grid;
+  width: 100%;
+  /* display: grid; */
   gap: 15px;
-  overflow-x:scroll;
+  height: auto;
 }
 .chart-headers {
   /* width: 100%; */
@@ -219,7 +232,7 @@ p4 {
 
 .filters {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: space-between;
   align-items: center;
   gap: 5px;
@@ -265,35 +278,18 @@ p4 {
   padding-left: 5px;
 }
 
-/* ChartBody */
-.chart-body {
-  width: 100%;
-  /* border-style: inset; */
-  display: flex;
-  justify-content: center;
-}
-.chart-body img {
-  object-fit: contain;
-  max-width: 100%;
-  max-height: 100%;
-}
-#chartsimage {
-  object-fit: contain;
-  /* width: 50%; */
-  max-width: 100%;
-  max-height: 100%;
-}
-
 /*
 :::: Responsive Home
 */
 
-@media (min-width: 1440.99px) {
+@media (min-width: 1439.99px) {
   .home-content,
   .overview-bar {
-    padding-left: 15%;
-    padding-right: 15%;
     transition: 0.3s ease all;
+  }
+  .section-charts {
+    width: 80%;
+    margin: auto;
   }
 }
 @media (max-width: 1300.99px) {
@@ -303,21 +299,81 @@ p4 {
   }
 }
 
-@media (max-width: 768.99px) {
+@media (max-width: 768.99px) and (min-width: 425.99px) {
   .section-overview {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
   }
-  #breadStockCard{
-    grid-column: span 2;
+
+  #todayCashStatus,
+  #todayProfitStatus,
+  #soldStockStatus,
+  #spoiledStockStatus {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  #todayCashStatus p4,
+  #todayProfitStatus p4,
+  #soldStockStatus p4,
+  #spoiledStockStatus p4 {
+    width: 100%;
+  }
+
+  #todayCashStatus span,
+  #todayProfitStatus span,
+  #soldStockStatus span,
+  #spoiledStockStatus span {
+    width: 100%;
+    font-size: small;
+  }
+}
+
+@media (max-width: 768.99px) {
+  .chart-body {
+    padding: 1%;
+  }
+  canvas {
+    width: max-content;
   }
 }
 
 @media (max-width: 600.99px) {
   .section-overview {
-    grid-template-columns: 1fr ;
+    grid-template-columns: 1fr;
   }
-  #breadStockCard{
-    grid-column:unset;
+  #breadStockCard {
+    grid-column: unset;
   }
-  
+  .chart-headers {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+  }
+  .chart-body {
+    position: relative;
+    height: auto; /* Atur tinggi sesuai kebutuhan */
+    width: 100%;
+    overflow: auto; /* Tambahkan ini untuk mengizinkan pengguliran */
+  }
+  .filters {
+    scale: 0.8;
+    width: 110%;
+    margin-left: -13px;
+  }
+  .filters select {
+    width: 100%;
+  }
+}
+
+@media (max-width: 425.99px) {
+  .section-charts {
+    max-width: 100%;
+  }
+  /* .chart-body {
+    max-width: 350px;
+  } */
+  canvas {
+    scale: 1;
+  }
 }

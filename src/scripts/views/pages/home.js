@@ -430,6 +430,7 @@ const Home = {
 
     // Panggil fungsi untuk menampilkan grafik stock saat halaman dimuat
     displayStockCharts();
+    
 
     //
     // Financial Chart
@@ -735,6 +736,20 @@ const Home = {
             },
           },
         },
+        plugins: [
+          {
+            id: "resizeChart",
+            beforeInit: function (chart) {
+              const originalResize = chart.resize;
+              chart.resize = function () {
+                const containerWidth = chart.canvas.parentNode.clientWidth;
+                chart.canvas.width = containerWidth;
+                chart.canvas.height = (containerWidth / 16) * 9; // Contoh aspek rasio 16:9
+                originalResize.apply(this, arguments);
+              };
+            },
+          },
+        ],
       });
     }
     displayFinancialCharts();
@@ -1098,8 +1113,33 @@ const Home = {
             },
           },
         },
+        plugins: [
+          {
+            id: "resizeChart",
+            beforeInit: function (chart) {
+              const originalResize = chart.resize;
+              chart.resize = function () {
+                const containerWidth = chart.canvas.parentNode.clientWidth;
+                const minHeight = 1500; // Tinggi minimum dalam piksel
+                // Mengatur tinggi berdasarkan rasio aspek 4:3
+                chart.canvas.height = Math.max(
+                  (containerWidth / 4) * 3,
+                  minHeight
+                );
+                chart.canvas.width = containerWidth;
+                originalResize.apply(this, arguments);
+              };
+            },
+          },
+        ],
       });
     }
+
+    window.addEventListener("resize", function () {
+      if (stockChart) stockChart.resize();
+      if (financialChart) financialChart.resize();
+      if (cashFlowChart) cashFlowChart.resize();
+    });
 
     // Event listeners untuk filter
     cashFlowFilter.addEventListener("change", function () {

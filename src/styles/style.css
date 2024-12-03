@@ -1,3 +1,14 @@
+/*
+:::: Reuse
+*/
+.navbar-hidden {
+  transform: translateY(120%);
+}
+
+/*
+:::: Common
+*/
+
 * {
   font-family: "Poppins", inter;
   margin: 0;
@@ -12,6 +23,7 @@ html {
 
 body {
   min-width: 320px;
+  /* background-color: whitesmoke; */
   /* user-select: text; */
 }
 
@@ -165,9 +177,7 @@ ItemsContainer
 }
 
 @media (max-width: 575.98px) {
-  body {
-    margin-bottom: 100px;
-  }
+
 
   .tooltip-container,
   .button-content,
@@ -178,6 +188,7 @@ ItemsContainer
 
   nav {
     /* visibility: hidden; */
+    /* background-color: whitesmoke; */
     position: fixed;
     bottom: 0;
     left: 0;
@@ -201,6 +212,7 @@ ItemsContainer
     background-color: #f58404;
     border: 5px solid #f58404;
     border-radius: 10px;
+    transition: transform 0.3s ease;
   }
 
   .container-item {

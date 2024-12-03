@@ -82,3 +82,29 @@ window.addEventListener("hashchange", () => {
 window.addEventListener("load", () => {
   app.renderPage();
 });
+
+const backToTopButton = document.querySelector(".button-content")
+ backToTopButton.onclick = function () {
+   window.scrollTo({
+     top: 0,
+     behavior: "smooth", // Menggulung dengan halus
+   });  
+ };
+
+ let lastScrollTop = 0;
+ const navbar = document.querySelector(".container_bottnav");
+
+ window.addEventListener("scroll", function () {
+   let scrollTop = window.scrollY || document.documentElement.scrollTop;
+
+   if (scrollTop > lastScrollTop) {
+     // Scrolling down
+     navbar.classList.add("navbar-hidden");
+   } else {
+     // Scrolling up
+     navbar.classList.remove("navbar-hidden");
+   }
+
+   lastScrollTop = scrollTop;
+ });
+  

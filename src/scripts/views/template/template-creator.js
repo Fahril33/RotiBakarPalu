@@ -565,7 +565,7 @@ const createHomeTemplate = () => `
               <p id="debit">Memuat saldo kredit..</p>
             </span>
             <i class="fas fa-circle-info"></i>
-          </div>
+          </div><br>
           <div class="tooltip">
             <span class="tooltiptext" id="totalCashTootltip">
               <div class="profit-icon" id="tweekCashStatus">
@@ -649,7 +649,7 @@ const createHomeTemplate = () => `
             </div>
           </div>
           <div class="chart-body">
-            <div style="width: 100%;"><canvas id="stockChartData"></canvas></div>
+              <canvas id="stockChartData"></canvas>
           </div>
         </div>
 
@@ -677,7 +677,7 @@ const createHomeTemplate = () => `
             </div>
           </div>
           <div class="chart-body">
-            <div style="width: 100%;"><canvas id="financialChartData"></canvas></div>
+            <canvas id="financialChartData"></canvas>
           </div>
         </div>
         
@@ -706,7 +706,7 @@ const createHomeTemplate = () => `
           </div>
           
           <div class="chart-body">
-            <div style="width: 100%;"><canvas id="cashFlowChartData"></canvas></div>
+            <canvas id="cashFlowChartData"></canvas>
           </div>
         </div>
       </div>
