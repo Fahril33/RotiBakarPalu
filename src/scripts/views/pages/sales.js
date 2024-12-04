@@ -13,11 +13,10 @@ import {
 } from "../../utils/sales/displayerData";
 import { handleFormSubmit } from "../../utils/sales/form-handler";
 import { showModal, closeModal } from "../../utils/sales/modal-handler";
-import { datePickerValue, getCurrentDate } from "../../utils/datePicker";
+import { getCurrentDate } from "../../utils/datePicker";
 import { bagIcon, soldIcon, editIcon } from "../../utils/icons";
 
 import {
-  isPredictionDataExist,
   syncSoldToPrediction,
 } from "../../../data/utils/predictionHandler";
 
@@ -25,8 +24,6 @@ import {
 import { showPredictionModal } from "../../utils/sales/prediction-modal";
 import { callDataShell, logDatesSince, showLoader } from "../../utils/syncData";
 import { checkWeatherData } from "../../../data/utils/weatherHandler";
-import { usePrediction } from "../../utils/algorithm";
-import { allPredictionDataByDate } from "../../../data/allData";
 // import { logDatesSince } from "../../utils/syncData";
 
 const Sales = {
@@ -73,12 +70,6 @@ const Sales = {
       .addEventListener("click", async () => {
         await showPredictionModal();
       });
-
-    // const currentDate = getCurrentDate().pickedDate;
-    // await isPredictionDataExist(currentDate)
-    // console.log('curddate', currentDate);
-    // const todaydata = (await allPredictionDataByDate("2024-11-22")).filteredData
-    // console.log('todayData', todaydata);
 
     await callDataShell();
   },
@@ -312,7 +303,7 @@ const Sales = {
         // Sesuaikan Nilai Terjual di Prediciton
         //
         await syncSoldToPrediction(date);
-      } catch (error) {
+    } catch (error) {
         console.error("An error occurred while deleting data:", error);
       }
     }

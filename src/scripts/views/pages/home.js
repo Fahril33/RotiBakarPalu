@@ -430,7 +430,6 @@ const Home = {
 
     // Panggil fungsi untuk menampilkan grafik stock saat halaman dimuat
     displayStockCharts();
-    
 
     //
     // Financial Chart
@@ -736,20 +735,6 @@ const Home = {
             },
           },
         },
-        plugins: [
-          {
-            id: "resizeChart",
-            beforeInit: function (chart) {
-              const originalResize = chart.resize;
-              chart.resize = function () {
-                const containerWidth = chart.canvas.parentNode.clientWidth;
-                chart.canvas.width = containerWidth;
-                chart.canvas.height = (containerWidth / 16) * 9; // Contoh aspek rasio 16:9
-                originalResize.apply(this, arguments);
-              };
-            },
-          },
-        ],
       });
     }
     displayFinancialCharts();
@@ -1113,25 +1098,6 @@ const Home = {
             },
           },
         },
-        plugins: [
-          {
-            id: "resizeChart",
-            beforeInit: function (chart) {
-              const originalResize = chart.resize;
-              chart.resize = function () {
-                const containerWidth = chart.canvas.parentNode.clientWidth;
-                const minHeight = 1500; // Tinggi minimum dalam piksel
-                // Mengatur tinggi berdasarkan rasio aspek 4:3
-                chart.canvas.height = Math.max(
-                  (containerWidth / 4) * 3,
-                  minHeight
-                );
-                chart.canvas.width = containerWidth;
-                originalResize.apply(this, arguments);
-              };
-            },
-          },
-        ],
       });
     }
 
@@ -1543,15 +1509,24 @@ const Home = {
     );
 
     if (stockPercentageChangeSold > 0) {
-      profitShowHideHandler(todaySoldStockStatusArrDown, todaySoldStockStatusArrUp)
+      profitShowHideHandler(
+        todaySoldStockStatusArrDown,
+        todaySoldStockStatusArrUp
+      );
       todaySoldStockStatusArrUpText.textContent = stockPercentageChangeSold;
-    }else{
-      profitShowHideHandler(todaySoldStockStatusArrUp, todaySoldStockStatusArrDown)
+    } else {
+      profitShowHideHandler(
+        todaySoldStockStatusArrUp,
+        todaySoldStockStatusArrDown
+      );
       todaySoldStockStatusArrDownText.textContent = stockPercentageChangeSold;
     }
 
     // SPOILED STOCKS PERCENTAGE HANDLER
-    const stockPercentageChangeSpoiled = persentaseSelisih(currSpoiledStockData, prevSpoiledStockData).hasilSelisih;
+    const stockPercentageChangeSpoiled = persentaseSelisih(
+      currSpoiledStockData,
+      prevSpoiledStockData
+    ).hasilSelisih;
 
     const todaySpoiledtockStatusArrUp = document.querySelector(
       "#spoiledStockStatus #arrUp"
@@ -1567,17 +1542,22 @@ const Home = {
     );
 
     if (stockPercentageChangeSpoiled > 0) {
-      profitShowHideHandler(todaySpoiledtockStatusArrUp, todaySpoiledtockStatusArrDown)
+      profitShowHideHandler(
+        todaySpoiledtockStatusArrUp,
+        todaySpoiledtockStatusArrDown
+      );
       todaySpoiledtockStatusArrDownText.textContent = `+${Math.abs(
         stockPercentageChangeSpoiled
       )}`;
-    }else{
-      profitShowHideHandler(todaySpoiledtockStatusArrDown, todaySpoiledtockStatusArrUp)
+    } else {
+      profitShowHideHandler(
+        todaySpoiledtockStatusArrDown,
+        todaySpoiledtockStatusArrUp
+      );
       todaySpoiledtockStatusArrUpText.textContent = Math.abs(
         stockPercentageChangeSpoiled
       );
     }
-
   },
 };
 

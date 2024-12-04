@@ -271,6 +271,7 @@ const Finance = {
 
     // Function to display the filtered data in the HTML template
     async function displayData(data) {
+      console.log('data', data);
       const tableContainer = document.querySelector("#ShoppingList");
       tableContainer.innerHTML = ""; // Clear previous data
 
@@ -320,6 +321,7 @@ const Finance = {
 
       data.forEach((entry) => {
         entry.barang.forEach((item) => {
+          console.log('iytem', item.namaBahan);
           const row = document.createElement("tr");
           row.setAttribute("data-id", item._id);
 
@@ -622,7 +624,14 @@ const Finance = {
       const deleteButtons = document.querySelectorAll(".button.delete");
       deleteButtons.forEach((button) => {
         button.addEventListener("click", async (event) => {
-          const namaBahan = event.target.getAttribute("data-nama");
+          const buttonElement = event.target.closest(".button.delete");
+          const namaBahan = buttonElement.getAttribute("data-nama");
+
+          // Atau tambahkan pengecekan
+          if (!namaBahan) {
+            console.error("Nama bahan tidak ditemukan");
+            return;
+          }
           const { default: swal } = await import("sweetalert2");
           const confirmDelete = await swal.fire({
             title: "Konfirmasi Hapus",
@@ -647,7 +656,7 @@ const Finance = {
               );
 
               if (!response.ok) {
-                throw new Error(`Gagal menghapus bahan ${namaBahan}.`);
+                throw new Error(`Gagal menghapus bahan ${namaBahan}. id: ${itemId}`);
               }
 
               // Refresh data setelah penghapusan

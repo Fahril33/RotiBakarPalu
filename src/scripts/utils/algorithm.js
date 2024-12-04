@@ -7,7 +7,7 @@ const axios = require("axios");
 
 async function fetchDataAndTrainModel(testData) {
   try {
-    const response = await axios.get("http://localhost:4000/api/prediction");
+    const response = await axios.get("http://localhost:5000/api/prediction");
     const allData = Array.isArray(response.data) ? response.data : [];
 
     if (allData.length === 0) {
