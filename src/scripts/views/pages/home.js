@@ -369,10 +369,10 @@ const Home = {
                     borderColor: "rgba(54, 162, 235, 1)",
                     backgroundColor: "rgba(54, 162, 235, 0.2)",
                     fill: true,
+                    hidden: true,
                   },
                 ]
               : []), // Menyertakan dataset "Total Stock" jika filterType adalah "daily"
-
             {
               label: "Additional Stock",
               data: totalAdditionalStockData,

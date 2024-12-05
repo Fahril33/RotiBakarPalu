@@ -66,6 +66,15 @@ document.addEventListener("DOMContentLoaded", async function () {
       }
     }, 300); // Tunggu 300ms sebelum mengirim permintaan
   });
+
+  // LOGOUT LISTENER
+  const logoutLink = document.querySelector('a[href="#/login"]');
+  if (logoutLink) {
+    logoutLink.addEventListener("click", function (event) {
+      event.preventDefault(); // Mencegah navigasi default
+      handleLogout();
+    });
+  }
 });
 
 // Inisialisasi objek App
@@ -77,6 +86,17 @@ const app = new App({
 window.addEventListener("hashchange", () => {
   app.renderPage();
 });
+
+function handleLogout() {
+  // Hapus token dari localStorage
+  localStorage.removeItem("token");
+
+  // Optional: Hapus data pengguna lainnya jika ada
+  // localStorage.removeItem("userData");
+
+  // Redirect ke halaman login
+  window.location.hash = "#/login";
+}
 
 // Event listener untuk load, render halaman saat halaman pertama kali dimuat
 window.addEventListener("load", () => {
