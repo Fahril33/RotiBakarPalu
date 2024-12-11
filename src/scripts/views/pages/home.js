@@ -1,5 +1,6 @@
 // import RBPsource, { bacaHariLibur, getHolidays } from "../../../data/source";
 
+import Swal from "sweetalert2";
 import {
   allFinanceDataByDate,
   allFinanceDataThisMonth,
@@ -7,6 +8,8 @@ import {
 } from "../../../data/allData";
 import RBPsource from "../../../data/source";
 import { getCurrentDate, getYesterdayDate } from "../../utils/datePicker";
+import { checkUserRole } from "../../utils/interceptor";
+
 import { createHomeTemplate } from "../template/template-creator";
 import Chart from "chart.js/auto";
 
@@ -20,10 +23,33 @@ const Home = {
   },
 
   async afterRender() {
+    const token = localStorage.getItem("token");
+    // Logika redirect untuk logout
+    if (!token) {
+      window.location.hash = "#/login";
+      return;
+    }
+
+    const isAllow = await checkUserRole();
+    console.log('isallow', isAllow);
+    if (!isAllow) {
+      window.location.hash = "#/sales";
+      Swal.fire({
+        title: "Akses Ditolak!",
+        text: "Anda tidak memiliki izin untuk mengakses halaman ini.",
+        icon: "error",
+        confirmButtonText: "OK",
+      }).then(() => {
+        // Redirect ke halaman lain, misalnya halaman beranda
+      });
+      return; // Hentikan proses render
+    }
+
+
     const defaultYear = getCurrentDate().year;
-    console.log("defaultY", defaultYear);
+    // console.log("defaultY", defaultYear);
     const defaultMonth = getCurrentDate().month;
-    console.log("defaultmongth", defaultMonth);
+    // console.log("defaultmongth", defaultMonth);
 
     //
     // Stock Chart
@@ -272,7 +298,7 @@ const Home = {
         targetMonth,
         targetWeek
       );
-      console.log("filtrdt", filteredData);
+      // console.log("filtrdt", filteredData);
 
       // Siapkan data untuk Chart.js
       let alltotalStockData = [];
@@ -626,7 +652,7 @@ const Home = {
       const targetMonth = month - 1; // Bulan dimulai dari 0
       const targetWeek = selectedWeek; // Ganti dengan nomor minggu (misal: 1, 2, 3, 4) atau 'semua'
 
-      console.log("yearValue", targetYear);
+      // console.log("yearValue", targetYear);
 
       // Filter data
       const filteredData = filterFinanceData(
@@ -637,7 +663,7 @@ const Home = {
         targetWeek
       );
 
-      console.log("Filtered Data:", filteredData);
+      // console.log("Filtered Data:", filteredData);
 
       // Siapkan data untuk Chart.js
       let totalCashData = [];
@@ -1170,8 +1196,8 @@ const Home = {
 
     const currDate = getCurrentDate().pickedDate;
     const yesterdayDate = getYesterdayDate().yesterday;
-    console.log("currdate", currDate);
-    console.log("ystdd", yesterdayDate);
+    // console.log("currdate", currDate);
+    // console.log("ystdd", yesterdayDate);
 
     function profitShowHideHandler(idToHide, idToShow) {
       idToHide.style.display = "none";
@@ -1205,7 +1231,7 @@ const Home = {
       if (dataSebelumnya === 0) {
         // Jika data sebelumnya 0, tapi data baru tidak 0
         if (dataBaru !== 0) {
-          console.log("Pertumbuhan 100%");
+          // console.log("Pertumbuhan 100%");
           return {
             hasilSelisih: "100.00",
             pesan: "Pertumbuhan 100%",
@@ -1221,7 +1247,7 @@ const Home = {
 
       // Hitung selisih dan persentase
       const hitungSelisih = dataBaru - dataSebelumnya;
-      console.log("HITUNGSELISIH", hitungSelisih);
+      // console.log("HITUNGSELISIH", hitungSelisih);
 
       // Perhitungan persentase selisih berdasarkan data sebelumnya
       const prosesSelisih = (hitungSelisih / dataSebelumnya) * 100;
@@ -1229,10 +1255,10 @@ const Home = {
       // Pembulatan dengan 2 desimal
       const hasilSelisih = prosesSelisih.toFixed(2);
 
-      console.log("Data Baru:", dataBaru);
-      console.log("Data Sebelumnya:", dataSebelumnya);
-      console.log("Selisih:", hitungSelisih);
-      console.log("Persentase Selisih:", hasilSelisih);
+      // console.log("Data Baru:", dataBaru);
+      // console.log("Data Sebelumnya:", dataSebelumnya);
+      // console.log("Selisih:", hitungSelisih);
+      // console.log("Persentase Selisih:", hasilSelisih);
 
       return {
         hasilSelisih: hasilSelisih,
@@ -1473,7 +1499,7 @@ const Home = {
 
     const currSoldStockData = currMonthStockData.totalSoldStock;
     const currSpoiledStockData = currMonthStockData.totalSpoiledStock;
-    console.log("currSSD", currSoldStockData, currSpoiledStockData);
+    // console.log("currSSD", currSoldStockData, currSpoiledStockData);
 
     // PREVIOUS MONTH STOCK DATA
     const prevMonthStockData = await allStockDataThisMonth(
@@ -1483,7 +1509,7 @@ const Home = {
 
     const prevSoldStockData = prevMonthStockData.totalSoldStock;
     const prevSpoiledStockData = prevMonthStockData.totalSpoiledStock;
-    console.log("prevSSD", prevSoldStockData, prevSpoiledStockData);
+    // console.log("prevSSD", prevSoldStockData, prevSpoiledStockData);
 
     // DISPLAY STOCK DATA
     totalSoldValue.textContent = `${currSoldStockData} terjual`;

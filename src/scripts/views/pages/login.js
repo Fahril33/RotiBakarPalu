@@ -1,82 +1,98 @@
+import Swal from "sweetalert2";
+import { urlOtorizator } from "../../utils/interceptor";
+import { createLoginTemplate } from "../template/template-creator";
+import { RBPlogo } from "../../utils/icons";
+import "../../../styles/login.css"
+
 const Login = {
   async render() {
     return `
-      <div class="login-container">
-        <h2>Login</h2>
-        <form id="loginForm">
-          <input type="text" id="email" placeholder="Email" required />
-          <input type="password" id="password" placeholder="Password" required />
-          <button type="submit">Login</button>
-        </form>
+      <div class="content">
+        ${createLoginTemplate()}
       </div>
     `;
   },
 
   async afterRender() {
-    const form = document.getElementById("loginForm");
-    form.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+    document.querySelector('.card-login-items img[alt="RBPlogo"]').src =
+      RBPlogo;
 
-      await this.login(email, password);
+     const form = document.getElementById("loginForm");
+     const submitButton = form.querySelector('button[type="submit"]');
+     submitButton.addEventListener("click", async (event) => {
+       event.preventDefault(); // Mencegah pengiriman form default
+       const email = document.getElementById("email").value;
+       const password = document.getElementById("password").value;
+
+       await this.login(email, password);
+     });
+
+    //
+    // togglePassword
+    //
+
+    const togglePassword = document.getElementById("togglePassword");
+    const passwordInput = document.getElementById("password");
+    const eyeIcon = document.getElementById("eyeIcon");
+
+    togglePassword.addEventListener("click", function () {
+      // Toggle the type attribute
+      const type =
+        passwordInput.getAttribute("type") === "password" ? "text" : "password";
+      passwordInput.setAttribute("type", type);
+
+      // Toggle the eye icon
+      eyeIcon.classList.toggle("fa-eye");
+      eyeIcon.classList.toggle("fa-eye-slash");
     });
   },
 
-  async login(email, password) {
+  async login(identifier, password) {
+    
+    const url = "http://localhost:5000/api/auth";
     try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
+      const response = await fetch(`${url}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ identifier, password }),
       });
 
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem("token", data.token);
-        window.location.hash = "#/home"; // Redirect ke halaman utama
+        await urlOtorizator();
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-end",
+          showConfirmButton: false,
+          timer: 2500,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
+          },
+        });
+        Toast.fire({
+          icon: "success",
+          title: "Anda Berhasil Masuk.",
+        });
       } else {
-        alert("Login gagal, silakan coba lagi.");
+        // Tampilkan pesan kesalahan tanpa detail sensitif
+        alert("Email atau password salah. Silakan coba lagi.");
+        console.warn("Login failed. Please check your credentials."); // Ganti log ini untuk debugging aman
       }
     } catch (error) {
-      console.error("Login error:", error);
-      alert("Terjadi kesalahan saat login.");
+      // Tangkap kesalahan jaringan atau internal
+      alert("Terjadi kesalahan saat login. Silakan coba lagi.");
+      console.warn("Login error:", error.message); // Log lebih aman
     }
   },
 
   // Tambahkan metode logout
   async logout() {
-    try {
-      const token = localStorage.getItem("token");
-
-      const response = await fetch("http://localhost:5000/api/auth/logout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Jika menggunakan token di header
-        },
-      });
-
-      if (response.ok) {
-        // Hapus token dari localStorage
-        localStorage.removeItem("token");
-
-        // Redirect ke halaman login
-        window.location.hash = "#/login";
-      } else {
-        console.error("Logout gagal");
-        // Tetap logout di sisi client meskipun request gagal
-        localStorage.removeItem("token");
-        window.location.hash = "#/login";
-      }
-    } catch (error) {
-      console.error("Logout error:", error);
-      // Fallback logout
-      localStorage.removeItem("token");
-      window.location.hash = "#/login";
-    }
+    
   },
 };
 

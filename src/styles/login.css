@@ -1,0 +1,157 @@
+h2#swal2-title {
+  background-color: white;
+  height: 20px;
+  width: auto;
+  margin-left: 10px;
+  margin-right: 0;
+}
+
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap");
+
+.container-login {
+  width: 100%;
+  height: 100vh;
+  /* background-color: orangered; */
+  background-color: #ef6b46;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  padding: 10px;
+}
+
+.card-login.component {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 530px;
+  height: 70vh;
+  background-color: white;
+  border-radius: 35px;
+}
+
+.card-login-items.image {
+  background-color: #f8e5c4;
+  width: 100%;
+  border-radius: 30px;
+  margin: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.card-login-items.image img {
+  width: 110%;
+  height: auto;
+}
+
+.card-login-items.inputs {
+  width: 90%;
+  margin: 10px 10px 10px 20px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+}
+
+.card-login-item {
+  width: 100%;
+  /* border: yellow; */
+  /* border-style: outset; */
+}
+.card-login-item.head p {
+  font-family: "Outfit", sans-serif;
+  text-align: center;
+  font-size: x-large;
+  font-weight: 750;
+}
+
+.card-login-item.body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* LoginForms */
+.card-login-item.body label {
+  margin: 0;
+  font-weight: 500;
+  font-size: small;
+}
+input#email,
+input#password {
+  margin: 0;
+  padding: 10px;
+  height: 20px;
+  width: 100%;
+  height: 30px;
+  border-radius: 5px;
+  border-color: #e9c8bf;
+  /* background-color: #ef6b46; */
+  border-style: solid;
+  border-width: 1px;
+}
+input#password {
+  padding-right: 30px;
+}
+#togglePassword {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-style: none;
+  background-color: rgba(189, 185, 185, 0);
+  cursor: pointer;
+}
+
+.card-login-item.foot button {
+  margin-top: 30px;
+  width: 100%;
+  height: 35px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  background-color: #ef6b46;
+  align-items: center;
+}
+
+button:hover {
+  scale: 1.02;font-weight: 500;
+}
+
+@media (max-width: 425.99px) {
+  .container-login {
+    height: 100vh;
+    min-height: 460px;
+    max-height: 1700px;
+    transition: 0.3s ease all;
+  }
+  .card-login.component {
+    grid-template-columns: 1fr;
+    width: 90vw;
+    height: auto;
+    margin: 0;
+    border-radius: 20px;
+  }
+  .card-login-items.image {
+    /* scale: 0.3; */
+    justify-content: center;
+    width: auto;
+    height: auto;
+    background-color: rgba(255, 255, 255, 0);
+  }
+  .card-login-items.image img {
+    max-width: 100px;
+    transition: 0.3s ease all;
+  }
+  .card-login-item.body {
+    width: 100%;
+  }
+  .card-login-items.inputs {
+    gap: 5px;
+    margin: 0;
+    padding: 20px;
+    padding-top: 0;
+    width: 100%;
+    transition: 0.3s ease all;
+  }
+}

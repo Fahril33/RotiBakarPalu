@@ -26,6 +26,8 @@ import holiday from "../../public/item/holiday.png";
 import puasa from "../../public/item/puasa.png";
 import editIcon from "../../public/editIcon.png";
 
+import RBPlogo from "../../public/RBPlogo.png";
+
 
 
 const weatherIconMap = {
@@ -73,5 +75,6 @@ export {
   weatherIconMap,
   weekendIconMap,
   holidayIconMap,
-  holidaysIconMap
+  holidaysIconMap,
+  RBPlogo,
 };

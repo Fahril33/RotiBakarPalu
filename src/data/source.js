@@ -71,6 +71,102 @@ class RBPsource {
       return [];
     }
   }
+
+  static async getUserData() {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      // Mengatur header untuk permintaan
+      const headers = {
+        "x-auth-token": token,
+      };
+
+      try {
+        // Mengambil data pengguna
+        const response = await fetch("http://localhost:5000/api/auth/user", {
+          method: "GET",
+          headers: headers,
+        });
+
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+
+        return await response.json();
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        return null;
+      }
+    } else {
+      console.warn("No token found in localStorage");
+      return null;
+    }
+  }
+
+  // getuserby id
+  static async getUserById(userId) {
+    const token = localStorage.getItem("token"); // Ambil token dari local storage atau tempat penyimpanan lainnya
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/auth/user/${userId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "x-auth-token": token, // Sertakan token di header
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} - ${response.statusText}`);
+      }
+
+      const userData = await response.json();
+      console.log("User  Data:", userData);
+      return userData; // Kembalikan data pengguna
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  }
+
+  // Fungsi untuk mendapatkan semua pengguna
+  static async getAllUsers() {
+    const token = localStorage.getItem("token"); // Ambil token dari local storage atau state
+
+    if (!token) {
+      console.warn("No token found in localStorage");
+      return [];
+    }
+
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/users", {
+        method: "GET",
+        headers: {
+          "x-auth-token": token, // Sertakan token di header
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Error fetching users");
+      }
+
+      const users = await response.json();
+      console.log(users); // Tampilkan daftar pengguna
+
+      // Pastikan data yang diterima adalah array
+      if (Array.isArray(users)) {
+        return users; // Kembalikan array pengguna
+      } else {
+        console.error("Data users is not an array");
+        return []; // Kembalikan array kosong jika data tidak valid
+      }
+    } catch (error) {
+      console.error("Error:", error.message);
+      return []; // Kembalikan array kosong jika terjadi kesalahan
+    }
+  }
 }
 
 // Fungsi untuk mengambil data cuaca pada jam 17:00
@@ -161,7 +257,6 @@ export async function convertGtoH() {
 }
 
 export async function bacaHariLibur(tanggalHariIni, year) {
-  
   // console.log("nyr", year);
   try {
     // const nowYear = "2023"

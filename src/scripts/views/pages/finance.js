@@ -8,6 +8,8 @@ import {
 } from "../../utils/finance/financialDisplayer";
 import { callDataShell, logDatesSince } from "../../utils/syncData";
 import { getCurrentDate } from "../../utils/datePicker";
+import { checkUserRole } from "../../utils/interceptor";
+import Swal from "sweetalert2";
 // import { isStocksDataExist } from "../../../data/utils/stockHandler";
 // import { minusOneDayDate } from "../../utils/datePicker";
 // import { resetAdditionalStockData } from "../../../data/utils/stockHandler";
@@ -26,6 +28,28 @@ const Finance = {
   },
 
   async afterRender() {
+    const token = localStorage.getItem("token");
+    // Logika redirect untuk logout
+    if (!token) {
+      window.location.hash = "#/login";
+      return;
+    }
+
+    const isAllow = await checkUserRole();
+    console.log("isallow", isAllow);
+    if (!isAllow) {
+      window.location.hash = "#/sales";
+      Swal.fire({
+        title: "Akses Ditolak!",
+        text: "Anda tidak memiliki izin untuk mengakses halaman ini.",
+        icon: "error",
+        confirmButtonText: "OK",
+      }).then(() => {
+        // Redirect ke halaman lain, misalnya halaman beranda
+      });
+      return; // Hentikan proses render
+    }
+
     await displayUpcomingEvent();
     await callDataShell();
     await displayFinance();
@@ -271,7 +295,7 @@ const Finance = {
 
     // Function to display the filtered data in the HTML template
     async function displayData(data) {
-      console.log('data', data);
+      console.log("data", data);
       const tableContainer = document.querySelector("#ShoppingList");
       tableContainer.innerHTML = ""; // Clear previous data
 
@@ -321,7 +345,7 @@ const Finance = {
 
       data.forEach((entry) => {
         entry.barang.forEach((item) => {
-          console.log('iytem', item.namaBahan);
+          console.log("iytem", item.namaBahan);
           const row = document.createElement("tr");
           row.setAttribute("data-id", item._id);
 
@@ -656,7 +680,9 @@ const Finance = {
               );
 
               if (!response.ok) {
-                throw new Error(`Gagal menghapus bahan ${namaBahan}. id: ${itemId}`);
+                throw new Error(
+                  `Gagal menghapus bahan ${namaBahan}. id: ${itemId}`
+                );
               }
 
               // Refresh data setelah penghapusan

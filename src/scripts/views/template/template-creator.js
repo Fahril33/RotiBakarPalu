@@ -713,10 +713,169 @@ const createHomeTemplate = () => `
     </div>
 `;
 
+const createSettingTemplate = () => {
+  return `
+  <div class="container-settings">
+    <div class="settings-header">
+      <p>Daftar Akun</p>
+      <button id="addAccount">+Akun</button>
+    </div>
+    <div class="card">
+      <ul id="userList">
+        
+      </ul>
+    </div>
+    <div class="settings-header">
+      <p>Daftar Bahan</p>
+      <button>+Bahan</button>
+    </div>
+    <!--  -->
+    <div class="card">
+      <div class="materials-list">
+        <div class="material-name">
+          <p>Roti</p>
+        </div>
+        <div class="material-list">
+          <ul>
+            <li class="list-item">
+              <table>
+                <tr>
+                  <th>#</th>
+                  <th>Nama</th>
+                  <th>Harga</th>
+                  <th>Satuan</th>
+                  <th></th>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>Roti Tawar</td>
+                  <td>Rp5.500</td>
+                  <td>porsi</td>
+                  <td>
+                    <div class="user-actions">
+                      <i class="fa fa-edit"></i>
+                      <i class="fa fa-trash"></i>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="materials-list">
+        <div class="material-name">
+          <p>Selai</p>
+        </div>
+        <div class="material-list">
+          <ul>
+            <li class="list-item">
+              <table>
+                <tr>
+                  <th>#</th>
+                  <th>Nama</th>
+                  <th>Harga</th>
+                  <th>Satuan</th>
+                  <th></th>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>Strawberry</td>
+                  <td>Rp30.000</td>
+                  <td>500gr</td>
+                  <td>
+                    <div class="user-actions">
+                      <i class="fa fa-edit"></i>
+                      <i class="fa fa-trash"></i>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>Blueberry</td>
+                  <td>Rp30.000</td>
+                  <td>500gr</td>
+                  <td>
+                    <div class="user-actions">
+                      <i class="fa fa-edit"></i>
+                      <i class="fa fa-trash"></i>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+ `;
+};
+
+const createLoginTemplate = () => {
+  return ` 
+  <div class="container-login"> 
+    <div class="card-login component"> 
+      <div class="card-login-items image"> 
+        <img src="" alt="RBPlogo"> 
+      </div> 
+      <div class="card-login-items inputs"> 
+        <div class="card-login-item head"> 
+          <p>Login</p> 
+        </div> 
+        <div class="card-login-item body"> 
+          <div> 
+            <label for="email">Email/Username :</label> 
+            <input type="text" id="email" name="email" required /> 
+          </div> 
+          <div> 
+            <label for="password">Password:</label> 
+            <div style="position: relative"> 
+              <input 
+                type="password" 
+                id="password" 
+                name="password" 
+                required 
+              /> 
+              <button type="button" id="togglePassword"> 
+                <i class="fas fa-eye-slash" id="eyeIcon"></i> 
+              </button> 
+            </div> 
+          </div> 
+        </div> 
+        <div class="card-login-item foot" > 
+          <div id="loginForm"> 
+            <button type="submit" >Login</button> 
+          </div> 
+        </div> 
+      </div> 
+    </div> 
+  </div> 
+  `;
+};
+
+const create404Page = `
+  <div class="error-container">
+   <img alt="RBPlogo" class="error-image" height="300" src="https://storage.googleapis.com/a1aa/image/zevZQop2JHSufExsTkhjG7GBjpPtlzu2UBkrhxe0gDnAmHznA.jpg" width="400"/>
+   <h1 class="error-heading">
+    404
+   </h1>
+   <p class="error-paragraph">
+    Oops! Halaman yang kamu cari tidak ada.
+   </p>
+   <a class="error-button" href="#/login">
+    Kembali
+   </a>
+  </div>
+`;
+
 export {
   createHomeTemplate,
   createModalTemplate,
   createSalesTemplate,
   createFinanceTemplate,
   createShoppingRowTemplate,
+  createSettingTemplate,
+  createLoginTemplate,
+  create404Page,
 };

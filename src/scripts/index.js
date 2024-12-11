@@ -5,6 +5,8 @@ import "../styles/loader.css";
 import "../styles/finance.css";
 import "../styles/responsive.css";
 import "../styles/home.css";
+// import "../styles/login.css";
+// import jwt from "jsonwebtoken";
 
 import {
   homeIcon,
@@ -12,9 +14,6 @@ import {
   walletIcon,
   navigationIcon,
 } from "./utils/icons";
-import { getCurrentDate } from "./utils/datePicker";
-import { allPredictionDataByDate } from "../data/allData";
-import { putPredictionData } from "../data/utils/predictionHandler";
 
 document.querySelector('.item-icons img[alt="Beranda Icon"]').src = homeIcon;
 document.querySelector('.item-icons img[alt="Penjualan Icon"]').src =
@@ -38,6 +37,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     profileContainer.classList.toggle("open");
   });
 
+  //
+  // HEADER
   // Tutup profileContainer jika klik di luar elemen tersebut
   document.addEventListener("click", function (event) {
     if (!profileContainer.contains(event.target)) {
@@ -45,29 +46,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   });
 
-  const todayDate = getCurrentDate().pickedDate;
-  let isOpen = (await allPredictionDataByDate(todayDate)).operasional;
-  console.log("isopen", isOpen);
-  // Set nilai dari button-3 berdasarkan nilai variabel
-  const checkbox = document.querySelector("#button-3 .checkbox");
-  checkbox.checked = isOpen;
-
-  // Event listener untuk menangkap perubahan kondisi
-  let debounceTimeout;
-  checkbox.addEventListener("change", async function () {
-    clearTimeout(debounceTimeout);
-    debounceTimeout = setTimeout(async () => {
-      if (this.checked) {
-        console.log("Open");
-        await putPredictionData({ operasional: true }, todayDate);
-      } else {
-        console.log("Close");
-        await putPredictionData({ operasional: false }, todayDate);
-      }
-    }, 300); // Tunggu 300ms sebelum mengirim permintaan
-  });
-
   // LOGOUT LISTENER
+  //
   const logoutLink = document.querySelector('a[href="#/login"]');
   if (logoutLink) {
     logoutLink.addEventListener("click", function (event) {
@@ -83,19 +63,41 @@ const app = new App({
 });
 
 // Event listener untuk hashchange, render halaman saat hash berubah
-window.addEventListener("hashchange", () => {
+window.addEventListener("hashchange", async () => {
   app.renderPage();
 });
 
-function handleLogout() {
-  // Hapus token dari localStorage
-  localStorage.removeItem("token");
+async function handleLogout() {
+  try {
+    const token = localStorage.getItem("token");
 
-  // Optional: Hapus data pengguna lainnya jika ada
-  // localStorage.removeItem("userData");
+    const response = await fetch("http://localhost:5000/api/auth/logout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token, // Jika menggunakan token di header
+      },
+    });
 
-  // Redirect ke halaman login
-  window.location.hash = "#/login";
+    if (response.ok) {
+      // Hapus token dari localStorage
+      localStorage.removeItem("token");
+
+      // Redirect ke halaman login
+      console.log('anda logout', );
+      window.location.hash = "#/login";
+    } else {
+      console.error("Logout gagal");
+      // Tetap logout di sisi client meskipun request gagal
+      localStorage.removeItem("token");
+      window.location.hash = "#/login";
+    }
+  } catch (error) {
+    console.error("Logout error:", error);
+    // Fallback logout
+    localStorage.removeItem("token");
+    window.location.hash = "#/login";
+  }
 }
 
 // Event listener untuk load, render halaman saat halaman pertama kali dimuat
@@ -103,28 +105,27 @@ window.addEventListener("load", () => {
   app.renderPage();
 });
 
-const backToTopButton = document.querySelector(".button-content")
- backToTopButton.onclick = function () {
-   window.scrollTo({
-     top: 0,
-     behavior: "smooth", // Menggulung dengan halus
-   });  
- };
+const backToTopButton = document.querySelector(".button-content");
+backToTopButton.onclick = function () {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth", // Menggulung dengan halus
+  });
+};
 
- let lastScrollTop = 0;
- const navbar = document.querySelector(".container_bottnav");
+let lastScrollTop = 0;
+const navbar = document.querySelector(".container_bottnav");
 
- window.addEventListener("scroll", function () {
-   let scrollTop = window.scrollY || document.documentElement.scrollTop;
+window.addEventListener("scroll", function () {
+  let scrollTop = window.scrollY || document.documentElement.scrollTop;
 
-   if (scrollTop > lastScrollTop) {
-     // Scrolling down
-     navbar.classList.add("navbar-hidden");
-   } else {
-     // Scrolling up
-     navbar.classList.remove("navbar-hidden");
-   }
+  if (scrollTop > lastScrollTop) {
+    // Scrolling down
+    navbar.classList.add("navbar-hidden");
+  } else {
+    // Scrolling up
+    navbar.classList.remove("navbar-hidden");
+  }
 
-   lastScrollTop = scrollTop;
- });
-  
+  lastScrollTop = scrollTop;
+});

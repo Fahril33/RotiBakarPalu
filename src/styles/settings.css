@@ -1,0 +1,248 @@
+* {
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  right: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.container-settings {
+  max-width: 100%;
+  /* height: 100vh; */
+  background-color: whitesmoke;
+  padding: 20px;
+  margin-top: -20px;
+}
+
+.container-settings .card {
+  width: 100%;
+  background-color: white; /* Use a more specific color code */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Define the shadow */
+  border-radius: 10px;
+  padding: 15px;
+  margin: 0;
+}
+
+.settings-header {
+  width: 100%;
+  margin: 20px 0 5px 0;
+
+  display: flex;
+  justify-content: space-between;
+}
+.settings-header p {
+  font-size: x-large;
+  font-weight: 600;
+}
+.settings-header button {
+  height: 35px;
+  background-color: #4caf50;
+  color: white;
+  border-radius: 10px;
+  border-style: none;
+  padding: 5px 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.settings-header button:hover {
+  scale: 1.1;
+}
+
+.list-item {
+  width: 100%;
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e7eb;
+  overflow: auto;
+}
+.list-item:last-child {
+  border-bottom: none;
+}
+
+ul,
+li {
+  list-style: none;
+  width: 100%;
+}
+.user-infos {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+.user-infos img {
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+}
+
+.user-info {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.user-name {
+  font-size: large;
+  font-weight: 600;
+}
+
+.userRole {
+  color: rgb(226, 192, 0);
+}
+.userRole:hover::after {
+  content: "Manager";
+  font-size: small;
+  font-weight: 400;
+}
+
+.status {
+  cursor: pointer;
+}
+.active {
+  color: rgb(131, 218, 0);
+  font-size: larger;
+}
+.active:hover::after {
+  content: "Karyawan aktif";
+  font-size: small;
+  font-weight: 400;
+}
+.inactive {
+  color: red;
+  font-size: larger;
+}
+.inactive:hover::after {
+  content: "Karyawan non-aktif";
+  font-size: small;
+  font-weight: 400;
+}
+.user-position {
+  font-size: medium;
+}
+
+.user-info-full {
+  max-height: 0; /* Awalnya tersembunyi */
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  opacity: 0; /* Awalnya transparan */
+}
+.user-info-full.expanded {
+  max-height: 200px; /* Tinggi maksimum yang cukup untuk konten */
+  opacity: 1; /* Tampilkan elemen */
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px; /* Jarak antar baris */
+}
+.info-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.info-label {
+  font-weight: 500;
+  width: 90px; /* Lebar kolom label */
+  text-align: left; /* Label rata kanan */
+}
+.info-symbol {
+  padding: 0 8px; /* Jarak kiri dan kanan untuk simbol ":" */
+}
+.info-value {
+  flex: 1; /* Isi kolom nilai menyesuaikan */
+}
+
+/*
+:::: Form Add New Account
+*/
+.form-group input,
+.form-group select {
+  height: 30px;
+  padding: 5px;
+}
+.form-group label {
+  margin: 0;
+  font-size: small;
+}
+#usernameError,
+#phoneError,
+#usernameDuplicate,
+#emailDuplicate,
+#phoneDuplicate {
+  display: none;
+  font-size: x-small;
+  color: red;
+}
+
+/* Responsif untuk layar kecil */
+@media (max-width: 600px) {
+  .info-item {
+    flex-direction: column; /* Label dan nilai jadi vertikal */
+    align-items: flex-start; /* Rata kiri */
+  }
+
+  .info-label {
+    width: auto; /* Hilangkan lebar tetap */
+    text-align: left; /* Label rata kiri */
+  }
+
+  .info-symbol {
+    display: none; /* Sembunyikan simbol ":" */
+  }
+}
+@media (max-width: 375.99px) {
+  .container-settings {
+    min-width: 400px;
+    min-height: 100vh;
+  }
+}
+
+/*  */
+
+.user-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  max-height: 20px
+}
+.user-actions button {
+  font-size: larger;
+  cursor: pointer;
+  background-color: white;
+  border-style: none;
+}
+.fa-edit {
+  color: rgb(0, 119, 255);
+}
+.fa-trash {
+  color: red;
+}
+.edit-btn:hover,
+.delete-btn:hover {
+  scale: 1.2;
+}
+
+/*
+:::: Bahan
+*/
+.materials-list {
+  max-width: 100%;
+}
+.material-name p {
+  width: 100%;
+  font-size: larger;
+  font-weight: 600;
+}
+.list-item table {
+  min-width: 400px;
+  border-collapse: collapse; /* Menghilangkan jarak antara batas sel */
+  border: none; /* Menghilangkan batas tabel */
+  background: transparent; /* Menghilangkan latar belakang tabel */
+  margin: 0; /* Menghilangkan margin tabel */
+  padding: 0; /* Menghilangkan padding tabel */
+}
+
+.list-item th:first-child {
+  width: 15px;
+}
