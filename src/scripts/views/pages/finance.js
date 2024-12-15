@@ -10,10 +10,6 @@ import { callDataShell, logDatesSince } from "../../utils/syncData";
 import { getCurrentDate } from "../../utils/datePicker";
 import { checkUserRole } from "../../utils/interceptor";
 import Swal from "sweetalert2";
-// import { isStocksDataExist } from "../../../data/utils/stockHandler";
-// import { minusOneDayDate } from "../../utils/datePicker";
-// import { resetAdditionalStockData } from "../../../data/utils/stockHandler";
-// import { datePickerValue } from "../../utils/datePicker";
 const Finance = {
   async render() {
     const currentDate = new Date().toLocaleDateString(); // Get current date only
@@ -54,39 +50,42 @@ const Finance = {
     await callDataShell();
     await displayFinance();
 
+    document
+      .getElementById("liburRefresh")
+      .addEventListener("click", async () => {
+        const errorEventElement = document.querySelector(".liburError");
+        const errorTextEventElement = document.querySelector(".liburError p");
+        const errorBtnEventElement = document.querySelector(".liburError button");
+        const loaderEventElement = document.querySelector("#liburLoader");
+        loaderEventElement.style.display = "block";
+        errorTextEventElement.style.display = "none";
+        errorBtnEventElement.style.display = "none";
+        errorEventElement.style.display = "none";
+        setTimeout(() => {
+          errorTextEventElement.style.display = "block";
+          errorBtnEventElement.style.display = "block";
+          loaderEventElement.style.display = "none";
+        }, 5000);
+        await displayUpcomingEvent();
+      });
+
     //
     // Handler untuk input daftar belanja
     //
 
+    // Ambil dan render bahan
+    await this.renderIngredients();
+
+    // Existing event listeners dan logic
     const checkboxes = document.querySelectorAll(".checkbox-input");
     const tableBody = document.getElementById("shoppingListTable");
-    const radioAmbil = document.getElementById("ambil"); // Radio button for "ambil" option
-    let itemCount = 1; // Counter for table row numbers
 
-    // Data for each item, including "Roti"
-    const itemData = {
-      "skmc-checkbox": { name: "SKMC", price: 10000 },
-      "skmp-checkbox": { name: "SKMP", price: 12000 },
-      "butter-checkbox": { name: "Mentega", price: 15000 },
-      "keju-checkbox": { name: "Keju", price: 13000 },
-      "pasta-checkbox": { name: "Pasta", price: 8000 },
-      "crispy-checkbox": { name: "Crispy", price: 7000 },
-      "mesis-checkbox": { name: "Mesis", price: 9000 },
-      "oreo-checkbox": { name: "Oreo", price: 11000 },
-      "nanas-checkbox": { name: "Nanas", price: 5000 },
-      "strawberry-checkbox": { name: "Strawberry", price: 6000 },
-      "blueberry-checkbox": { name: "Blueberry", price: 7000 },
-      "vanilla-checkbox": { name: "Vanilla", price: 6500 },
-      "durian-checkbox": { name: "Durian", price: 7500 },
-      "sarikaya-checkbox": { name: "Sarikaya", price: 9000 },
-      "tiramisu-checkbox": { name: "Tiramisu", price: 10000 },
-      "taro-checkbox": { name: "Taro", price: 11000 },
-      "cappuchino-checkbox": { name: "Cappuchino", price: 12000 },
-      roti: { name: "Roti", price: 5500 }, // Roti item
-    };
+    // Modifikasi existing logic untuk menggunakan data dinamis
+    const itemData = await this.buildItemDataFromIngredients();
 
     // Storage to cache quantity values
     const quantityCache = {};
+    let itemCount = 1;
 
     function updateShoppingListTable() {
       // Save current quantities to cache before clearing the table
@@ -101,42 +100,16 @@ const Finance = {
       itemCount = 1;
 
       // Check if any checkbox or radio button is selected
-      const isAnySelected =
-        Array.from(checkboxes).some((checkbox) => checkbox.checked) ||
-        radioAmbil.checked;
+      const isAnySelected = Array.from(checkboxes).some(
+        (checkbox) => checkbox.checked
+      );
 
       // Show or hide the shopping list based on selection
       const shoppingListContainer = document.getElementById("shoppingList");
       if (isAnySelected) {
         shoppingListContainer.style.display = "block"; // Show the shopping list
         // Render the shopping list only if something is selected
-        if (radioAmbil.checked) {
-          const rotiRow = document.createElement("tr");
-          const rotiQuantity = quantityCache["roti"] || 15; // Use cached value or default to 1
-          const rotiTotalPrice = itemData["roti"].price * rotiQuantity; // Calculate total price for Roti
-          rotiRow.innerHTML = `
-            <td>${itemCount++}</td>
-            <td>${itemData["roti"].name}</td>
-            <td>Rp. ${itemData["roti"].price.toLocaleString("id-ID")}</td>
-            <td><input type="number" value="${rotiQuantity}" min="1" id="quantity-roti" class="quantity-input"></td>
-            <td>Rp. ${rotiTotalPrice.toLocaleString("id-ID")}</td>
-            <td>
-              <div class="radio-input">
-                <label>
-                  <input value="cash" name="payment-roti" id="payment-roti-cash" type="radio" checked/>
-                  <span>Cash</span>
-                </label>
-                <label>
-                  <input value="debit" name="payment-roti" id="payment-roti-debit" type="radio" />
-                  <span>Debit</span>
-                </label>
-                <span class="selection"></span>
-              </div>
-            </td>
-          `;
 
-          tableBody.appendChild(rotiRow);
-        }
         // Loop through all checkboxes
         checkboxes.forEach((checkbox) => {
           if (checkbox.checked) {
@@ -146,29 +119,30 @@ const Finance = {
             if (item) {
               // Create a new row for each selected item
               const newRow = document.createElement("tr");
-              const cachedQuantity = quantityCache[itemId] || 1; // Use cached value or default to 1
+              const defaultQuantity = item.name === "Roti" ? 15 : 1;
+              const cachedQuantity = quantityCache[itemId] || defaultQuantity; // Use cached value or default to 1
               const totalPrice = item.price * cachedQuantity; // Calculate total price for the item
 
               newRow.innerHTML = `
-            <td>${itemCount++}</td>
-            <td>${item.name}</td>
-            <td>Rp. ${item.price.toLocaleString("id-ID")}</td>
-            <td><input type="number" value="${cachedQuantity}" min="1" id="quantity-${itemId}" class="quantity-input"></td>
-            <td>Rp. ${totalPrice.toLocaleString("id-ID")}</td>
-            <td>
-              <div class="radio-input">
-                <label>
-                  <input value="cash" name="payment-${itemId}" id="cash" type="radio" checked/>
-                  <span>Cash</span>
-                </label>
-                <label>
-                  <input value="debit" name="payment-${itemId}" id="debit" type="radio" />
-                  <span>Debit</span>
-                </label>
-                <span class="selection"></span>
-              </div>
-            </td> 
-          `;
+                <td>${itemCount++}</td>
+                <td>${item.name}</td>
+                <td>Rp. ${item.price.toLocaleString("id-ID")}</td>
+                <td><input type="number" value="${cachedQuantity}" min="1" id="quantity-${itemId}" class="quantity-input"></td>
+                <td>Rp. ${totalPrice.toLocaleString("id-ID")}</td>
+                <td>
+                  <div class="radio-input">
+                    <label>
+                      <input value="cash" name="payment-${itemId}" id="cash" type="radio" checked/>
+                      <span>Cash</span>
+                    </label>
+                    <label>
+                      <input value="debit" name="payment-${itemId}" id="debit" type="radio" />
+                      <span>Debit</span>
+                    </label>
+                    <span class="selection"></span>
+                  </div>
+                </td> 
+              `;
 
               // Add event listener to update total price when quantity changes
               const quantityInput = newRow.querySelector(`#quantity-${itemId}`);
@@ -207,6 +181,177 @@ const Finance = {
 
     // Initial table rendering
     updateShoppingListTable();
+
+    //
+    // INPUT DATA BELANJA
+    //
+
+    document
+      .getElementById("submit-button")
+      .addEventListener("click", async () => {
+        const selectedDate = document.querySelector("#dataDatePicker").value;
+        const shoppingTableRows = document.querySelectorAll(
+          "#shoppingListTable tr"
+        );
+        const newItems = [];
+
+        // Collect new items from the table
+        shoppingTableRows.forEach((row) => {
+          const namaBahan = row.querySelector("td:nth-child(2)").textContent;
+          const jumlah = parseInt(
+            row.querySelector("td:nth-child(4) input").value,
+            10
+          );
+          const hargaPerItem = parseInt(
+            row
+              .querySelector("td:nth-child(3)")
+              .textContent.replace("Rp. ", "")
+              .replace(".", ""),
+            10
+          );
+          const totalHarga = hargaPerItem * jumlah;
+
+          // Dapatkan metode pembayaran
+          const paymentRadios = row.querySelectorAll('input[name^="payment-"]');
+          const payment = Array.from(paymentRadios).find(
+            (radio) => radio.checked
+          ).value;
+
+          newItems.push({
+            namaBahan,
+            jumlah,
+            harga: hargaPerItem,
+            totalHarga,
+            payment, // Tambahkan metode pembayaran
+          });
+        });
+
+        // Proses penggabungan item dengan nama yang sama dan metode pembayaran yang berbeda
+        const mergedItems = {};
+        newItems.forEach((item) => {
+          const key = `${item.namaBahan}-${item.payment}`; // Buat key unik berdasarkan nama bahan dan metode pembayaran
+          if (mergedItems[key]) {
+            // Jika sudah ada, tambahkan jumlah dan totalHarga
+            mergedItems[key].jumlah += item.jumlah;
+            mergedItems[key].totalHarga += item.totalHarga;
+          } else {
+            // Jika belum ada, masukkan item baru
+            mergedItems[key] = { ...item };
+          }
+        });
+
+        // Ubah mergedItems ke array
+        const finalItems = Object.values(mergedItems);
+
+        // Hitung total cash dan debit
+        const totalCash = finalItems
+          .filter((item) => item.payment === "cash")
+          .reduce((total, item) => total + item.totalHarga, 0);
+
+        const totalDebit = finalItems
+          .filter((item) => item.payment === "debit")
+          .reduce((total, item) => total + item.totalHarga, 0);
+
+        const totalBelanja = totalCash + totalDebit;
+
+        const currentDateData = await getCurrentDateData(selectedDate);
+        console.log("current date data:", currentDateData);
+
+        if (currentDateData) {
+          // Perform a PUT request to update the existing entry
+          const updatedItems = [...currentDateData.barang]; // Copy existing items
+
+          newItems.forEach((newItem) => {
+            const existingItem = updatedItems.find(
+              (item) => item.namaBahan === newItem.namaBahan
+            );
+            if (existingItem) {
+              // Update quantity and price for existing items
+              existingItem.jumlah += newItem.jumlah; // Update quantity
+              existingItem.harga = newItem.harga; // Update unit price
+              existingItem.totalHarga =
+                existingItem.harga * existingItem.jumlah; // Recalculate total price
+            } else {
+              // Tambahkan item baru jika belum ada
+              updatedItems.push(newItem); // Tambahkan item baru ke array
+            }
+          });
+          try {
+            await fetch(
+              `${API_ENDPOINT.DAFTARBELANJA}/${currentDateData._id}`,
+              {
+                method: "PUT",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  tanggal: selectedDate,
+                  barang: updatedItems, // Update barang yang baru
+                  totalBelanja: totalBelanja, // Gunakan total belanja terbaru
+                }),
+              }
+            );
+            tableBody.innerHTML = "";
+
+            // Call the new function to update Roti stock
+            await logDatesSince(getCurrentDate().pickedDate);
+
+            await updateRotiStock();
+            setTodayDate();
+
+            console.log("Data updated successfully");
+          } catch (error) {
+            console.error("Error updating data:", error);
+          }
+        } else {
+          // Create new entry
+          await fetch(API_ENDPOINT.DAFTARBELANJA, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              tanggal: selectedDate,
+              barang: newItems, // Ensure this matches the expected structure
+              totalBelanja: totalBelanja, // Gunakan total belanja terbaru
+              totalCash: totalCash,
+              totalDebit: totalDebit,
+            }),
+          });
+          tableBody.innerHTML = "";
+
+          // Call the new function to update Roti stock
+          await logDatesSince(getCurrentDate().pickedDate);
+          await updateRotiStock();
+          setTodayDate();
+          console.log("New data added successfully");
+        }
+
+        // Uncheck all checkboxes and radio buttons
+        checkboxes.forEach((checkbox) => {
+          checkbox.checked = false; // Uncheck checkbox
+        });
+
+        radioButtons.forEach((radio) => {
+          radio.checked = false; // Uncheck radio button
+        });
+
+        // Clear quantity cache
+        Object.keys(quantityCache).forEach((key) => {
+          delete quantityCache[key]; // Remove each cached quantity
+        });
+
+        // Check if any checkbox or radio button is selected after submit
+        const isAnySelected =
+          Array.from(checkboxes).some((checkbox) => checkbox.checked) ||
+          Array.from(radioButtons).some((radio) => radio.checked);
+        const shoppingListContainer = document.getElementById("shoppingList");
+        if (!isAnySelected) {
+          shoppingListContainer.style.display = "none"; // Hide the shopping list if nothing is selected
+          tableBody.innerHTML =
+            "<tr><td colspan='5'>No items selected.</td></tr>"; // Show no items message
+        }
+      });
 
     //
     // Date Picker & Show data
@@ -295,7 +440,7 @@ const Finance = {
 
     // Function to display the filtered data in the HTML template
     async function displayData(data) {
-      console.log("data", data);
+      // console.log("data", data);
       const tableContainer = document.querySelector("#ShoppingList");
       tableContainer.innerHTML = ""; // Clear previous data
 
@@ -745,180 +890,86 @@ const Finance = {
       });
     }
 
-    //
-    // INPUT DATA BELANJA
-    //
-
-    document
-      .getElementById("submit-button")
-      .addEventListener("click", async () => {
-        const selectedDate = document.querySelector("#dataDatePicker").value;
-        const shoppingTableRows = document.querySelectorAll(
-          "#shoppingListTable tr"
-        );
-        const newItems = [];
-
-        // Collect new items from the table
-        shoppingTableRows.forEach((row) => {
-          const namaBahan = row.querySelector("td:nth-child(2)").textContent;
-          const jumlah = parseInt(
-            row.querySelector("td:nth-child(4) input").value,
-            10
-          );
-          const hargaPerItem = parseInt(
-            row
-              .querySelector("td:nth-child(3)")
-              .textContent.replace("Rp. ", "")
-              .replace(".", ""),
-            10
-          );
-          const totalHarga = hargaPerItem * jumlah;
-
-          // Dapatkan metode pembayaran
-          const paymentRadios = row.querySelectorAll('input[name^="payment-"]');
-          const payment = Array.from(paymentRadios).find(
-            (radio) => radio.checked
-          ).value;
-
-          newItems.push({
-            namaBahan,
-            jumlah,
-            harga: hargaPerItem,
-            totalHarga,
-            payment, // Tambahkan metode pembayaran
-          });
-        });
-
-        // Proses penggabungan item dengan nama yang sama dan metode pembayaran yang berbeda
-        const mergedItems = {};
-        newItems.forEach((item) => {
-          const key = `${item.namaBahan}-${item.payment}`; // Buat key unik berdasarkan nama bahan dan metode pembayaran
-          if (mergedItems[key]) {
-            // Jika sudah ada, tambahkan jumlah dan totalHarga
-            mergedItems[key].jumlah += item.jumlah;
-            mergedItems[key].totalHarga += item.totalHarga;
-          } else {
-            // Jika belum ada, masukkan item baru
-            mergedItems[key] = { ...item };
-          }
-        });
-
-        // Ubah mergedItems ke array
-        const finalItems = Object.values(mergedItems);
-
-        // Hitung total cash dan debit
-        const totalCash = finalItems
-          .filter((item) => item.payment === "cash")
-          .reduce((total, item) => total + item.totalHarga, 0);
-
-        const totalDebit = finalItems
-          .filter((item) => item.payment === "debit")
-          .reduce((total, item) => total + item.totalHarga, 0);
-
-        const totalBelanja = totalCash + totalDebit;
-
-        const currentDateData = await getCurrentDateData(selectedDate);
-        console.log("current date data:", currentDateData);
-
-        if (currentDateData) {
-          // Perform a PUT request to update the existing entry
-          const updatedItems = [...currentDateData.barang]; // Copy existing items
-
-          newItems.forEach((newItem) => {
-            const existingItem = updatedItems.find(
-              (item) => item.namaBahan === newItem.namaBahan
-            );
-            if (existingItem) {
-              // Update quantity and price for existing items
-              existingItem.jumlah += newItem.jumlah; // Update quantity
-              existingItem.harga = newItem.harga; // Update unit price
-              existingItem.totalHarga =
-                existingItem.harga * existingItem.jumlah; // Recalculate total price
-            } else {
-              // Tambahkan item baru jika belum ada
-              updatedItems.push(newItem); // Tambahkan item baru ke array
-            }
-          });
-          try {
-            await fetch(
-              `${API_ENDPOINT.DAFTARBELANJA}/${currentDateData._id}`,
-              {
-                method: "PUT",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  tanggal: selectedDate,
-                  barang: updatedItems, // Update barang yang baru
-                  totalBelanja: totalBelanja, // Gunakan total belanja terbaru
-                }),
-              }
-            );
-            tableBody.innerHTML = "";
-
-            // Call the new function to update Roti stock
-            await logDatesSince(getCurrentDate().pickedDate);
-
-            await updateRotiStock();
-            setTodayDate();
-
-            console.log("Data updated successfully");
-          } catch (error) {
-            console.error("Error updating data:", error);
-          }
-        } else {
-          // Create new entry
-          await fetch(API_ENDPOINT.DAFTARBELANJA, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              tanggal: selectedDate,
-              barang: newItems, // Ensure this matches the expected structure
-              totalBelanja: totalBelanja, // Gunakan total belanja terbaru
-              totalCash: totalCash,
-              totalDebit: totalDebit,
-            }),
-          });
-          tableBody.innerHTML = "";
-
-          // Call the new function to update Roti stock
-          await logDatesSince(getCurrentDate().pickedDate);
-          await updateRotiStock();
-          setTodayDate();
-          console.log("New data added successfully");
-        }
-
-        // Uncheck all checkboxes and radio buttons
-        checkboxes.forEach((checkbox) => {
-          checkbox.checked = false; // Uncheck checkbox
-        });
-
-        radioButtons.forEach((radio) => {
-          radio.checked = false; // Uncheck radio button
-        });
-
-        // Clear quantity cache
-        Object.keys(quantityCache).forEach((key) => {
-          delete quantityCache[key]; // Remove each cached quantity
-        });
-
-        // Check if any checkbox or radio button is selected after submit
-        const isAnySelected =
-          Array.from(checkboxes).some((checkbox) => checkbox.checked) ||
-          Array.from(radioButtons).some((radio) => radio.checked);
-        const shoppingListContainer = document.getElementById("shoppingList");
-        if (!isAnySelected) {
-          shoppingListContainer.style.display = "none"; // Hide the shopping list if nothing is selected
-          tableBody.innerHTML =
-            "<tr><td colspan='5'>No items selected.</td></tr>"; // Show no items message
-        }
-      });
     setTodayDate();
     // Fill Today Stock Data
     // await isStocksDataExist();
     // updateShoppingListTable();
+  },
+
+  async renderIngredients() {
+    try {
+      // Ambil data bahan dari sumber data
+      const ingredients = await RBPsource.getDataBahan();
+
+      // Kelompokkan bahan berdasarkan kategori
+      const categorizedIngredients = ingredients.reduce((acc, ingredient) => {
+        if (!acc[ingredient.kategori]) {
+          acc[ingredient.kategori] = [];
+        }
+        acc[ingredient.kategori].push(ingredient);
+        return acc;
+      }, {});
+
+      // Render kategori dan bahan
+      const containerShopping = document.querySelector(".containerShopping");
+
+      Object.entries(categorizedIngredients).forEach(([category, items]) => {
+        const categorySection = document.createElement("div");
+        categorySection.innerHTML = `<p id="purchase_Name">${category}</p>`;
+
+        const itemContainer = document.createElement("div");
+        itemContainer.className = "shoppingItemQuantity";
+
+        items.forEach((item) => {
+          const itemDiv = document.createElement("div");
+          itemDiv.className = "itemCheckbox";
+          itemDiv.innerHTML = `
+            <input
+              type="checkbox"
+              id="${item._id}-checkbox"
+              class="checkbox-input"
+              data-name="${item.namaBahan}"
+              data-price="${item.harga}"
+            />
+            <label 
+              for="${item._id}-checkbox" 
+              class="checkbox-label" 
+              id="${item._id}-label"
+            >
+              ${item.namaBahan}
+            </label>
+          `;
+
+          itemContainer.appendChild(itemDiv);
+        });
+
+        categorySection.appendChild(itemContainer);
+        containerShopping.insertBefore(
+          categorySection,
+          containerShopping.querySelector("#shoppingList")
+        );
+      });
+    } catch (error) {
+      console.error("Error rendering ingredients:", error);
+    }
+  },
+
+  async buildItemDataFromIngredients() {
+    try {
+      const ingredients = await RBPsource.getDataBahan();
+
+      // Konversi data bahan menjadi format yang kompatibel dengan existing logic
+      return ingredients.reduce((acc, item) => {
+        acc[`${item._id}-checkbox`] = {
+          name: item.namaBahan,
+          price: item.harga,
+        };
+        return acc;
+      }, {});
+    } catch (error) {
+      console.error("Error building item data:", error);
+      return {};
+    }
   },
 };
 

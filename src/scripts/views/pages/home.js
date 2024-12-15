@@ -4,10 +4,15 @@ import Swal from "sweetalert2";
 import {
   allFinanceDataByDate,
   allFinanceDataThisMonth,
+  allPredictionDataByDate,
   allStockDataThisMonth,
 } from "../../../data/allData";
 import RBPsource from "../../../data/source";
-import { getCurrentDate, getYesterdayDate } from "../../utils/datePicker";
+import {
+  getCurrentDate,
+  getTomorrowDate,
+  getYesterdayDate,
+} from "../../utils/datePicker";
 import { checkUserRole } from "../../utils/interceptor";
 
 import { createHomeTemplate } from "../template/template-creator";
@@ -31,7 +36,7 @@ const Home = {
     }
 
     const isAllow = await checkUserRole();
-    console.log('isallow', isAllow);
+    console.log("isallow", isAllow);
     if (!isAllow) {
       window.location.hash = "#/sales";
       Swal.fire({
@@ -45,11 +50,19 @@ const Home = {
       return; // Hentikan proses render
     }
 
-
     const defaultYear = getCurrentDate().year;
     // console.log("defaultY", defaultYear);
     const defaultMonth = getCurrentDate().month;
     // console.log("defaultmongth", defaultMonth);
+
+    //
+    // Prediction Chart
+    //
+
+    const allPredictionData = await RBPsource.getPredictions();
+    this.displayPredictionChart(allPredictionData);
+
+    await this.renderPrediksiKeTable();
 
     //
     // Stock Chart
@@ -1584,6 +1597,187 @@ const Home = {
         stockPercentageChangeSpoiled
       );
     }
+  },
+
+  async displayPredictionChart(predictionData) {
+    // Hitung total data
+    const totalData = predictionData.length;
+
+    // Hitung jumlah untuk setiap kategori
+    const akuratTrue = predictionData.filter(
+      (item) => item.akurat === true
+    ).length;
+    const akuratFalse = predictionData.filter(
+      (item) => item.akurat === false
+    ).length;
+    const akuratNull = predictionData.filter(
+      (item) => item.akurat === null
+    ).length;
+
+    // Hitung persentase
+    const persenAkuratTrue = ((akuratTrue / totalData) * 100).toFixed(2);
+    const persenAkuratFalse = ((akuratFalse / totalData) * 100).toFixed(2);
+    const persenAkuratNull = ((akuratNull / totalData) * 100).toFixed(2);
+
+    // Buat chart
+    const ctx = document.getElementById("predictionAccuracy").getContext("2d");
+    new Chart(ctx, {
+      type: "pie",
+      data: {
+        labels: [
+          `Akurat (${persenAkuratTrue}%)`,
+          `Tidak Akurat (${persenAkuratFalse}%)`,
+          `Belum Diverifikasi (${persenAkuratNull}%)`,
+        ],
+        datasets: [
+          {
+            data: [akuratTrue, akuratFalse, akuratNull],
+            backgroundColor: [
+              "rgba(75, 192, 192, 0.6)", // Hijau untuk akurat
+              "rgba(255, 99, 132, 0.6)", // Merah untuk tidak akurat
+              "rgba(54, 162, 235, 0.6)", // Biru untuk belum diverifikasi
+            ],
+            borderColor: [
+              "rgba(75, 192, 192, 1)",
+              "rgba(255, 99, 132, 1)",
+              "rgba(54, 162, 235, 1)",
+            ],
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: "Keseluruhan",
+          },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const currentValue = context.parsed;
+                const percentage = ((currentValue / total) * 100).toFixed(2);
+                return `${context.label}: ${currentValue} (${percentage}%)`;
+              },
+            },
+          },
+        },
+      },
+    });
+  },
+
+  // Fungsi untuk menghitung akurasi prediksi
+  async hitungAkurasiPrediksi(dataPrediksi, databasePrediksi) {
+    // Filter data prediksi yang sesuai dengan kriteria
+    const prediksiSesuai = databasePrediksi.filter(
+      (item) =>
+        item.weekend === dataPrediksi.weekend &&
+        item.libur === dataPrediksi.libur &&
+        item.cuaca === dataPrediksi.cuaca &&
+        item.event_raya === dataPrediksi.event_raya
+    );
+    // console.log("prediksiSesuai", prediksiSesuai);
+
+    // Hitung total prediksi sesuai
+    const totalPrediksiSesuai = prediksiSesuai.length;
+    console.log("totalPrediksiSesuai", totalPrediksiSesuai);
+
+    // Hitung prediksi yang akurat
+    const prediksiAkurat = prediksiSesuai.filter(
+      (item) => item.akurat === true
+    ).length;
+
+    console.log("prediksiAkurat", prediksiAkurat);
+
+    // Hitung persentase akurasi
+    const persentaseAkurasi =
+      totalPrediksiSesuai > 0
+        ? ((prediksiAkurat / totalPrediksiSesuai) * 100).toFixed(2)
+        : 0;
+
+    return {
+      totalPrediksi: totalPrediksiSesuai,
+      prediksiAkurat: prediksiAkurat,
+      persentaseAkurasi: `${persentaseAkurasi}%`,
+    };
+  },
+
+  // Render ke dalam tabel
+  async renderPrediksiKeTable() {
+    const dataPrediksiHariIni = (
+      await allPredictionDataByDate(getCurrentDate().pickedDate)
+    ).filteredData;
+    const dataPrediksiHariIniFilter = {
+      weekend: dataPrediksiHariIni.weekend,
+      libur: dataPrediksiHariIni.libur,
+      cuaca: dataPrediksiHariIni.cuaca,
+      event_raya: dataPrediksiHariIni.event_raya,
+    };
+    console.log("Data Prediksi Hari Ini: ", dataPrediksiHariIniFilter);
+
+    const dataPrediksiBesok = (
+      await allPredictionDataByDate(getTomorrowDate().tomorrowDate)
+    ).filteredData;
+    const dataPrediksiBesokFilter = {
+      weekend: dataPrediksiBesok.weekend,
+      libur: dataPrediksiBesok.libur,
+      cuaca: dataPrediksiBesok.cuaca,
+      event_raya: dataPrediksiBesok.event_raya,
+    };
+    console.log("Data Prediksi besok: ", dataPrediksiBesokFilter);
+
+    // Contoh database prediksi (seharusnya diambil dari backend/database)
+    const databasePrediksi = await RBPsource.getPredictions();
+    // console.log("databasePrediksi", databasePrediksi);
+
+    // Hitung akurasi untuk hari ini dan besok
+    const akurasiHariIni = await this.hitungAkurasiPrediksi(
+      dataPrediksiHariIniFilter,
+      databasePrediksi
+    );
+    const akurasiBesok = await this.hitungAkurasiPrediksi(
+      dataPrediksiBesokFilter,
+      databasePrediksi
+    );
+
+    // Ambil elemen tabel
+    const tabelPrediksi = document.querySelector(".predictionsDataTable");
+
+    // Bersihkan isi tabel sebelumnya
+    tabelPrediksi.innerHTML = `
+        <tr>
+            <td>Hari ini</td>
+            <td>:</td>
+            <td>${dataPrediksiHariIni.hasil_prediksi}</td>
+            <td></td>
+            <td>akurasi :</td>
+            <td>${akurasiHariIni.persentaseAkurasi}
+            <div class="tooltip">
+              <span class="tooltiptext">
+                <p id="predTooltip">${akurasiHariIni.prediksiAkurat} / ${akurasiHariIni.totalPrediksi} Data prediksi</p>
+              </span>
+              <i class="fas fa-circle-info"></i>
+            </div>
+            </td>
+        </tr>
+        <tr>
+            <td>Besok</td>
+            <td>:</td>
+            <td>${dataPrediksiBesok.hasil_prediksi}</td>
+            <td></td>
+            <td>akurasi :</td>
+            <td>${akurasiBesok.persentaseAkurasi}
+            <div class="tooltip">
+              <span class="tooltiptext">
+                <p id="predTooltip">${akurasiBesok.prediksiAkurat} / ${akurasiBesok.totalPrediksi} Data prediksi</p>
+              </span>
+              <i class="fas fa-circle-info"></i>
+            </div>
+            </td>
+        </tr>
+    `;
   },
 };
 

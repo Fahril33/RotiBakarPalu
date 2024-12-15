@@ -152,6 +152,7 @@ export async function allPredictionDataByDate(dates) {
     event_raya: raya = "untracked",
     hasil_prediksi: hasilPrediksi = "none",
     operasional: operasional = "none",
+    akurat: akurat = "none"
   } = filteredData;
 
   return {
@@ -163,6 +164,7 @@ export async function allPredictionDataByDate(dates) {
     raya,
     hasilPrediksi,
     operasional,
+    akurat,
   };
 }
 

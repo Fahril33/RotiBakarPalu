@@ -49,7 +49,7 @@ export function handleModalSubmit (
       time: time,
       price: newPrice,
       quantity: newQuantity,
-      income: newPrice * newQuantity, // Menghitung income baru
+      income: newPrice * newQuantity, 
       place: newPlace,
     };
 

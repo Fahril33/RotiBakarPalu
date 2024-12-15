@@ -220,7 +220,11 @@ const createFinanceTemplate = () => `
           <div class="details">
             <p class="valueEventRaya">Event/Raya Mendatang</p>
             <div class="activity-container">
-              
+              <div class="liburError">
+                <p>Gagal mengambil data, coba lagi.</p>
+                <button id="liburRefresh"><i class="fa fa-refresh"></i>Refresh</button>
+              </div>   
+              <div class="loader" id="liburLoader"></div>
             </div>
           </div>
         </div>
@@ -235,249 +239,10 @@ const createFinanceTemplate = () => `
   <div class="card">
     <div class="containerShopping">
       <h2>Tambah Daftar Belanja</h2>
-      <p id="purchase_Name">Roti</p>
-      <div class="shoppingItemQuantity">
-        <div class="radioOption">
-          <input type="radio" id="ambil" name="option" value="ambil" />
-          <label for="ambil">ambil</label>
-        </div>
-        <div class="radioOption">
-          <input
-            type="radio"
-            id="tidakAmbil"
-            name="option"
-            value="tidakAmbil"
-          />
-          <label for="tidakAmbil">tidak</label>
-        </div>
-      </div>
-
-      <!--  -->
-      <!-- BAHAN -->
-      <!--  -->
-      <p id="purchase_Name">Bahan</p>
-      <div class="shoppingItemQuantity">
-        <div class="itemCheckbox">
-          <input
-            type="checkbox"
-            id="skmc-checkbox"
-            class="checkbox-input"
-          />
-          <label for="skmc-checkbox" class="checkbox-label" id="skmc-label"
-            >SKMC</label
-          >
-        </div>
-        <div class="itemCheckbox">
-          <input
-            type="checkbox"
-            id="skmp-checkbox"
-            class="checkbox-input"
-          />
-          <label for="skmp-checkbox" class="checkbox-label" id="skmp-label"
-            >SKMP</label
-          >
-        </div>
-        <div class="itemCheckbox">
-          <input
-            type="checkbox"
-            id="butter-checkbox"
-            class="checkbox-input"
-          />
-          <label
-            for="butter-checkbox"
-            class="checkbox-label"
-            id="butter-label"
-            >Butter</label
-          >
-        </div>
-        <div class="itemCheckbox">
-          <input
-            type="checkbox"
-            id="keju-checkbox"
-            class="checkbox-input"
-          />
-          <label for="keju-checkbox" class="checkbox-label" id="keju-label"
-            >Keju</label
-          >
-        </div>
-      </div>
-
-      <!--  -->
-      <!-- COKLAT -->
-      <!--  -->
-      <p id="purchase_Name">Coklat</p>
-      <div class="shoppingItemQuantity">
-        <div class="itemCheckbox">
-          <input
-            type="checkbox"
-            id="pasta-checkbox"
-            class="checkbox-input"
-          />
-          <label
-            for="pasta-checkbox"
-            class="checkbox-label"
-            id="pasta-label"
-            >Pasta</label
-          >
-        </div>
-        <div class="itemCheckbox">
-          <input
-            type="checkbox"
-            id="crispy-checkbox"
-            class="checkbox-input"
-          />
-          <label
-            for="bahan-checkbox2"
-            class="checkbox-label"
-            id="crispy-label"
-            >Crispy</label
-          >
-        </div>
-        <div class="itemCheckbox">
-          <input
-            type="checkbox"
-            id="mesis-checkbox"
-            class="checkbox-input"
-          />
-          <label
-            for="mesis-checkbox"
-            class="checkbox-label"
-            id="mesis-label"
-            >Mesis</label
-          >
-        </div>
-        <div class="itemCheckbox">
-          <input
-            type="checkbox"
-            id="oreo-checkbox"
-            class="checkbox-input"
-          />
-          <label for="oreo-checkbox" class="checkbox-label" id="oreo-label"
-            >Oreo</label
-          >
-        </div>
-      </div>
-
-      <!--  -->
-      <!-- SELAI -->
-      <!--  -->
-      <p id="purchase_Name">Selai</p>
-      <div class="shoppingItemQuantity" id="selai">
-        <div class="itemCheckbox">
-          <input
-            type="checkbox"
-            id="nanas-checkbox"
-            class="checkbox-input"
-          />
-          <label
-            for="nanas-checkbox"
-            class="checkbox-label"
-            id="nanas-label"
-            >Nanas</label
-          >
-        </div>
-        <div class="itemCheckbox">
-          <input
-            type="checkbox"
-            id="strawberry-checkbox"
-            class="checkbox-input"
-          />
-          <label
-            for="strawberry-checkbox"
-            class="checkbox-label"
-            id="strawberry-label"
-            >Strawberry</label
-          >
-        </div>
-        <div class="itemCheckbox">
-          <input
-            type="checkbox"
-            id="blueberry-checkbox"
-            class="checkbox-input"
-          />
-          <label
-            for="blueberry-checkbox"
-            class="checkbox-label"
-            id="blueberry-label"
-            >Blueberry</label
-          >
-        </div>
-        <div class="itemCheckbox">
-          <input
-            type="checkbox"
-            id="vanilla-checkbox"
-            class="checkbox-input"
-          />
-          <label
-            for="vanilla-checkbox"
-            class="checkbox-label"
-            id="vanilla-label"
-            >Vanilla</label
-          >
-        </div>
-        <div class="itemCheckbox">
-          <input
-            type="checkbox"
-            id="durian-checkbox"
-            class="checkbox-input"
-          />
-          <label
-            for="durian-checkbox"
-            class="checkbox-label"
-            id="durian-label"
-            >Durian</label
-          >
-        </div>
-        <div class="itemCheckbox">
-          <input
-            type="checkbox"
-            id="sarikaya-checkbox"
-            class="checkbox-input"
-          />
-          <label
-            for="sarikaya-checkbox"
-            class="checkbox-label"
-            id="sarikaya-label"
-            >Sarikaya</label
-          >
-        </div>
-        <div class="itemCheckbox">
-          <input
-            type="checkbox"
-            id="tiramisu-checkbox"
-            class="checkbox-input"
-          />
-          <label
-            for="tiramisu-checkbox"
-            class="checkbox-label"
-            id="tiramisu-label"
-            >Tiramisu</label
-          >
-        </div>
-        <div class="itemCheckbox">
-          <input
-            type="checkbox"
-            id="taro-checkbox"
-            class="checkbox-input"
-          />
-          <label for="taro-checkbox" class="checkbox-label" id="taro-label"
-            >Taro</label
-          >
-        </div>
-        <div class="itemCheckbox">
-          <input
-            type="checkbox"
-            id="cappuchino-checkbox"
-            class="checkbox-input"
-          />
-          <label
-            for="cappuchino-checkbox"
-            class="checkbox-label"
-            id="cappuchino-label"
-            >Cappuchino</label
-          >
-        </div>
-      </div>
+      
+      <!-- Kontainer untuk checkbox yang akan dirender -->
+      <div id="checkboxContainer"></div> 
+      
     </div>
 
     <div class="containerShopping" id="shoppingList">
@@ -625,6 +390,36 @@ const createHomeTemplate = () => `
         </div>
       </div>
       <div class="section-charts">
+        <div class="card prediction-charts" id="prediction-charts">
+          <div class="chart-headers" >
+            <p4>Akurasi Prediksi Penjualan</p4>            
+          </div>
+          <div class="predictionsDataTableContainer">
+            <table class="predictionsDataTable">
+              <tr>
+                <td>Hari ini</td>
+                <td>:</td>
+                <td>Memuat..</td>
+                <td></td>
+                <td>akurasi :</td>
+                <td>Memuat..</td>
+              </tr>
+              <tr>
+                <td>Besok</td>
+                <td>:</td>
+                <td>Memuat..</td>
+                <td></td>
+                <td>akurasi :</td>
+                <td>Memuat..</td>
+              </tr>
+            </table>
+          </div>
+          <div class="chart-body" style="padding-bottom: 10px">            
+
+            <canvas id="predictionAccuracy" style="max-width: 800px; max-height: 800px;" ></canvas>
+          </div>
+        </div>
+        
         <div class="card stocks-charts" id="stocks-charts">
           <div class="chart-headers" >
             <p4>Historis Stok</p4>
@@ -727,86 +522,11 @@ const createSettingTemplate = () => {
     </div>
     <div class="settings-header">
       <p>Daftar Bahan</p>
-      <button>+Bahan</button>
+      <button id="addIngredients">+Bahan</button>
     </div>
     <!--  -->
     <div class="card">
-      <div class="materials-list">
-        <div class="material-name">
-          <p>Roti</p>
-        </div>
-        <div class="material-list">
-          <ul>
-            <li class="list-item">
-              <table>
-                <tr>
-                  <th>#</th>
-                  <th>Nama</th>
-                  <th>Harga</th>
-                  <th>Satuan</th>
-                  <th></th>
-                </tr>
-                <tr>
-                  <td>1</td>
-                  <td>Roti Tawar</td>
-                  <td>Rp5.500</td>
-                  <td>porsi</td>
-                  <td>
-                    <div class="user-actions">
-                      <i class="fa fa-edit"></i>
-                      <i class="fa fa-trash"></i>
-                    </div>
-                  </td>
-                </tr>
-              </table>
-            </li>
-          </ul>
-        </div>
-      </div>
-      <div class="materials-list">
-        <div class="material-name">
-          <p>Selai</p>
-        </div>
-        <div class="material-list">
-          <ul>
-            <li class="list-item">
-              <table>
-                <tr>
-                  <th>#</th>
-                  <th>Nama</th>
-                  <th>Harga</th>
-                  <th>Satuan</th>
-                  <th></th>
-                </tr>
-                <tr>
-                  <td>1</td>
-                  <td>Strawberry</td>
-                  <td>Rp30.000</td>
-                  <td>500gr</td>
-                  <td>
-                    <div class="user-actions">
-                      <i class="fa fa-edit"></i>
-                      <i class="fa fa-trash"></i>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>2</td>
-                  <td>Blueberry</td>
-                  <td>Rp30.000</td>
-                  <td>500gr</td>
-                  <td>
-                    <div class="user-actions">
-                      <i class="fa fa-edit"></i>
-                      <i class="fa fa-trash"></i>
-                    </div>
-                  </td>
-                </tr>
-              </table>
-            </li>
-          </ul>
-        </div>
-      </div>
+      <div id="materials-root"></div>
     </div>
   </div>
  `;

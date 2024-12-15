@@ -81,7 +81,6 @@ const Login = {
       } else {
         // Tampilkan pesan kesalahan tanpa detail sensitif
         alert("Email atau password salah. Silakan coba lagi.");
-        console.warn("Login failed. Please check your credentials."); // Ganti log ini untuk debugging aman
       }
     } catch (error) {
       // Tangkap kesalahan jaringan atau internal

@@ -18,27 +18,27 @@ export async function displayFinance() {
 
     // Kosongkan isi elemen sebelum mengubahnya
     const cashElement = document.querySelector("#TodayCash");
-    cashElement.textContent = ""; // Mengosongkan isi
+    cashElement.textContent = "Memuat.."; // Mengosongkan isi
     cashElement.textContent = `Rp. ${todayCash.toLocaleString("id-ID")}`;
 
     const debitElement = document.querySelector("#todayCredit");
-    debitElement.textContent = ""; // Mengosongkan isi
+    debitElement.textContent = "Memuat.."; // Mengosongkan isi
     debitElement.textContent = `Rp. ${todayDebit.toLocaleString("id-ID")}`;
 
     const totalElement = document.querySelector("#todayTotal");
-    totalElement.textContent = ""; // Mengosongkan isi
+    totalElement.textContent = "Memuat.."; // Mengosongkan isi
     totalElement.textContent = `Rp. ${todayTotal.toLocaleString("id-ID")}`;
 
     const incomeElement = document.querySelector("#incomeTM");
-    incomeElement.textContent = ""; // Mengosongkan isi
+    incomeElement.textContent = "Memuat.."; // Mengosongkan isi
     incomeElement.textContent = `Rp. ${totalIncome.toLocaleString("id-ID")}`;
 
     const expenseElement = document.querySelector("#expenseTM");
-    expenseElement.textContent = ""; // Mengosongkan isi
+    expenseElement.textContent = "Memuat.."; // Mengosongkan isi
     expenseElement.textContent = `Rp. ${totalExpense.toLocaleString("id-ID")}`;
 
     const profitElement = document.querySelector("#profitTM");
-    profitElement.textContent = ""; // Mengosongkan isi
+    profitElement.textContent = "Memuat.."; // Mengosongkan isi
     profitElement.textContent = `Rp. ${totalProfit.toLocaleString("id-ID")}`;
   } catch (error) {
     console.error("Error displaying finance data:", error);
@@ -53,6 +53,15 @@ export async function displayUpcomingEvent(date) {
 
   const catchEventThisYear = await bacaHariLibur(date, nowYear);
   const catchEventNextYear = await bacaHariLibur(date, nextYear);
+
+  const errorEventElement = document.querySelector(".liburError");
+  const loaderEventElement = document.querySelector("#liburLoader");
+  errorEventElement.style.display = "none";
+  if (!catchEventThisYear | !catchEventNextYear) {
+    errorEventElement.style.display = "block";
+    return;
+  }
+
   const eventList = [
     {
       year: nowYear,
@@ -70,7 +79,7 @@ export async function displayUpcomingEvent(date) {
   const upcomingEvents = allEvents.filter(
     (event) => new Date(event.holiday_date) >= today
   );
-//   console.log("upcoming evn", upcomingEvents);
+  //   console.log("upcoming evn", upcomingEvents);
 
   // Mengurutkan upcomingEvents berdasarkan holiday_date
   upcomingEvents.sort(
@@ -102,4 +111,6 @@ export async function displayUpcomingEvent(date) {
     activityItem.appendChild(activityText);
     activityContainer.appendChild(activityItem);
   });
+  errorEventElement.style.display = "none";
+  loaderEventElement.style.display = "none";
 }

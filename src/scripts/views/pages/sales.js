@@ -155,7 +155,7 @@ const Sales = {
             <td>
               <div class="actions">
                   <div class="button edit">
-                      <i class="fas fa-edit"></i>
+                      <i class="fas fa-edit" id="salesEditBtn"></i>
                       <span>Edit</span>
                   </div>
                   <div class="button delete">

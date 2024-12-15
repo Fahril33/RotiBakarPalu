@@ -56,7 +56,6 @@ class App {
       navbar.style.display = "inline-block"; // Tampilkan navbar
     }
 
-    // console.log('getalluser', await RBPsource.getAllUsers());
 
     // Username Displayer
     //

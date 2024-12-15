@@ -164,11 +164,7 @@ li {
   margin: 0;
   font-size: small;
 }
-#usernameError,
-#phoneError,
-#usernameDuplicate,
-#emailDuplicate,
-#phoneDuplicate {
+.error {
   display: none;
   font-size: x-small;
   color: red;
@@ -204,7 +200,7 @@ li {
   display: flex;
   gap: 10px;
   padding: 10px;
-  max-height: 20px
+  max-height: 20px;
 }
 .user-actions button {
   font-size: larger;
@@ -245,4 +241,12 @@ li {
 
 .list-item th:first-child {
   width: 15px;
+}
+
+#ingredients-td {
+  padding: 0;
+}
+#ingredients-td .user-actions {
+  padding-top: 0;
+  padding-bottom: 0 ;
 }

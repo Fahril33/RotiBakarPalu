@@ -177,8 +177,6 @@ ItemsContainer
 }
 
 @media (max-width: 575.98px) {
-
-
   .tooltip-container,
   .button-content,
   .tooltip-content {
@@ -239,7 +237,7 @@ ItemsContainer
   position: relative;
   display: inline-block;
 }
-.userData{
+.userData {
   display: flex;
   flex-wrap: nowrap;
   width: 200px;
@@ -539,13 +537,14 @@ tr:nth-child(even) {
   .button span {
     display: none;
   }
-  .button.delete, .button.edit {
+  .button.delete,
+  .button.edit {
     width: 2.5rem;
     height: 2.5rem;
   }
   .button i {
-  margin: 0;
-}
+    margin: 0;
+  }
 }
 
 /*
@@ -557,6 +556,10 @@ tr:nth-child(even) {
 }
 
 /* edit sales */
+
+#salesEditBtn {
+  color: white;
+}
 .modal {
   position: fixed;
   top: 0;

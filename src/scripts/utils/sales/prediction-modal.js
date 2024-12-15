@@ -3,7 +3,10 @@ import {
   allPredictionDataByDate,
   allStockDataByDate,
 } from "../../../data/allData";
-import { isPredictionDataExist, putPredictionData } from "../../../data/utils/predictionHandler";
+import {
+  isPredictionDataExist,
+  putPredictionData,
+} from "../../../data/utils/predictionHandler";
 import { putNewStockData } from "../../../data/utils/stockHandler";
 import { usePrediction } from "../algorithm";
 import { datePickerValue } from "../datePicker";
@@ -19,6 +22,8 @@ export async function showPredictionModal() {
   const pickedDate = (await datePickerValue()).dateValue;
   const cuaca = (await allPredictionDataByDate(pickedDate)).cuaca;
   const eventRaya = (await allPredictionDataByDate(pickedDate)).raya;
+  const akurat = (await allPredictionDataByDate(pickedDate)).akurat;
+  console.log("akurat", akurat);
   const spoiledStock = (await allStockDataByDate(pickedDate)).spoiledStock;
 
   const modalContent = `
@@ -72,6 +77,20 @@ export async function showPredictionModal() {
           </select>
         </div>
         <div class="form-group">
+          <label for="todayAkurat">Akurat</label>
+          <select id="todayAkurat" name="todayAkurat">
+            <option value="null" ${
+              akurat === null || akurat === "none" ? "selected" : ""
+            }>None</option>
+            <option value="true" ${
+              akurat === true ? "selected" : ""
+            }>Ya</option>
+            <option value="false" ${
+              akurat === false ? "selected" : ""
+            }>Tidak</option>
+          </select>
+        </div>
+        <div class="form-group">
           <label for="todaySpoiledStock">Roti rusak</label>
           <input type="number" id="todaySpoiledStock" name="todaySpoiled" min="0" value="${spoiledStock}" />
         </div>
@@ -98,18 +117,30 @@ export async function showPredictionModal() {
       ).value;
       const updatedSpoiledStock =
         modal.querySelector("#todaySpoiledStock").value;
+      const updatedAkurat = modal.querySelector("#todayAkurat").value;
+      console.log("updatedAkurat", updatedAkurat);
+
+      let akuratBoolean;
+      if (updatedAkurat === "true") {
+        akuratBoolean = true;
+      } else if (updatedAkurat === "false") {
+        akuratBoolean = false;
+      } else {
+        akuratBoolean = null; // Jika nilainya "null" atau "none"
+      }
 
       const updatedData = {
         cuaca: updatedWeatherValue,
         event_raya: updatedEventRaya,
         manual_update: true,
+        akurat: akuratBoolean,
       };
 
-      // Add logic to handle the updated data here
-      console.log("Updated Data:", {
-        weatherValue: updatedWeatherValue,
-        eventRaya: updatedEventRaya,
-      });
+      // console.log("Updated Data:", {
+      //   weatherValue: updatedWeatherValue,
+      //   eventRaya: updatedEventRaya,
+      //   akurat: updatedAkurat,
+      // });
 
       try {
         await isPredictionDataExist(pickedDate);

@@ -530,6 +530,10 @@ h4 {
   color: #c16904;
 }
 
+/*
+:::: Loader
+*/
+
 .loading {
   position: fixed;
   top: 50%;
@@ -540,4 +544,44 @@ h4 {
   border-radius: 5px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
+}
+
+/* HTML: <div class="loader"></div> */
+.loader {
+  display: none;
+  margin: auto;
+  width: 50px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 8px solid;
+  border-color: #000 #0000;
+  animation: l1 1s infinite;
+}
+@keyframes l1 {to{transform: rotate(.5turn)}}
+
+/*
+:::: EVENT DISPLAY
+*/
+
+.liburError{
+  display: none;
+  text-align: center;
+  font-size: large;
+  font-weight: 600;
+  padding: 10px;
+  color: red;
+}
+#liburRefresh {
+  background-color: orange;
+  border-style: none;
+  border-radius: 5px;
+  padding: 5px;
+  margin: auto;
+  cursor: pointer;
+  color: white;
+}
+#liburRefresh i {
+  font-size: small;
+  margin-right: 5px;
+  color: white;
 }

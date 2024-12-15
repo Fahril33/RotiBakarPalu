@@ -167,6 +167,59 @@ class RBPsource {
       return []; // Kembalikan array kosong jika terjadi kesalahan
     }
   }
+
+  static async getDataBahan() {
+    try {
+      const response = await fetch("http://localhost:5000/api/bahan/", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "x-auth-token": localStorage.getItem("token"),
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Data Bahan:", data);
+
+      // Pastikan data yang diterima adalah array
+      if (Array.isArray(data)) {
+        return data; // Kembalikan array pengguna
+      } else {
+        console.error("Data data is not an array");
+        return []; // Kembalikan array kosong jika data tidak valid
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  }
+
+  static async getDataBahanById(id) {
+    try {
+      const response = await fetch(`http://localhost:5000/api/bahan/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "x-auth-token": localStorage.getItem("token"),
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Data Bahan:", data);
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      console.log("id ini gaada bg", id);
+    }
+  }
 }
 
 // Fungsi untuk mengambil data cuaca pada jam 17:00
