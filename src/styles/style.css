@@ -263,6 +263,9 @@ ItemsContainer
   border-radius: 4px;
   overflow: hidden;
 }
+.dropdown-menu a{
+  cursor: pointer;
+}
 
 .dropdown-menu li {
   list-style: none;
@@ -1028,6 +1031,40 @@ tr:nth-child(even) {
 .button-content:focus:not(:focus-visible) {
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
 }
+
+/*
+:::: Form Update Sync Data
+*/
+
+#manualSyncDataForm{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: auto;
+}
+#startDate {
+  cursor: pointer;
+} 
+#manualSyncDataForm .form-group{
+  padding: 0;
+  margin: auto;
+}
+#manualSyncDataForm .form-group submit{
+  width: auto;
+  padding: auto;
+}
+
+
+/*
+:::: Buttons Sales Page
+*/
+#editPrediction{
+  display: block;
+}
+
+
+/*
+:::: 
+*/
 
 /* Responsive Design */
 @media (max-width: 768px) {

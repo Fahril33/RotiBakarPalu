@@ -1,13 +1,17 @@
 import UrlParser from "../routes/url-parser";
 import routes from "../routes/routes";
 import { getCurrentDate } from "../utils/datePicker";
-import { allPredictionDataByDate } from "../../data/allData";
+import {
+  allPredictionDataByDate,
+  allSalesDataByDate,
+} from "../../data/allData";
 import { putPredictionData } from "../../data/utils/predictionHandler";
 import { urlOtorizator } from "../utils/interceptor";
 import RBPsource from "../../data/source";
 import { create404Page } from "./template/template-creator";
 import "../../styles/404page.css";
 import { RBPlogo } from "../utils/icons";
+import Swal from "sweetalert2";
 
 class App {
   constructor({ content }) {
@@ -15,6 +19,11 @@ class App {
   }
 
   async renderPage() {
+    const data = await RBPsource.getUserData();
+    if (!data) {
+      window.location.hash = "#/login";
+    }
+    
     await urlOtorizator();
     const url = UrlParser.parseActiveUrlWithCombiner();
     const token = localStorage.getItem("token");
@@ -33,6 +42,7 @@ class App {
     const navbar = document.querySelector(".tooltip-container");
     const miniNavbar = document.querySelector(".container_bottnav");
     const settingNav = document.getElementById("settingsPage");
+    const manualSyncModal = document.getElementById("manualUpdate");
 
     // Cek apakah URL ada dalam rute
     const isPage = routes[url];
@@ -56,22 +66,21 @@ class App {
       navbar.style.display = "inline-block"; // Tampilkan navbar
     }
 
-
     // Username Displayer
     //
-    if (token) {
-      const data = await RBPsource.getUserData();
+    
+    if (token && data) {
       // Menampilkan sambutan
-      console.log("status", data.status);
-      console.log("role", data.role);
       if (data.role === "employee") {
         navbar.style.display = "none";
         miniNavbar.style.display = "none";
         settingNav.style.display = "none";
+        manualSyncModal.style.display = "none";
       } else {
         navbar.style.display = "inline-block";
         miniNavbar.style.display = "flex";
         settingNav.style.display = "unset";
+        manualSyncModal.style.display = "unset";
       }
       const welcomeMessage = `Hallo, ${data.username}!`;
       document.getElementById("welcome").innerText = welcomeMessage;
@@ -94,6 +103,28 @@ class App {
             console.log("Open");
             await putPredictionData({ operasional: true }, todayDate);
           } else {
+            const todaySold = (
+              await allSalesDataByDate(getCurrentDate().pickedDate)
+            ).soldTotal;
+            if (todaySold > 0) {
+              this.checked = true;
+              const Toast = Swal.mixin({
+                toast: true,
+                position: "top-start",
+                showConfirmButton: false,
+                timer: 2500,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                  toast.onmouseenter = Swal.stopTimer;
+                  toast.onmouseleave = Swal.resumeTimer;
+                },
+              });
+              Toast.fire({
+                icon: "warning",
+                title: "Sudah ada transaksi hari ini!",
+              });
+              return;
+            }
             console.log("Close");
             await putPredictionData({ operasional: false }, todayDate);
           }
@@ -107,6 +138,10 @@ class App {
     this._content.innerHTML = await page.render();
 
     await page.afterRender();
+     if (!data) {
+       document.querySelector(".card-login-header").style.display = "block";
+       document.getElementById("loginBtn").disabled = true;
+     }
   }
 }
 

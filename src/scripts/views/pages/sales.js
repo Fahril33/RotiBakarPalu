@@ -10,20 +10,20 @@ import {
   displayerPredictionData,
   displayerSold,
   displayerWeather,
+  hideComponents,
 } from "../../utils/sales/displayerData";
 import { handleFormSubmit } from "../../utils/sales/form-handler";
 import { showModal, closeModal } from "../../utils/sales/modal-handler";
-import { getCurrentDate } from "../../utils/datePicker";
+import { datePickerValue, getCurrentDate } from "../../utils/datePicker";
 import { bagIcon, soldIcon, editIcon } from "../../utils/icons";
 
-import {
-  syncSoldToPrediction,
-} from "../../../data/utils/predictionHandler";
+import { syncSoldToPrediction } from "../../../data/utils/predictionHandler";
 
 // import { usePrediction } from "../../utils/algorithm";
 import { showPredictionModal } from "../../utils/sales/prediction-modal";
-import { callDataShell, logDatesSince, showLoader } from "../../utils/syncData";
-import { checkWeatherData } from "../../../data/utils/weatherHandler";
+import { callDataShell, logDatesSince } from "../../utils/syncData";
+import { checkUserRole } from "../../utils/interceptor";
+import Swal from "sweetalert2";
 // import { logDatesSince } from "../../utils/syncData";
 
 const Sales = {
@@ -38,7 +38,8 @@ const Sales = {
   },
 
   async afterRender() {
-    showLoader(true, "Memuat data penjualan...");
+    // showLoader(true, "Memuat data penjualan...");
+
     // image render
     document.getElementById("imgPredict").src = bagIcon;
     document.querySelector('img[alt="soldIcon"]').src = soldIcon;
@@ -48,19 +49,54 @@ const Sales = {
 
     // Tampilkan loader sebelum memuat data
 
-    try {
-      await this.displaySalesData();
-    } catch (error) {
-      console.error("Error loading sales data:", error);
-    } finally {
-      // Sembunyikan loader setelah semua data dimuat
-      showLoader(false);
-    }
+    await this.displaySalesData();
 
     // FormHandler-Input
     const form = document.querySelector(".purchase-form form");
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+      console.log("ini diklik");
+      const isAllow = await checkUserRole();
+      console.log("sialow", !isAllow);
+
+      const pickedDate = (await datePickerValue()).dateValue;
+
+      // Create Date objects for comparison
+      const pickedDateObj = new Date(pickedDate);
+      const currDate = new Date();
+
+      // Set both dates to midnight to compare just the dates
+      pickedDateObj.setHours(0, 0, 0, 0);
+      currDate.setHours(0, 0, 0, 0);
+
+      // Get date 1 days before current date
+      const oneDaysAgo = new Date(currDate);
+      oneDaysAgo.setDate(currDate.getDate() - 1);
+
+      const oneDaysAhead = new Date(currDate);
+      oneDaysAhead.setDate(currDate.getDate());
+
+      if (pickedDateObj < oneDaysAgo) {
+        if (!isAllow) {
+          Swal.fire({
+            icon: "error",
+            title: "Akses Terbatas!",
+            text: "Operasional hari ini telah dibatasi.",
+            confirmButtonColor: "#3085d6",
+          });
+          return;
+        }
+      } else if (pickedDateObj > oneDaysAhead) {
+        if (!isAllow) {
+          Swal.fire({
+            icon: "info",
+            title: "Akses Terbatas!",
+            text: "Operasional hari ini belum dimulai.",
+            confirmButtonColor: "#3085d6",
+          });
+          return;
+        }
+      }
       await handleFormSubmit(API_ENDPOINT, this);
       await this.displaySalesData();
     });
@@ -123,13 +159,17 @@ const Sales = {
       await displayerWeather();
       await displayerHolidays();
       await displayerPredictionData();
+
+      if (!(await checkUserRole())) {
+        await hideComponents(selectedDate);
+      }
     } catch (error) {
       console.error("Error filtering data:", error);
     }
   },
   // buat hndler displayer data
   async displaySalesData() {
-    await checkWeatherData();
+    // await checkWeatherData();
     await displayerSold();
     await displayerIncome();
     await displayerWeather();
@@ -152,7 +192,7 @@ const Sales = {
             <td>${soldItem.price}</td>
             <td>${soldItem.quantity}</td>
             <td>${soldItem.place}</td>
-            <td>
+            <td id="salesActionBtn">
               <div class="actions">
                   <div class="button edit">
                       <i class="fas fa-edit" id="salesEditBtn"></i>
@@ -171,7 +211,7 @@ const Sales = {
     } else {
       tbody.innerHTML = `
         <tr>
-          <td colspan="5" style="text-align: center;">No sales data available for this date.</td>
+          <td colspan="5" style="text-align: center;"><span class="noData">Tidak ada data untuk hari ini.</span></td>
         </tr>
       `;
     }
@@ -199,6 +239,51 @@ const Sales = {
     if (existingModal) {
       existingModal.remove();
     }
+
+    // checking
+    const isAllow = await checkUserRole();
+    console.log("sialow", !isAllow);
+
+    const pickedDate = (await datePickerValue()).dateValue;
+
+    // Create Date objects for comparison
+    const pickedDateObj = new Date(pickedDate);
+    const currDate = new Date();
+
+    // Set both dates to midnight to compare just the dates
+    pickedDateObj.setHours(0, 0, 0, 0);
+    currDate.setHours(0, 0, 0, 0);
+
+    // Get date 1 days before current date
+    const oneDaysAgo = new Date(currDate);
+    oneDaysAgo.setDate(currDate.getDate() - 1);
+
+    const oneDaysAhead = new Date(currDate);
+    oneDaysAhead.setDate(currDate.getDate());
+
+    if (pickedDateObj < oneDaysAgo) {
+      if (!isAllow) {
+        Swal.fire({
+          icon: "error",
+          title: "Akses Terbatas!",
+          text: "Operasional hari ini telah dibatasi.",
+          confirmButtonColor: "#3085d6",
+        });
+        return;
+      }
+    } else if (pickedDateObj > oneDaysAhead) {
+      if (!isAllow) {
+        Swal.fire({
+          icon: "info",
+          title: "Akses Terbatas!",
+          text: "Operasional hari ini belum dimulai.",
+          confirmButtonColor: "#3085d6",
+        });
+        return;
+      }
+    }
+
+    // Continue
 
     const row = e.target.closest("tr");
     const saleMongoId = row.getAttribute("data-id");
@@ -250,7 +335,21 @@ const Sales = {
         const result = await response.json();
         console.log("Sale data successfully updated:", result);
 
-        
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-end",
+          showConfirmButton: false,
+          timer: 2500,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
+          },
+        });
+        Toast.fire({
+          icon: "success",
+          title: "Pesanan berhasil diperbarui.",
+        });
         closeModal(modal);
         await logDatesSince(date);
         await this.displaySalesData();
@@ -266,18 +365,62 @@ const Sales = {
   },
 
   async handleDelete(e) {
+    // Checking
+    const isAllow = await checkUserRole();
+    console.log("sialow", !isAllow);
+
+    const pickedDate = (await datePickerValue()).dateValue;
+
+    // Create Date objects for comparison
+    const pickedDateObj = new Date(pickedDate);
+    const currDate = new Date();
+
+    // Set both dates to midnight to compare just the dates
+    pickedDateObj.setHours(0, 0, 0, 0);
+    currDate.setHours(0, 0, 0, 0);
+
+    // Get date 1 days before current date
+    const oneDaysAgo = new Date(currDate);
+    oneDaysAgo.setDate(currDate.getDate() - 1);
+
+    const oneDaysAhead = new Date(currDate);
+    oneDaysAhead.setDate(currDate.getDate());
+
+    if (pickedDateObj < oneDaysAgo) {
+      if (!isAllow) {
+        Swal.fire({
+          icon: "error",
+          title: "Akses Terbatas!",
+          text: "Operasional hari ini telah dibatasi.",
+          confirmButtonColor: "#3085d6",
+        });
+        return;
+      }
+    } else if (pickedDateObj > oneDaysAhead) {
+      if (!isAllow) {
+        Swal.fire({
+          icon: "info",
+          title: "Akses Terbatas!",
+          text: "Operasional hari ini belum dimulai.",
+          confirmButtonColor: "#3085d6",
+        });
+        return;
+      }
+    }
+
+    // Continue
     const row = e.target.closest("tr");
     const saleMongoId = row.getAttribute("data-id");
     const date = document.getElementById("dataDatePicker").value;
 
     const { default: swal } = await import("sweetalert2");
     const confirmDelete = await swal.fire({
-      title: "Confirm Delete",
-      text: "Are you sure you want to delete this sale data?",
+      title: "Konfirmasi Hapus",
+      text: "Anda yakin pesanan ini harus dihapus?",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Delete",
-      cancelButtonText: "Cancel",
+      confirmButtonText: "Hapus",
+      cancelButtonText: "Batal",
     });
     if (confirmDelete.isConfirmed) {
       try {
@@ -292,18 +435,33 @@ const Sales = {
           throw new Error(`Failed to delete sale data with ID ${saleMongoId}.`);
         }
 
-        const result = await response.json();
-        console.log("Sale data successfully deleted:", result);
+        // const result = await response.json();
+        // console.log("Sale data successfully deleted:", result);
+
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-end",
+          showConfirmButton: false,
+          timer: 2500,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
+          },
+        });
+        Toast.fire({
+          icon: "success",
+          title: "Pesanan berhasil dihapus.",
+        });
 
         await logDatesSince(date);
-
         await this.displaySalesData();
 
         //
         // Sesuaikan Nilai Terjual di Prediciton
         //
         await syncSoldToPrediction(date);
-    } catch (error) {
+      } catch (error) {
         console.error("An error occurred while deleting data:", error);
       }
     }

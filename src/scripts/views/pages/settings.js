@@ -4,6 +4,7 @@ import RBPsource from "../../../data/source";
 import Swal from "sweetalert2";
 import { checkUserRole } from "../../utils/interceptor";
 import { closeModal, showModal } from "../../utils/sales/modal-handler";
+import { callDataShell } from "../../utils/syncData";
 
 const Settings = {
   async render() {
@@ -730,6 +731,8 @@ const Settings = {
       root.appendChild(categoryDiv);
     });
     this.addIngredientsEventListeners();
+
+    await callDataShell();
   },
 
   async addNewIngredients() {
@@ -1143,6 +1146,9 @@ const Settings = {
       });
     }
   },
+
+  
+
 };
 
 export default Settings;

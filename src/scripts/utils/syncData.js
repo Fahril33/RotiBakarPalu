@@ -1,6 +1,8 @@
 // import { minusOneDayStockData } from "../../data/allData";
+import Swal from "sweetalert2";
 import {
   allFinanceDataByDate,
+  allPredictionDataByDate,
   allSalesDataByDate,
   allShoplistDataByDate,
   allStockDataByDate,
@@ -9,12 +11,19 @@ import {
   createNewFinanceDataShell,
   putFinanceData,
 } from "../../data/utils/financeHandler";
+import { getHolidayValue } from "../../data/utils/holidayHandler";
 import { syncSoldToPrediction } from "../../data/utils/predictionHandler";
 import {
   isAnyStockDataShell,
   putNewStockData,
 } from "../../data/utils/stockHandler";
-import { getCurrentDate } from "./datePicker";
+import { checkWeatherData } from "../../data/utils/weatherHandler";
+import {
+  getCurrentDate,
+  getTomorrowDate,
+  getYesterdayDate,
+} from "./datePicker";
+import { closeModal, showModal } from "./sales/modal-handler";
 
 // Tambahkan fungsi ini di luar logDatesSince
 async function subtractOneDay(dateString) {
@@ -47,11 +56,8 @@ export async function logDatesSince(pickedDate, logsince = false) {
       ).padStart(2, "0")}-${String(currentDate.getDate()).padStart(2, "0")}`;
 
       // Menampilkan loader
-      if(logsince){
+      if (logsince) {
         let syncText = `Sinkronisasi data: ${formattedDate}`;
-        showLoader(true, syncText);
-      }else{
-        let syncText = `Mengolah Pesanan`;
         showLoader(true, syncText);
       }
 
@@ -80,6 +86,7 @@ export async function logDatesSince(pickedDate, logsince = false) {
 
       let isStockShellAvailable = (await allStockDataByDate(formattedDate))
         .filteredData;
+        console.log('isstockada', isStockShellAvailable);
       if (isStockShellAvailable === `none`) {
         console.log("gaada bang, wait ditambahin");
         await isAnyStockDataShell(formattedDate);
@@ -186,11 +193,159 @@ export function showLoader(isLoading, text) {
   }
 }
 
+//
+//
+//
 export async function callDataShell() {
   const currDate = getCurrentDate().pickedDate;
-  console.log('currDate', currDate);
-  await logDatesSince(currDate)
+  const tomorrowDate = getTomorrowDate().tomorrowDate;
+
+  const financeData = (await allFinanceDataByDate(currDate)).filteredData;
+  console.log("financeData", financeData);
+  const stockData = (await allStockDataByDate(currDate)).filteredData;
+  console.log("stockData", stockData);
+  const predicitionDataToday = (await allPredictionDataByDate(currDate))
+    .filteredData;
+  const predictionDataTomorrow = await (
+    await allFinanceDataByDate(tomorrowDate)
+  ).filteredData;
+
+  const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: false,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.onmouseenter = Swal.stopTimer;
+      toast.onmouseleave = Swal.resumeTimer;
+    },
+  });
+
+  // =? DATA HARI INI ADA?
+  if (financeData === `none` || stockData === `none`) {
+    // console.log("Data tidak tersedia");
+
+    // Tampilkan toast loading
+    const loadingToast = Toast.fire({
+      html: `
+        <div class="loader" style="display: block"></div>
+        <span style="margin-left: 10px;">Memuat data, harap tunggu...</span>
+    `,
+    });
+
+    // =? DATA PREDIKSI ADA?
+    if (!predicitionDataToday || !predictionDataTomorrow) {
+      try {
+        await checkWeatherData();
+      } catch (error) {
+        console.error("Error occurred:", error);
+        Swal.fire({
+          icon: "error",
+          title: `${error}`,
+          text: "Oops.. Gagal mengambil data cuaca!. Silahkan Refresh Halaman",
+        });
+        loadingToast.close();
+        return;
+      }
+      try {
+        await getHolidayValue();
+      } catch (error) {
+        console.error("Error occurred:", error);
+        Swal.fire({
+          icon: "error",
+          title: `${error}`,
+          text: "Oops.. Gagal mengambil data Event/Libur!. Silahkan Refresh Halaman",
+        });
+        loadingToast.close();
+        return;
+      }
+    } else {
+      console.log("Data Prediksi sudah ada");
+    }
+
+    const yesterdayDate = getYesterdayDate().yesterday;
+    const operationalYesterday = (await allPredictionDataByDate(yesterdayDate))
+      .operasional;
+
+    if (operationalYesterday) {
+      await logDatesSince(currDate);
+    } else {
+      let operationalDate = null;
+      let currentDate = new Date(currDate);
+      while (!operationalDate) {
+        currentDate.setDate(currentDate.getDate() - 1);
+        const formattedDate = `${currentDate.getFullYear()}-${String(
+          currentDate.getMonth() + 1
+        ).padStart(2, "0")}-${String(currentDate.getDate()).padStart(2, "0")}`;
+        const operationalData = (await allPredictionDataByDate(formattedDate))
+          .filteredData;
+        if (operationalData && operationalData.operasional) {
+          operationalDate = formattedDate;
+        }
+      }
+      // return operationalDate;
+      console.log("terakhir buka pada tanggal", operationalDate);
+      await logDatesSince(operationalDate);
+    }
+    loadingToast.close();
+  } else {
+    console.log("Semua Data Tersedia");
+  }
+
+  // const predictionData = await allPredictionDataByDate(currDate)
+  // console.log("currDate", currDate);
+  // await logDatesSince(currDate)
   // await checkWeatherData();
   // await getHolidayValue();
   // await usePrediction();
+}
+
+export function manualSyncData() {
+  const modalContent = `
+    <div class="modal-content" id="manualSyncModal">
+      <span class="close">&times;</span>
+      <h2>Sinkronisasi Manual</h2>
+      <form id="manualSyncDataForm">
+        
+        <div class="form-group">
+          <label for="startDate">Tanggal Mulai</label>
+          <input type="date" id="startDate" name="startDate" required/>
+        </div>
+        
+        <div class="form-group">
+          <button type="submit">Sinkronkan Data</button>
+        </div> 
+      </form>
+    </div>
+    `;
+
+  // Tampilkan modal dengan konten
+  const modal = showModal(modalContent);
+
+  document
+    .getElementById("manualSyncDataForm")
+    .addEventListener("submit", (e) => {
+      e.preventDefault();
+      const dateValue = modal.querySelector("#startDate").value;
+      console.log("dateValue", dateValue);
+      Swal.fire({
+        title: 'Konfirmasi',
+        text: `Apakah Anda yakin ingin sinkronisasi data sejak tanggal ${dateValue}?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, sinkronisasi!',
+        cancelButtonText: 'Tidak, batalkan',
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          await logDatesSince(dateValue, true)
+          closeModal(modal);
+        }
+      });
+    });
+
+  // Tambahkan event listener untuk menutup modal
+  modal.querySelector(".close").addEventListener("click", () => {
+    modal.style.display = "none";
+  });
 }

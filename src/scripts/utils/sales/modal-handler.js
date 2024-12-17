@@ -1,5 +1,6 @@
 // import RBPsource from "../../data/source";
 
+import Swal from "sweetalert2";
 import { getCurrentDate } from "../datePicker";
 import { logDatesSince } from "../syncData";
 
@@ -70,8 +71,23 @@ export function handleModalSubmit (
         );
       }
 
-      const result = await response.json();
-      console.log("Data penjualan berhasil diperbarui:", result);
+      // const result = await response.json();
+      // console.log("Data penjualan berhasil diperbarui:", result);
+      const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.onmouseenter = Swal.stopTimer;
+          toast.onmouseleave = Swal.resumeTimer;
+        },
+      });
+      Toast.fire({
+        icon: "success",
+        title: "Catatan berhasil diperbarui.",
+      });
       const currDate = getCurrentDate().pickedDate
       await logDatesSince(currDate);
 

@@ -59,7 +59,9 @@ const Home = {
     // Prediction Chart
     //
 
-    const allPredictionData = await RBPsource.getPredictions();
+    const allPredictionData = (await RBPsource.getPredictions()).filter(
+      (item) => item.operasional === true
+    );
     this.displayPredictionChart(allPredictionData);
 
     await this.renderPrediksiKeTable();
@@ -1651,7 +1653,7 @@ const Home = {
         plugins: {
           title: {
             display: true,
-            text: "Keseluruhan",
+            text: "Keseluruhan (Operasional Aktif)",
           },
           tooltip: {
             callbacks: {
@@ -1729,7 +1731,9 @@ const Home = {
     console.log("Data Prediksi besok: ", dataPrediksiBesokFilter);
 
     // Contoh database prediksi (seharusnya diambil dari backend/database)
-    const databasePrediksi = await RBPsource.getPredictions();
+    const databasePrediksi = (await RBPsource.getPredictions()).filter(
+      (item) => item.operasional === true
+    );
     // console.log("databasePrediksi", databasePrediksi);
 
     // Hitung akurasi untuk hari ini dan besok

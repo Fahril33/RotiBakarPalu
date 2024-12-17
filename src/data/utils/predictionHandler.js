@@ -12,7 +12,7 @@ export async function postPredictionData(predictionData) {
       },
       body: JSON.stringify(predictionData),
     });
-
+    
     if (!response.ok) {
       const errorText = await response.text(); // Ambil teks kesalahan
       throw new Error(

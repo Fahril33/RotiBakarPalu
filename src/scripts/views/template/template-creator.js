@@ -34,7 +34,7 @@ const createSalesTemplate = () => `
           </div>
 
           <div class="form-group">
-            <button type="submit">Simpan</button>
+            <button type="submit" id="addSales">Simpan</button>
           </div>
         </form>
       </div>
@@ -103,7 +103,7 @@ const createSalesTemplate = () => `
               <th>Harga</th>
               <th>Jumlah</th>
               <th>Lokasi</th>
-              <th>Action</th>
+              <th id="salesAction">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -173,21 +173,21 @@ const createFinanceTemplate = () => `
         <div class="dashboard-card">
             <i class="fas fa-money-bill-wave"></i>
             <div class="details">
-              <p class="value" id="TodayCash"></p>
+              <p class="value" id="TodayCash">Memuat..</p>
               <p class="title">Saldo Tunai</p>
             </div>
         </div>
         <div class="dashboard-card">
             <i class="fas fa-credit-card"></i>
             <div class="details">
-              <p class="value" id="todayCredit"></p>
+              <p class="value" id="todayCredit">Memuat..</p>
               <p class="title">Saldo Kredit</p>
             </div>
         </div>
         <div class="dashboard-card">
             <i class="fas fa-wallet"></i>
             <div class="details">
-              <p class="value" id="todayTotal"></p>
+              <p class="value" id="todayTotal">Memuat..</p>
               <p class="title">Total Saldo</p>
             </div>
         </div>
@@ -196,21 +196,21 @@ const createFinanceTemplate = () => `
         <div class="dashboard-card">
             <i class="fas fa-arrow-up"></i>
             <div class="details">
-              <p class="value" id="incomeTM"></p>
+              <p class="value" id="incomeTM">Memuat..</p>
               <p class="title">Pemasukan Bulan Ini</p>
             </div>
         </div>
         <div class="dashboard-card">
             <i class="fas fa-arrow-down"></i>
             <div class="details">
-              <p class="value" id="expenseTM"></p>
+              <p class="value" id="expenseTM">Memuat..</p>
               <p class="title">Pengeluaran Bulan Ini</p>
             </div>
         </div>
         <div class="dashboard-card">
             <i class="fas fa-chart-line"></i>
             <div class="details">
-              <p class="value" id="profitTM"></p>
+              <p class="value" id="profitTM">Memuat..</p>
               <p class="title">Keuntungan Bulan Ini</p>
             </div>
         </div>
@@ -313,6 +313,7 @@ const createHomeTemplate = () => `
     <div class="overview-bar">
       <p>Rincian</p>
       <div class="overview-navigator">
+        <a href="#prediction-charts">Prediksi</a>
         <a href="#stocks-charts">Stok</a>
         <a href="#finance-charts">Keuangan</a>
         <a href="#financialFlow-charts">Arus Kas</a>
@@ -368,7 +369,7 @@ const createHomeTemplate = () => `
           <div class="profit-icon" id="todayProfitStatus">
             <i class="fas fa-arrow-up" id="arrUp"><span>12,69%</span></i>
             <i class="fas fa-arrow-down" id="arrDown"><span>12,69%</span></i>
-            <span> berdasarkan bulan lalu</span>
+            <span> dari bulan lalu</span>
           </div>
         </div>
         <div class="card financial" id="breadStockCard">
@@ -535,40 +536,45 @@ const createSettingTemplate = () => {
 const createLoginTemplate = () => {
   return ` 
   <div class="container-login"> 
-    <div class="card-login component"> 
-      <div class="card-login-items image"> 
-        <img src="" alt="RBPlogo"> 
-      </div> 
-      <div class="card-login-items inputs"> 
-        <div class="card-login-item head"> 
-          <p>Login</p> 
+    <div class="card-login component">
+      <div class="card-login-header">
+        <span id="dbError">Database sedang bermasalah, silahkan <a href="https://wa.me/6281342246239" target="_blank">melapor</a>.</span>
+      </div>
+      <div class="card-login-body">
+        <div class="card-login-items image"> 
+          <img src="" alt="RBPlogo"> 
         </div> 
-        <div class="card-login-item body"> 
-          <div> 
-            <label for="email">Email/Username :</label> 
-            <input type="text" id="email" name="email" required /> 
+        <div class="card-login-items inputs"> 
+          <div class="card-login-item head"> 
+            <p>Login</p> 
           </div> 
-          <div> 
-            <label for="password">Password:</label> 
-            <div style="position: relative"> 
-              <input 
-                type="password" 
-                id="password" 
-                name="password" 
-                required 
-              /> 
-              <button type="button" id="togglePassword"> 
-                <i class="fas fa-eye-slash" id="eyeIcon"></i> 
-              </button> 
+          <div class="card-login-item body"> 
+            <div> 
+              <label for="email">Email/Username :</label> 
+              <input type="text" id="email" name="email" required /> 
+            </div> 
+            <div> 
+              <label for="password">Password:</label> 
+              <div style="position: relative"> 
+                <input 
+                  type="password" 
+                  id="password" 
+                  name="password" 
+                  required 
+                /> 
+                <button type="button" id="togglePassword"> 
+                  <i class="fas fa-eye-slash" id="eyeIcon"></i> 
+                </button> 
+              </div> 
+            </div> 
+          </div> 
+          <div class="card-login-item foot" > 
+            <div id="loginForm"> 
+              <button type="submit" id="loginBtn">Login</button> 
             </div> 
           </div> 
         </div> 
-        <div class="card-login-item foot" > 
-          <div id="loginForm"> 
-            <button type="submit" >Login</button> 
-          </div> 
-        </div> 
-      </div> 
+      </div>
     </div> 
   </div> 
   `;

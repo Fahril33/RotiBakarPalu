@@ -445,7 +445,7 @@ const Finance = {
       tableContainer.innerHTML = ""; // Clear previous data
 
       if (data.length === 0) {
-        tableContainer.innerHTML = "<p>No data available for this date.</p>";
+        tableContainer.innerHTML = `<span class="noData">Tidak ada data untuk hari ini.</span>`;
         return;
       }
 

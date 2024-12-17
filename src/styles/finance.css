@@ -530,6 +530,14 @@ h4 {
   color: #c16904;
 }
 
+.noData {
+  width: 100%;
+  text-align: center;
+  margin: 20px 0;
+  font-size: medium;
+  font-weight: 600;
+}
+
 /*
 :::: Loader
 */

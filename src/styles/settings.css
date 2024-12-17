@@ -63,6 +63,10 @@ li {
   list-style: none;
   width: 100%;
 }
+
+#userList{
+  max-width: 100%;
+}
 .user-infos {
   width: 100%;
   display: flex;
@@ -188,7 +192,6 @@ li {
 }
 @media (max-width: 375.99px) {
   .container-settings {
-    min-width: 400px;
     min-height: 100vh;
   }
 }

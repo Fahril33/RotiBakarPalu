@@ -1,10 +1,17 @@
 import generateID from "./generateID";
 import RBPsource from "../../../data/source";
-import { datePickerValue } from "../datePicker";
+import { datePickerValue, getCurrentDate } from "../datePicker";
 import { stockConverter } from "../../../data/utils/stockHandler";
-import { allPredictionDataByDate } from "../../../data/allData";
-import { isPredictionDataExist, putPredictionData, syncSoldToPrediction } from "../../../data/utils/predictionHandler";
+import {
+  allPredictionDataByDate,
+  allSalesDataByDate,
+} from "../../../data/allData";
+import {
+  isPredictionDataExist,
+  putPredictionData,
+} from "../../../data/utils/predictionHandler";
 import { logDatesSince } from "../syncData";
+import Swal from "sweetalert2";
 
 export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
   // Ambil nilai dari input form
@@ -35,13 +42,13 @@ export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
   //   time: time,
   //   day: day,
   // };
-  let totalMerchantIncome = 0; 
-  let totalOutletIncome = 0; 
+  let totalMerchantIncome = 0;
+  let totalOutletIncome = 0;
 
   if (lokasi === "outlet") {
     totalOutletIncome = income;
   } else if (lokasi === "merchant") {
-    totalMerchantIncome = income; 
+    totalMerchantIncome = income;
   }
 
   const salesData = {
@@ -96,8 +103,23 @@ export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
           }
           return response.json(); // Mengubah respons menjadi JSON
         })
-        .then((data) => {
-          console.log("Data berhasil diperbarui:", data); // Menampilkan data yang diperbarui
+        .then(() => {
+          // console.log("Data berhasil diperbarui:", data); // Menampilkan data yang diperbarui
+          const Toast = Swal.mixin({
+            toast: true,
+            position: "top-start",
+            showConfirmButton: false,
+            timer: 2500,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+              toast.onmouseenter = Swal.stopTimer;
+              toast.onmouseleave = Swal.resumeTimer;
+            },
+          });
+          Toast.fire({
+            icon: "success",
+            title: "Pesanan berhasil dicatat.",
+          });
         })
         .catch((error) => {
           console.error("Terjadi kesalahan:", error); // Menangani kesalahan
@@ -113,8 +135,7 @@ export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
       // Sesuaikan Nilai Terjual di Prediciton
       //
 
-      await syncSoldToPrediction(formattedDate);
-      await logDatesSince(formattedDate)
+      await logDatesSince(formattedDate);
     } catch (error) {
       console.error("Terjadi kesalahan saat memperbarui data:", error);
     }
@@ -133,8 +154,23 @@ export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
           }
           return response.json(); // Mengubah respons menjadi JSON
         })
-        .then((data) => {
-          console.log("Data berhasil disimpan:", data); // Menampilkan data yang disimpan
+        .then(async () => {
+          // console.log("Data berhasil disimpan:", data); // Menampilkan data yang disimpan
+          const Toast = Swal.mixin({
+            toast: true,
+            position: "top-start",
+            showConfirmButton: false,
+            timer: 2500,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+              toast.onmouseenter = Swal.stopTimer;
+              toast.onmouseleave = Swal.resumeTimer;
+            },
+          });
+          Toast.fire({
+            icon: "success",
+            title: "Pesanan berhasil dicatat.",
+          });
         })
         .catch((error) => {
           console.error("Terjadi kesalahan:", error); // Menangani kesalahan
@@ -143,7 +179,6 @@ export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
       // Ambil data terbaru dari server setelah berhasil menyimpan
       const updatedSalesData = await RBPsource.salesData();
       await logDatesSince(formattedDate);
-
 
       // Perbarui tampilan tabel dengan data terbaru
       salesInstance.populateSalesTable(updatedSalesData);
@@ -167,5 +202,17 @@ export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
     } catch (error) {
       console.error("Terjadi kesalahan saat menyimpan data:", error);
     }
+  }
+  //
+  // STATUS Outlet
+  const todayDate = getCurrentDate().pickedDate;
+  let isOpen = (await allPredictionDataByDate(todayDate)).operasional;
+  const todaySold = (await allSalesDataByDate(getCurrentDate().pickedDate))
+    .soldTotal;
+  const checkbox = document.querySelector("#button-3 .checkbox");
+
+  if (!isOpen && todaySold > 0) {
+    checkbox.checked = true;
+    await putPredictionData({ operasional: true }, todayDate);
   }
 };

@@ -6,6 +6,32 @@ h2#swal2-title {
   margin-right: 0;
 }
 
+.card-login-header {
+  display: none;
+  width: 100%;
+  height: auto;
+  text-align: center;
+  margin-top: 10px;
+  font-size: medium;
+  font-weight: 500;
+  color: red;
+}
+#dbError a {
+  color: red;
+  font-size: medium;
+  font-weight: bold;
+}
+
+.card-login-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  border-radius: 35px;
+}
+
 @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap");
 
 .container-login {
@@ -21,9 +47,8 @@ h2#swal2-title {
 }
 
 .card-login.component {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
   width: 530px;
   height: 70vh;
   background-color: white;
@@ -115,7 +140,8 @@ input#password {
 }
 
 button:hover {
-  scale: 1.02;font-weight: 500;
+  scale: 1.02;
+  font-weight: 500;
 }
 
 @media (max-width: 425.99px) {

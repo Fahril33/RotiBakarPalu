@@ -14,6 +14,7 @@ import {
   walletIcon,
   navigationIcon,
 } from "./utils/icons";
+import { manualSyncData } from "./utils/syncData";
 
 document.querySelector('.item-icons img[alt="Beranda Icon"]').src = homeIcon;
 document.querySelector('.item-icons img[alt="Penjualan Icon"]').src =
@@ -84,7 +85,7 @@ async function handleLogout() {
       localStorage.removeItem("token");
 
       // Redirect ke halaman login
-      console.log('anda logout', );
+      console.log("anda logout");
       window.location.hash = "#/login";
     } else {
       console.error("Logout gagal");
@@ -128,4 +129,14 @@ window.addEventListener("scroll", function () {
   }
 
   lastScrollTop = scrollTop;
+});
+
+const manualUpdateButton = document.getElementById("manualUpdate");
+
+// Menambahkan event listener untuk click
+manualUpdateButton.addEventListener("click", function () {
+  // Fungsi yang akan dijalankan saat elemen diklik
+  console.log("Tombol manual update diklik!");
+
+  manualSyncData();
 });

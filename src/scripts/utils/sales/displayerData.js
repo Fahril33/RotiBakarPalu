@@ -15,7 +15,7 @@ import {
 export async function displayerSold() {
   const totalStock = (await allStocksData()).totalStock;
   const spoiledStock = (await allStocksData()).spoiledStock;
-  const stockData = totalStock - spoiledStock
+  const stockData = totalStock - spoiledStock;
   const nowRemainingStock = (await allStocksData()).remainingStock;
   const salesData = (await allSalesData()).soldTotal;
   let remainingStock = stockData - salesData;
@@ -131,5 +131,36 @@ export async function displayerPredictionData() {
     todayPredictionText.textContent = `Tidak ada data hari ini`;
   } else {
     todayPredictionText.textContent = `Prediksi penjualan hari ini : ${todayPredData}`;
+  }
+}
+
+export async function hideComponents(selectedDate) {
+  const pickedDate = selectedDate;
+
+  // Create Date objects for comparison
+  const pickedDateObj = new Date(pickedDate);
+  const currDate = new Date();
+
+  // Set both dates to midnight to compare just the dates
+  pickedDateObj.setHours(0, 0, 0, 0);
+  currDate.setHours(0, 0, 0, 0);
+
+  // Get date 1 days before current date
+  const oneDaysAgo = new Date(currDate);
+  oneDaysAgo.setDate(currDate.getDate() - 1);
+
+  const oneDaysAhead = new Date(currDate);
+  oneDaysAhead.setDate(currDate.getDate() + 1);
+
+  if (pickedDateObj < oneDaysAgo || pickedDateObj > oneDaysAhead) {
+    const editPrediction = document.getElementById("editPrediction");
+    if (editPrediction) {
+      editPrediction.style.display = "none";
+    }
+  } else {
+    const editPrediction = document.getElementById("editPrediction");
+    if (editPrediction) {
+      editPrediction.style.display = "block";
+    }
   }
 }

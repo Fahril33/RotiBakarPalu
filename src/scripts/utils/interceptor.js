@@ -112,7 +112,7 @@ export async function urlOtorizator() {
 export async function checkUserRole() {
   // Dapatkan role pengguna dari local storage atau state management
   const currentUserRole = await RBPsource.getUserData();
-  console.log("cur", currentUserRole);
+  // console.log("cur", currentUserRole);
   if (!currentUserRole) {
     window.location.hash = "#/login";
     return;

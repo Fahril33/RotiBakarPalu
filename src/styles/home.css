@@ -22,6 +22,7 @@
 
 .overview-navigator {
   display: flex;
+  /* flex-wrap: wrap; */
   gap: 10px;
 }
 .overview-navigator a {
@@ -281,29 +282,32 @@ p4 {
 /*
 :::: Prediction Chart
 */
-.predictionsDataTableContainer{
+.predictionsDataTableContainer {
   margin: 10px 0;
+  width: 100%;
 }
 .predictionsDataTable {
   all: unset;
   border-style: none;
   border: none;
   background-color: white;
-  margin: 40px 0;
+  /* margin: 40px 0; */
   align-self: flex-start;
   width: 100%;
   height: auto;
 }
 .predictionsDataTable th,
 .predictionsDataTable td {
+  width: auto;
   border: none;
   background-color: white;
   padding-bottom: 0;
   padding-top: 0;
   font-size: medium;
   font-weight: 500;
+  color: rgb(120, 54, 0);
 }
-#predTooltip{
+#predTooltip {
   color: white;
 }
 
@@ -408,5 +412,9 @@ p4 {
   } */
   canvas {
     scale: 1;
+  }
+  .predictionsDataTable th,
+  .predictionsDataTable td {
+    font-size: x-small;
   }
 }
