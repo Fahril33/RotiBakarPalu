@@ -135,8 +135,5 @@ const manualUpdateButton = document.getElementById("manualUpdate");
 
 // Menambahkan event listener untuk click
 manualUpdateButton.addEventListener("click", function () {
-  // Fungsi yang akan dijalankan saat elemen diklik
-  console.log("Tombol manual update diklik!");
-
   manualSyncData();
 });

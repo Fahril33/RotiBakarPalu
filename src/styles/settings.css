@@ -253,3 +253,11 @@ li {
   padding-top: 0;
   padding-bottom: 0 ;
 }
+
+/*
+:::: swal
+*/
+
+.swal2-small{
+  scale: 0.8;
+}

@@ -10,6 +10,8 @@ import { callDataShell, logDatesSince } from "../../utils/syncData";
 import { getCurrentDate } from "../../utils/datePicker";
 import { checkUserRole } from "../../utils/interceptor";
 import Swal from "sweetalert2";
+import { closeModal, showModal } from "../../utils/sales/modal-handler";
+import { allFinanceDataByDate } from "../../../data/allData";
 const Finance = {
   async render() {
     const currentDate = new Date().toLocaleDateString(); // Get current date only
@@ -55,7 +57,8 @@ const Finance = {
       .addEventListener("click", async () => {
         const errorEventElement = document.querySelector(".liburError");
         const errorTextEventElement = document.querySelector(".liburError p");
-        const errorBtnEventElement = document.querySelector(".liburError button");
+        const errorBtnEventElement =
+          document.querySelector(".liburError button");
         const loaderEventElement = document.querySelector("#liburLoader");
         loaderEventElement.style.display = "block";
         errorTextEventElement.style.display = "none";
@@ -430,8 +433,21 @@ const Finance = {
         filterDataByDate(newDate); // Filter data based on the selected date
       });
 
-    // Initialize with today's date on page load
+    document.querySelectorAll(".fas.fa-credit-card").forEach((element) => {
+      element.addEventListener("click", () => {
+        console.log('Element with class "fas fa-credit-card" clicked');
+        this.switchFinanceModalModal();
+      });
+    });
 
+    document.querySelectorAll(".fas.fa-wallet").forEach((element) => {
+      element.addEventListener("click", () => {
+        console.log('Element with class "fas fa-wallet" clicked');
+        this.switchFinanceModalModal();
+      });
+    });
+
+    // Initialize with today's date on page load
     async function getCurrentDateData(selectedDate) {
       // Fetch existing data for the selected date
       const existingData = await RBPsource.getDaftarBelanja();
@@ -891,9 +907,6 @@ const Finance = {
     }
 
     setTodayDate();
-    // Fill Today Stock Data
-    // await isStocksDataExist();
-    // updateShoppingListTable();
   },
 
   async renderIngredients() {
@@ -970,6 +983,86 @@ const Finance = {
       console.error("Error building item data:", error);
       return {};
     }
+  },
+
+  async switchFinanceModalModal() {
+    const currDate = getCurrentDate().pickedDate;
+    const cashValue = (await allFinanceDataByDate(currDate)).totalCash;
+    const debitValue = (await allFinanceDataByDate(currDate)).totalDebit;
+    const modalContent = `
+    <div class="modal-content" id="manualSyncModal">
+      <span class="close">&times;</span>
+      <h2>Switch Saldo Kas</h2>
+      <form id="switchFinancial">
+        <div class="form-group">
+          <div class="financialSwitchHead">
+            <div>
+              <label for="cashFinance">Saldo tunai</label>
+              <input type="text" id="cashFinance" name="cashFinance" disabled value="Rp ${cashValue
+                .toLocaleString()
+                .replace(/,/g, ".")}"/>
+            </div>
+            <div>
+              <i class="fas fa-arrow-right" id="arrowSwitchFinance"></i>
+            </div>
+            <div>
+              <label for="switch">Saldo non-tunai</label>
+              <input type="text" id="switch" name="switch" disabled value="Rp ${debitValue
+                .toLocaleString()
+                .replace(/,/g, ".")}"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="switchValue">Nilai Tukar</label>
+          <input type="number" id="switchValue" name="switchValue" required/>
+        </div>
+        
+        <div class="form-group">
+          <div class="financialSwitchFooter">
+            <div>
+              <i class="fas fa-sync" id="switchFinance-btn"></i>            
+            </div>
+            <div>
+              <button type="submit">Sinkronkan Data</button>
+            </div>
+          </div>
+        </div> 
+      </form>
+    </div>
+    `;
+
+    // Tampilkan modal dengan konten
+    const modal = showModal(modalContent);
+
+    document
+      .getElementById("switchFinance-btn")
+      .addEventListener("click", () => {
+        let switchToWhere;
+        const arrowIcon = document.getElementById("arrowSwitchFinance");
+        if (arrowIcon.classList.contains("rotate")) {
+          arrowIcon.classList.remove("rotate");
+          arrowIcon.classList.add("reset");
+          switchToWhere = "toCash";
+        } else {
+          arrowIcon.classList.remove("reset");
+          arrowIcon.classList.add("rotate");
+          switchToWhere = "toDebit";
+        }
+        console.log(switchToWhere);
+      });
+
+    document
+      .getElementById("switchFinancial")
+      .addEventListener("submit", (e) => {
+        e.preventDefault();
+      });
+
+    // Tambahkan event listener untuk menutup modal
+    modal.querySelector(".close").addEventListener("click", () => {
+      modal.style.display = "none";
+    });
   },
 };
 

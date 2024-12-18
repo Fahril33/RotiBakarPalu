@@ -1690,6 +1690,12 @@ const Home = {
     const prediksiAkurat = prediksiSesuai.filter(
       (item) => item.akurat === true
     ).length;
+    const prediksiAkuratFalse = prediksiSesuai.filter(
+      (item) => item.akurat === false
+    ).length;
+    const prediksiAkuratNull = prediksiSesuai.filter(
+      (item) => item.akurat === null
+    ).length;
 
     console.log("prediksiAkurat", prediksiAkurat);
 
@@ -1703,6 +1709,8 @@ const Home = {
       totalPrediksi: totalPrediksiSesuai,
       prediksiAkurat: prediksiAkurat,
       persentaseAkurasi: `${persentaseAkurasi}%`,
+      prediksiAkuratNull: prediksiAkuratNull,
+      prediksiAkuratFalse: prediksiAkuratFalse
     };
   },
 
@@ -1739,7 +1747,8 @@ const Home = {
     // Hitung akurasi untuk hari ini dan besok
     const akurasiHariIni = await this.hitungAkurasiPrediksi(
       dataPrediksiHariIniFilter,
-      databasePrediksi
+      databasePrediksi,
+      
     );
     const akurasiBesok = await this.hitungAkurasiPrediksi(
       dataPrediksiBesokFilter,
@@ -1761,6 +1770,7 @@ const Home = {
             <div class="tooltip">
               <span class="tooltiptext">
                 <p id="predTooltip">${akurasiHariIni.prediksiAkurat} / ${akurasiHariIni.totalPrediksi} Data prediksi</p>
+                <p id="predTooltip">N: ${akurasiHariIni.prediksiAkuratNull}, F: ${akurasiHariIni.prediksiAkuratFalse}, T: ${akurasiHariIni.prediksiAkurat}</p>
               </span>
               <i class="fas fa-circle-info"></i>
             </div>
@@ -1776,6 +1786,7 @@ const Home = {
             <div class="tooltip">
               <span class="tooltiptext">
                 <p id="predTooltip">${akurasiBesok.prediksiAkurat} / ${akurasiBesok.totalPrediksi} Data prediksi</p>
+                <p id="predTooltip">N: ${akurasiBesok.prediksiAkuratNull}, F: ${akurasiBesok.prediksiAkuratFalse}, T: ${akurasiBesok.prediksiAkurat}</p>
               </span>
               <i class="fas fa-circle-info"></i>
             </div>

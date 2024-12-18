@@ -174,21 +174,21 @@ const createFinanceTemplate = () => `
             <i class="fas fa-money-bill-wave"></i>
             <div class="details">
               <p class="value" id="TodayCash">Memuat..</p>
-              <p class="title">Saldo Tunai</p>
+              <p class="title">Saldo tunai</p>
             </div>
         </div>
         <div class="dashboard-card">
-            <i class="fas fa-credit-card"></i>
+            <i class="fas fa-credit-card" data-tooltip="Klik untuk switch keuangan"></i>
             <div class="details">
               <p class="value" id="todayCredit">Memuat..</p>
-              <p class="title">Saldo Kredit</p>
+              <p class="title">Saldo non-tunai</p>
             </div>
         </div>
         <div class="dashboard-card">
-            <i class="fas fa-wallet"></i>
+            <i class="fas fa-wallet" data-tooltip="Klik untuk switch keuangan"></i>
             <div class="details">
               <p class="value" id="todayTotal">Memuat..</p>
-              <p class="title">Total Saldo</p>
+              <p class="title">Total saldo</p>
             </div>
         </div>
       </div>
@@ -197,21 +197,21 @@ const createFinanceTemplate = () => `
             <i class="fas fa-arrow-up"></i>
             <div class="details">
               <p class="value" id="incomeTM">Memuat..</p>
-              <p class="title">Pemasukan Bulan Ini</p>
+              <p class="title">Income bulan ini</p>
             </div>
         </div>
         <div class="dashboard-card">
             <i class="fas fa-arrow-down"></i>
             <div class="details">
               <p class="value" id="expenseTM">Memuat..</p>
-              <p class="title">Pengeluaran Bulan Ini</p>
+              <p class="title">Expenses bulan ini</p>
             </div>
         </div>
         <div class="dashboard-card">
             <i class="fas fa-chart-line"></i>
             <div class="details">
               <p class="value" id="profitTM">Memuat..</p>
-              <p class="title">Keuntungan Bulan Ini</p>
+              <p class="title">Profit bulan ini</p>
             </div>
         </div>
       </div>

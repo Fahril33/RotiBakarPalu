@@ -8,6 +8,7 @@
     STOCKS: `${CONFIG.BASE_URL}stocks`,
     DAFTARBELANJA: `${CONFIG.BASE_URL}daftarBelanja`,
     PREDICTION: `${CONFIG.BASE_URL}prediction`,
+    STATUS: `${CONFIG.BASE_URL}status`,
     UPDATE_DAFTARBELANJA: (id) => `${CONFIG.BASE_URL}daftarBelanja/${id}`,
   };
 

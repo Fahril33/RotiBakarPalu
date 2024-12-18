@@ -1,6 +1,22 @@
 import API_ENDPOINT from "../config/config";
 
 class RBPsource {
+  static async serverStatus() {
+    fetch(API_ENDPOINT.STATUS)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        document.getElementById("loginBtn").disabled = false;
+      })
+      .catch((error) => {
+        document.querySelector(".card-login-header").style.display = "block";
+        document.getElementById("loginBtn").disabled = true;
+      });
+  }
   static async salesData() {
     try {
       const response = await fetch(API_ENDPOINT.SALES);
@@ -12,7 +28,6 @@ class RBPsource {
       // Jika API mengembalikan object dengan key 'data' berisi array, akses dengan benar
       return responseJson.data || responseJson; // pastikan mengembalikan array
     } catch (error) {
-      console.error("Error fetching sales data:", error);
       return [];
     }
   }

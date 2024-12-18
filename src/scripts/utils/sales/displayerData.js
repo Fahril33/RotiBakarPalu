@@ -46,6 +46,7 @@ export async function displayerWeather() {
   const dateValue = (await datePickerValue()).dateValue;
   const todayWeather = (await allPredictionDataByDate(dateValue)).cuaca;
   const tomorrowWeather = (await allPredictionDataByDate(dateValue)).cuacaBesok;
+  
 
   // Menentukan ikon cuaca hari ini
   const todayWeatherIcon =

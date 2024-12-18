@@ -1,7 +1,6 @@
-.content{
+.content {
   margin: 0;
   width: 100%;
-  
 }
 
 /* Page Keuangan */
@@ -565,13 +564,17 @@ h4 {
   border-color: #000 #0000;
   animation: l1 1s infinite;
 }
-@keyframes l1 {to{transform: rotate(.5turn)}}
+@keyframes l1 {
+  to {
+    transform: rotate(0.5turn);
+  }
+}
 
 /*
 :::: EVENT DISPLAY
 */
 
-.liburError{
+.liburError {
   display: none;
   text-align: center;
   font-size: large;
@@ -592,4 +595,80 @@ h4 {
   font-size: small;
   margin-right: 5px;
   color: white;
+}
+
+/*
+:::: Financial icon
+*/
+
+.fas.fa-credit-card,
+.fas.fa-wallet {
+  cursor: pointer;
+}
+.fas.fa-credit-card:hover,
+.fas.fa-wallet:hover {
+  scale: 1.1;
+}
+
+[data-tooltip] {
+  position: relative;
+  cursor: pointer;
+}
+
+[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 0%;
+  left: 50%;
+  transform: translateX(10%);
+  background-color: #333;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+  font-size: small;
+  font-weight: 400;
+  font-family: "Poppins", sans-serif;
+}
+
+/* Modal */
+.financialSwitchHead {
+  display: grid;
+  grid-template-columns: 1fr 0.08fr 1fr;
+  gap: 5px;
+}
+.financialSwitchHead > div:nth-child(2) {
+  width: 10px;
+  align-self: flex-end;
+}
+#arrowSwitchFinance {
+  margin-left: -4px;
+  color: #784204;
+}
+.rotate {
+  transition: transform 0.5s ease; /* Menambahkan transisi */
+  transform: rotate(180deg);
+}
+.reset {
+  transition: transform 0.5s ease; /* Menambahkan transisi */
+  transform: rotate(0deg); /* Mengatur rotasi 0 derajat */
+}
+
+.financialSwitchFooter {
+  display: flex;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  justify-content: flex-end;
+}
+.financialSwitchFooter > div:first-child {
+  color: white;
+  align-self: center;
+  background-color: #c16904;
+  padding: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#switchFinance-btn:hover {
+  scale: 1.1;
 }

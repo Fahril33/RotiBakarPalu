@@ -2,7 +2,8 @@ import Swal from "sweetalert2";
 import { urlOtorizator } from "../../utils/interceptor";
 import { createLoginTemplate } from "../template/template-creator";
 import { RBPlogo } from "../../utils/icons";
-import "../../../styles/login.css"
+import "../../../styles/login.css";
+import RBPsource from "../../../data/source";
 
 const Login = {
   async render() {
@@ -16,16 +17,22 @@ const Login = {
   async afterRender() {
     document.querySelector('.card-login-items img[alt="RBPlogo"]').src =
       RBPlogo;
+    const data = await RBPsource.serverStatus();
+    console.log('data', data);
+    if (!data == []) {
+      document.querySelector(".card-login-header").style.display = "block";
+      document.getElementById("loginBtn").disabled = true;
+    }
 
-     const form = document.getElementById("loginForm");
-     const submitButton = form.querySelector('button[type="submit"]');
-     submitButton.addEventListener("click", async (event) => {
-       event.preventDefault(); // Mencegah pengiriman form default
-       const email = document.getElementById("email").value;
-       const password = document.getElementById("password").value;
+    const form = document.getElementById("loginForm");
+    const submitButton = form.querySelector('button[type="submit"]');
+    submitButton.addEventListener("click", async (event) => {
+      event.preventDefault(); // Mencegah pengiriman form default
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
 
-       await this.login(email, password);
-     });
+      await this.login(email, password);
+    });
 
     //
     // togglePassword
@@ -48,7 +55,6 @@ const Login = {
   },
 
   async login(identifier, password) {
-    
     const url = "http://localhost:5000/api/auth";
     try {
       const response = await fetch(`${url}/login`, {
@@ -90,9 +96,7 @@ const Login = {
   },
 
   // Tambahkan metode logout
-  async logout() {
-    
-  },
+  async logout() {},
 };
 
 export default Login;

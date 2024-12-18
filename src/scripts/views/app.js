@@ -23,7 +23,7 @@ class App {
     if (!data) {
       window.location.hash = "#/login";
     }
-    
+
     await urlOtorizator();
     const url = UrlParser.parseActiveUrlWithCombiner();
     const token = localStorage.getItem("token");
@@ -138,10 +138,7 @@ class App {
     this._content.innerHTML = await page.render();
 
     await page.afterRender();
-     if (!data) {
-       document.querySelector(".card-login-header").style.display = "block";
-       document.getElementById("loginBtn").disabled = true;
-     }
+     
   }
 }
 

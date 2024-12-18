@@ -24,6 +24,7 @@ import {
   getYesterdayDate,
 } from "./datePicker";
 import { closeModal, showModal } from "./sales/modal-handler";
+import { usePrediction } from "./algorithm";
 
 // Tambahkan fungsi ini di luar logDatesSince
 async function subtractOneDay(dateString) {
@@ -86,7 +87,7 @@ export async function logDatesSince(pickedDate, logsince = false) {
 
       let isStockShellAvailable = (await allStockDataByDate(formattedDate))
         .filteredData;
-        console.log('isstockada', isStockShellAvailable);
+      console.log("isstockada", isStockShellAvailable);
       if (isStockShellAvailable === `none`) {
         console.log("gaada bang, wait ditambahin");
         await isAnyStockDataShell(formattedDate);
@@ -173,6 +174,16 @@ export async function logDatesSince(pickedDate, logsince = false) {
       // Tambahkan satu hari
       currentDate.setDate(currentDate.getDate() + 1);
     }
+
+    // Tampilkan swal success setelah looping selesai
+    Swal.fire({
+      icon: "success",
+      title: "Sinkronisasi Selesai",
+      text: "Semua data telah berhasil disinkronkan.",
+      customClass: {
+        popup: 'swal2-small'
+      }
+    });
   } else {
     console.log("The dateValue is not less than today's date.");
   }
@@ -288,9 +299,31 @@ export async function callDataShell() {
       console.log("terakhir buka pada tanggal", operationalDate);
       await logDatesSince(operationalDate);
     }
+
+    //
+    
     loadingToast.close();
   } else {
     console.log("Semua Data Tersedia");
+    // Cuaca besok ada?
+    const realtomorrowWeather = (
+      await allPredictionDataByDate(getCurrentDate().pickedDate)
+    ).cuacaBesok;
+    if (
+      realtomorrowWeather === "none" ||
+      realtomorrowWeather === "" ||
+      realtomorrowWeather === "unknown"
+    ) {
+      await checkWeatherData();
+    }
+    
+    // prediction besok ada?
+    const realtomorrowPrediction = (await allPredictionDataByDate(tomorrowDate)).hasilPrediksi;
+    console.log('rtp', realtomorrowPrediction);
+    if (realtomorrowPrediction === "" || realtomorrowPrediction === "none" || realtomorrowPrediction === "unknown") {
+      console.log("kosong cuy");
+      await usePrediction()
+    }
   }
 
   // const predictionData = await allPredictionDataByDate(currDate)
@@ -328,20 +361,40 @@ export function manualSyncData() {
     .addEventListener("submit", (e) => {
       e.preventDefault();
       const dateValue = modal.querySelector("#startDate").value;
-      console.log("dateValue", dateValue);
-      Swal.fire({
-        title: 'Konfirmasi',
-        text: `Apakah Anda yakin ingin sinkronisasi data sejak tanggal ${dateValue}?`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Ya, sinkronisasi!',
-        cancelButtonText: 'Tidak, batalkan',
-      }).then(async (result) => {
-        if (result.isConfirmed) {
-          await logDatesSince(dateValue, true)
-          closeModal(modal);
-        }
-      });
+      const selectedDate = new Date(dateValue);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Set waktu hari ini ke 00:00:00 untuk perbandingan yang akurat
+
+      // Periksa apakah tanggal yang dipilih kurang dari hari ini
+      if (selectedDate > today) {
+        Swal.fire({
+          title: "Kesalahan",
+          text: "Tanggal yang dipilih harus kurang dari hari ini.",
+          icon: "error",
+          confirmButtonText: "OK",
+          customClass: {
+            popup: "swal2-small",
+          },
+        });
+      } else {
+        console.log("dateValue", dateValue);
+        Swal.fire({
+          title: "Konfirmasi",
+          text: `Apakah Anda yakin ingin sinkronisasi data sejak tanggal ${dateValue}?`,
+          icon: "question",
+          showCancelButton: true,
+          confirmButtonText: "Ya, sinkronisasi!",
+          cancelButtonText: "Tidak, batalkan",
+          customClass: {
+            popup: "swal2-small",
+          },
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            await logDatesSince(dateValue, true);
+            closeModal(modal);
+          }
+        });
+      }
     });
 
   // Tambahkan event listener untuk menutup modal
