@@ -1006,8 +1006,8 @@ const Finance = {
               <i class="fas fa-arrow-right" id="arrowSwitchFinance"></i>
             </div>
             <div>
-              <label for="switch">Saldo non-tunai</label>
-              <input type="text" id="switch" name="switch" disabled value="Rp ${debitValue
+              <label for="debitValue">Saldo non-tunai</label>
+              <input type="text" id="debitValue" name="debitValue" disabled value="Rp ${debitValue
                 .toLocaleString()
                 .replace(/,/g, ".")}"/>
             </div>
@@ -1036,10 +1036,10 @@ const Finance = {
     // Tampilkan modal dengan konten
     const modal = showModal(modalContent);
 
+    let switchToWhere;
     document
       .getElementById("switchFinance-btn")
       .addEventListener("click", () => {
-        let switchToWhere;
         const arrowIcon = document.getElementById("arrowSwitchFinance");
         if (arrowIcon.classList.contains("rotate")) {
           arrowIcon.classList.remove("rotate");
@@ -1053,16 +1053,42 @@ const Finance = {
         console.log(switchToWhere);
       });
 
+
     document
       .getElementById("switchFinancial")
       .addEventListener("submit", (e) => {
         e.preventDefault();
+        const cashValue = modal.querySelector("#cashFinance").value;
+        const debitValue = modal.querySelector("#debitValue").value;
+        const switchValue = modal.querySelector("#switchValue").value;
+        const cleanCashValue = cashValue
+          .replace("Rp", "")
+          .trim()
+          .replace(/\D/g, "");
+        const cleanDebitValue = debitValue
+          .replace("Rp", "")
+          .trim()
+          .replace(/\D/g, "");
+
+        if (switchToWhere === "toCash") {
+          if (switchValue < cashValue) {
+            console.log("kebanyakan jir");
+          } else {
+            console.log("kurang jir");
+          }
+        } else if (switchToWhere === "toDebit") {
+          if (switchValue < debitValue) {
+            console.log("kebanyakan juga jir");
+          }
+        }
+        // console.log("switchValue", switchValue);
+        // console.log("cashval", cashValue);
       });
 
     // Tambahkan event listener untuk menutup modal
-    modal.querySelector(".close").addEventListener("click", () => {
-      modal.style.display = "none";
-    });
+    // modal.querySelector(".close").addEventListener("click", () => {
+    //   modal.style.display = "none";
+    // });
   },
 };
 

@@ -105,7 +105,7 @@ const Settings = {
         <div class="form-group">
           <label for="userRole">Posisi </label>
           <select id="userRole" name="userRole">
-            <option value="User" selected>Karyawan</option>
+            <option value="employee" selected>Karyawan</option>
             <option value="manager">Manager</option>
           </select>
         </div>   
@@ -170,6 +170,15 @@ const Settings = {
           return;
         }
 
+        console.log("Fullname", fullName)
+        console.log("Address", address)
+        console.log("Phone", phoneNumber)
+        console.log("Username", userName)
+        console.log("Email", email)
+        console.log("Password", password)
+        console.log("Role", userRole)
+        console.log("Status", userStatus)
+        console.log("Position", position)
         try {
           const token = localStorage.getItem("token"); // Ambil token dari local storage
 
@@ -177,6 +186,8 @@ const Settings = {
             console.warn("No token found in localStorage");
             return;
           }
+
+          
 
           const response = await fetch(
             "http://localhost:5000/api/auth/register",
