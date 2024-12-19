@@ -131,8 +131,8 @@ export async function logDatesSince(pickedDate, logsince = false) {
         in_debit: inDebit,
         out_cash: outCash,
         out_debit: outDebit,
-        total_cash: ydayTotalCash + inCash - outCash - cashToDebit,
-        total_debit: ydayTotalDebit + inDebit - outDebit - debitToCash,
+        total_cash: ydayTotalCash + inCash - outCash + debitToCash - cashToDebit,
+        total_debit: ydayTotalDebit + inDebit - outDebit + cashToDebit - debitToCash,
       };
 
       console.log("calon data", financeData);
@@ -175,13 +175,19 @@ export async function logDatesSince(pickedDate, logsince = false) {
       currentDate.setDate(currentDate.getDate() + 1);
     }
 
+    
     // Tampilkan swal success setelah looping selesai
     Swal.fire({
       icon: "success",
       title: "Sinkronisasi Selesai",
       text: "Semua data telah berhasil disinkronkan.",
       customClass: {
-        popup: 'swal2-small'
+        popup: "swal2-small",
+      },
+      confirmButtonText: "OK",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.reload();
       }
     });
   } else {
@@ -301,7 +307,7 @@ export async function callDataShell() {
     }
 
     //
-    
+
     loadingToast.close();
   } else {
     console.log("Semua Data Tersedia");
@@ -316,13 +322,18 @@ export async function callDataShell() {
     ) {
       await checkWeatherData();
     }
-    
+
     // prediction besok ada?
-    const realtomorrowPrediction = (await allPredictionDataByDate(tomorrowDate)).hasilPrediksi;
-    console.log('rtp', realtomorrowPrediction);
-    if (realtomorrowPrediction === "" || realtomorrowPrediction === "none" || realtomorrowPrediction === "unknown") {
+    const realtomorrowPrediction = (await allPredictionDataByDate(tomorrowDate))
+      .hasilPrediksi;
+    console.log("rtp", realtomorrowPrediction);
+    if (
+      realtomorrowPrediction === "" ||
+      realtomorrowPrediction === "none" ||
+      realtomorrowPrediction === "unknown"
+    ) {
       console.log("kosong cuy");
-      await usePrediction()
+      await usePrediction();
     }
   }
 

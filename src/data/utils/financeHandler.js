@@ -34,7 +34,7 @@ export async function postFinance(financeData) {
 }
 
 export async function putFinanceData(financeData, date) {
-console.log('fidata',date,":", financeData);
+// console.log('fidata',date,":", financeData);
   try {
     const response = await fetch(`${API_ENDPOINT.FINANCE}/date/${date}`, {
       method: "PUT",
@@ -47,7 +47,7 @@ console.log('fidata',date,":", financeData);
     if (!response.ok) {
       throw new Error("Gagal menyimpan data finance.");
     }
-    console.log("Data finance berhasil diperbarui melalui PUT.");
+    // console.log("Data finance berhasil diperbarui melalui PUT.");
   } catch (error) {
     console.error("Terjadi kesalahan saat melakukan PUT data finance:", error);
   }

@@ -198,7 +198,7 @@ class RBPsource {
       }
 
       const data = await response.json();
-      console.log("Data Bahan:", data);
+      // console.log("Data Bahan:", data);
 
       // Pastikan data yang diterima adalah array
       if (Array.isArray(data)) {

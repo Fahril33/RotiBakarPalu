@@ -5,6 +5,11 @@ import { getCurrentDate } from "../datePicker";
 import { logDatesSince } from "../syncData";
 
 export const showModal = (content) => {
+  const existingModal = document.querySelector(".modal");
+  if (existingModal) {
+    console.log('modal double jir', );
+    existingModal.remove();
+  }
   const modal = document.createElement("div");
   modal.classList.add("modal");
   modal.innerHTML = content;

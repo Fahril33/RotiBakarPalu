@@ -170,15 +170,6 @@ const Settings = {
           return;
         }
 
-        console.log("Fullname", fullName)
-        console.log("Address", address)
-        console.log("Phone", phoneNumber)
-        console.log("Username", userName)
-        console.log("Email", email)
-        console.log("Password", password)
-        console.log("Role", userRole)
-        console.log("Status", userStatus)
-        console.log("Position", position)
         try {
           const token = localStorage.getItem("token"); // Ambil token dari local storage
 

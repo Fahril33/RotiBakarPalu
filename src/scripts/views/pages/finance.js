@@ -7,11 +7,12 @@ import {
   displayUpcomingEvent,
 } from "../../utils/finance/financialDisplayer";
 import { callDataShell, logDatesSince } from "../../utils/syncData";
-import { getCurrentDate } from "../../utils/datePicker";
+import { getCurrentDate, getYesterdayDate } from "../../utils/datePicker";
 import { checkUserRole } from "../../utils/interceptor";
 import Swal from "sweetalert2";
 import { closeModal, showModal } from "../../utils/sales/modal-handler";
 import { allFinanceDataByDate } from "../../../data/allData";
+import { putFinanceData } from "../../../data/utils/financeHandler";
 const Finance = {
   async render() {
     const currentDate = new Date().toLocaleDateString(); // Get current date only
@@ -433,16 +434,8 @@ const Finance = {
         filterDataByDate(newDate); // Filter data based on the selected date
       });
 
-    document.querySelectorAll(".fas.fa-credit-card").forEach((element) => {
-      element.addEventListener("click", () => {
-        console.log('Element with class "fas fa-credit-card" clicked');
-        this.switchFinanceModalModal();
-      });
-    });
-
     document.querySelectorAll(".fas.fa-wallet").forEach((element) => {
       element.addEventListener("click", () => {
-        console.log('Element with class "fas fa-wallet" clicked');
         this.switchFinanceModalModal();
       });
     });
@@ -987,8 +980,26 @@ const Finance = {
 
   async switchFinanceModalModal() {
     const currDate = getCurrentDate().pickedDate;
-    const cashValue = (await allFinanceDataByDate(currDate)).totalCash;
-    const debitValue = (await allFinanceDataByDate(currDate)).totalDebit;
+    const financeData = await allFinanceDataByDate(currDate);
+    const total_cash = financeData.totalCash;
+    const total_debit = financeData.totalDebit;
+    const cash_to_debit = financeData.cashToDebit;
+    const debit_to_cash = financeData.debitToCash;
+    const inCash = financeData.inCash;
+    const inDebit = financeData.inDebit;
+    const outCash = financeData.outCash;
+    const outDebit = financeData.outDebit;
+
+    const totalCashYesterday = await (
+      await allFinanceDataByDate(getYesterdayDate().yesterday)
+    ).totalCash;
+    const totalDebitYesterday = await (
+      await allFinanceDataByDate(getYesterdayDate().yesterday)
+    ).totalDebit;
+
+    const originalTotalCash = totalCashYesterday + inCash - outCash;
+    const originalTotalDebit = totalDebitYesterday + inDebit - outDebit;
+
     const modalContent = `
     <div class="modal-content" id="manualSyncModal">
       <span class="close">&times;</span>
@@ -997,8 +1008,27 @@ const Finance = {
         <div class="form-group">
           <div class="financialSwitchHead">
             <div>
+              <label for="beforeCashValue">Saldo tunai awal</label>
+              <input type="text" id="beforeCashValue" name="beforeCashValue" disabled value="Rp ${originalTotalCash
+                .toLocaleString()
+                .replace(/,/g, ".")}"/>
+            </div>
+            <div>
+              <i class="fas fa-code-commit"  id="originalFinanceSwitch"></i>
+            </div>
+            <div>
+              <label for="beforeDebitValue">Saldo rekening awal</label>
+              <input type="text" id="beforeDebitValue" name="beforeDebitValue" disabled value="Rp ${originalTotalDebit
+                .toLocaleString()
+                .replace(/,/g, ".")}"/>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="financialSwitchHead">
+            <div>
               <label for="cashFinance">Saldo tunai</label>
-              <input type="text" id="cashFinance" name="cashFinance" disabled value="Rp ${cashValue
+              <input type="text" id="cashFinance" name="cashFinance" disabled value="Rp ${total_cash
                 .toLocaleString()
                 .replace(/,/g, ".")}"/>
             </div>
@@ -1006,8 +1036,25 @@ const Finance = {
               <i class="fas fa-arrow-right" id="arrowSwitchFinance"></i>
             </div>
             <div>
-              <label for="debitValue">Saldo non-tunai</label>
-              <input type="text" id="debitValue" name="debitValue" disabled value="Rp ${debitValue
+              <label for="debitValue">Saldo rekening</label>
+              <input type="text" id="debitValue" name="debitValue" disabled value="Rp ${total_debit
+                .toLocaleString()
+                .replace(/,/g, ".")}"/>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="financialSwitchHead">
+            <div>
+              <input type="text" id="toCash" name="toCash" disabled value="Rp ${debit_to_cash
+                .toLocaleString()
+                .replace(/,/g, ".")}"/>
+            </div>
+            <div>
+              <i class="fas fa-arrow-right-arrow-left" id="doubleArrowSwitchFinance"></i>
+            </div>
+            <div>
+              <input type="text" id="toDebit" name="debitValue" disabled value="Rp ${cash_to_debit
                 .toLocaleString()
                 .replace(/,/g, ".")}"/>
             </div>
@@ -1015,17 +1062,21 @@ const Finance = {
         </div>
 
         <div class="form-group">
-          <label for="switchValue">Nilai Tukar</label>
-          <input type="number" id="switchValue" name="switchValue" required/>
+          <label for="switchValue" id="switchValueLabel">Tukar tunai kek rekening</label>
+          <input type="number" id="switchValue" name="switchValue" placeholder="Nilai untuk ditukar" required/>
+          <span class="error" id="switchFinanceError">Nilai minimal Rp.5000.</span>        
         </div>
         
         <div class="form-group">
           <div class="financialSwitchFooter">
             <div>
+              <button type="button" id="resetFinanceSwitch"><i class="fas fa-trash-can-arrow-up"></i>Reset</button>
+            </div>
+            <div>
               <i class="fas fa-sync" id="switchFinance-btn"></i>            
             </div>
             <div>
-              <button type="submit">Sinkronkan Data</button>
+              <button type="submit" id="switchSubmit">Konfirmasi</button>
             </div>
           </div>
         </div> 
@@ -1036,59 +1087,241 @@ const Finance = {
     // Tampilkan modal dengan konten
     const modal = showModal(modalContent);
 
-    let switchToWhere;
+    let switchToWhere = "toDebit";
     document
       .getElementById("switchFinance-btn")
       .addEventListener("click", () => {
-        const arrowIcon = document.getElementById("arrowSwitchFinance");
+        const arrowIcon = modal.querySelector("#arrowSwitchFinance");
+        const switchLabel = modal.querySelector("#switchValueLabel");
+        // const toDebit = modal.querySelector("#toDebit");
+        // const toCash = modal.querySelector("#toCash");
+
         if (arrowIcon.classList.contains("rotate")) {
           arrowIcon.classList.remove("rotate");
           arrowIcon.classList.add("reset");
-          switchToWhere = "toCash";
+          switchToWhere = "toDebit";
+          switchLabel.textContent = "Tukar tunai ke rekening";
+          // toDebit.disabled = false;
+          // toCash.disabled = true;
+          // toCash.classList.add("borderAdd");
+          // toDebit.classList.remove("borderAdd");
         } else {
           arrowIcon.classList.remove("reset");
           arrowIcon.classList.add("rotate");
-          switchToWhere = "toDebit";
+          switchToWhere = "toCash";
+          switchLabel.textContent = "Tukar rekening ke tunai";
+          // toDebit.disabled = true;
+          // toCash.disabled = false;
+          // toDebit.classList.add("borderAdd");
+          // toCash.classList.remove("borderAdd");
         }
         console.log(switchToWhere);
       });
 
+    document
+      .getElementById("resetFinanceSwitch")
+      .addEventListener("click", async () => {
+        const toCashValue = document.querySelector("#toCash").value
+        const toDebitValue = document.querySelector("#toDebit").value
+        if (toDebitValue === "Rp 0" && toCashValue === "Rp 0") {
+          Swal.fire({
+            icon: "info",
+            title: "Hmmm..",
+            text: "Tidak ada yang perlu direset.",
+            confirmButtonText: "OK",
+            customClass: {
+              popup: "swal2-small",
+            },
+          });
+          return;
+        }
+        const result = await Swal.fire({
+          icon: "warning", 
+          title: "Apakah anda yakin?",
+          text: "Nilai tukar akan dikembalikan ke nilai awal",
+          showCancelButton: true,
+          confirmButtonText: "Ya",
+          cancelButtonText: "Tidak",
+          customClass: {
+            popup: "swal2-small",
+          },
+        });
+
+        if (!result.isConfirmed) {
+          return;
+        }
+        const updatedData = {
+          total_cash: originalTotalCash,
+          total_debit: originalTotalDebit,
+          cash_to_debit: 0,
+          debit_to_cash: 0,
+        };
+
+        await putFinanceData(updatedData, currDate);
+        Swal.fire({
+          icon: "success",
+          title: "Selesai!",
+          text: "Nilai tukar berhasil direset!",
+          confirmButtonText: "OK",
+          customClass: {
+            popup: "swal2-small",
+          },
+        });
+        await displayFinance();
+
+        document.querySelector(
+          "#cashFinance"
+        ).value = `Rp ${originalTotalCash.toLocaleString("id-ID")}`;
+        document.querySelector(
+          "#debitValue"
+        ).value = `Rp ${originalTotalDebit.toLocaleString("id-ID")}`;
+        document.querySelector("#toCash").value = `Rp 0`;
+        document.querySelector("#toDebit").value = `Rp 0`;
+      });
 
     document
       .getElementById("switchFinancial")
-      .addEventListener("submit", (e) => {
+      .addEventListener("submit", async (e) => {
         e.preventDefault();
-        const cashValue = modal.querySelector("#cashFinance").value;
-        const debitValue = modal.querySelector("#debitValue").value;
-        const switchValue = modal.querySelector("#switchValue").value;
-        const cleanCashValue = cashValue
-          .replace("Rp", "")
-          .trim()
-          .replace(/\D/g, "");
-        const cleanDebitValue = debitValue
-          .replace("Rp", "")
-          .trim()
-          .replace(/\D/g, "");
+        const switchValue = parseInt(modal.querySelector("#switchValue").value);
+
+        if (switchValue < 5000) {
+          modal.querySelector("#switchFinanceError").style.display = "block";
+          modal.querySelector("#switchValue").value = 5000;
+          return;
+        } else {
+          modal.querySelector("#switchFinanceError").style.display = "none";
+        }
+
+        const cashToDebit = cash_to_debit;
+        const debitToCash = debit_to_cash;
+
+        let toDebit;
+        let toCash;
 
         if (switchToWhere === "toCash") {
-          if (switchValue < cashValue) {
-            console.log("kebanyakan jir");
-          } else {
-            console.log("kurang jir");
+          console.log("switch: ", switchToWhere);
+          if (switchValue > total_debit) {
+            // console.log("kebanyakan jir", total_debit);
+            Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: "Saldo tidak cukup untuk tarik tunai!",
+              confirmButtonText: "OK",
+              customClass: {
+                popup: "swal2-small",
+              },
+            });
+            return;
           }
+
+          const toGoValue = debitToCash;
+          const toFromValue = cashToDebit;
+
+          const { toFrom, toGo } = await this.getSwitchValues(
+            toFromValue,
+            toGoValue,
+            switchValue
+          );
+          toDebit = toFrom;
+          toCash = toGo;
         } else if (switchToWhere === "toDebit") {
-          if (switchValue < debitValue) {
-            console.log("kebanyakan juga jir");
+          console.log("switch: ", switchToWhere);
+          if (switchValue > total_cash) {
+            Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: "Saldo tidak cukup untuk setor tunai!",
+              confirmButtonText: "OK",
+              customClass: {
+                popup: "swal2-small",
+              },
+            });
+            return;
           }
+
+          const toGoValue = cashToDebit;
+          const toFromValue = debitToCash;
+
+          const { toFrom, toGo } = await this.getSwitchValues(
+            toFromValue,
+            toGoValue,
+            switchValue
+          );
+          toDebit = toGo;
+          toCash = toFrom;
         }
-        // console.log("switchValue", switchValue);
-        // console.log("cashval", cashValue);
+
+        const updatedData = {
+          total_cash: originalTotalCash - toDebit + toCash,
+          total_debit: originalTotalDebit - toCash + toDebit,
+          cash_to_debit: toDebit,
+          debit_to_cash: toCash,
+        };
+        console.log("updatedData", updatedData);
+
+        const result = await Swal.fire({
+          icon: "warning",
+          title: "Konfirmasi",
+          text: "Apakah anda yakin ingin mengubah nilai tukar?",
+          showCancelButton: true,
+          cancelButtonText: "Tidak",
+          confirmButtonText: "Ya",
+          customClass: {
+            popup: "swal2-small",
+          },
+        });
+
+        if (result.isConfirmed) {
+          await putFinanceData(updatedData, currDate);
+        } else {
+          return;
+        }
+        Swal.fire({
+          icon: "success",
+          title: "Selesai!",
+          text: "Nilai tukar berhasil diubah!",
+          confirmButtonText: "OK",
+          customClass: {
+            popup: "swal2-small",
+          },
+        });
+
+        closeModal(modal);
+        await displayFinance();
       });
 
     // Tambahkan event listener untuk menutup modal
-    // modal.querySelector(".close").addEventListener("click", () => {
-    //   modal.style.display = "none";
-    // });
+    modal.querySelector(".close").addEventListener("click", () => {
+      modal.style.display = "none";
+    });
+  },
+
+  async getSwitchValues(toFromValue, toGoValue, switchValue) {
+    let toFrom = toFromValue;
+    let toGo = toGoValue;
+
+    if (toFrom === 0) {
+      toGo = toGo + switchValue;
+      console.log("1 asal = 0");
+    } else if (toFrom >= switchValue) {
+      toFrom = toFrom - switchValue;
+      console.log("2 asal >= nilai tukar");
+    } else {
+      toGo = -(toGo - switchValue);
+      toFrom = 0;
+      console.log(
+        "3 asal < tujuan, nilainya mines, dikembalikan ke tuujuan hasilnya saja lalu asalnya direset ke 0"
+      );
+    }
+
+    console.log("toGo", toGo);
+    console.log("toFrom", toFrom);
+
+    return {
+      toFrom: toFrom,
+      toGo: toGo,
+    };
   },
 };
 

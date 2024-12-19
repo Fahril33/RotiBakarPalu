@@ -178,14 +178,14 @@ const createFinanceTemplate = () => `
             </div>
         </div>
         <div class="dashboard-card">
-            <i class="fas fa-credit-card" data-tooltip="Klik untuk switch keuangan"></i>
+            <i class="fas fa-credit-card"></i>
             <div class="details">
               <p class="value" id="todayCredit">Memuat..</p>
-              <p class="title">Saldo non-tunai</p>
+              <p class="title">Saldo rekening</p>
             </div>
         </div>
         <div class="dashboard-card">
-            <i class="fas fa-wallet" data-tooltip="Klik untuk switch keuangan"></i>
+            <i class="fas fa-wallet bounce-animation" data-tooltip="Klik untuk switch keuangan"></i>
             <div class="details">
               <p class="value" id="todayTotal">Memuat..</p>
               <p class="title">Total saldo</p>
