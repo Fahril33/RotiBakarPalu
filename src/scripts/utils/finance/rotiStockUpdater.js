@@ -13,27 +13,29 @@ export async function updateRotiStock() {
   const todayDate = document.getElementById("dataDatePicker").value;
   const yesterdayRemainingStock = (await allStocksData())
     .minusOneDayDateRemainingStock;
+  const spoiledStock = (await allStocksData()).spoiledStock
   const todaySoldStock = (await allSalesData()).soldTotal;
 
-  const rotiData = updatedData.find(
-    (entry) =>
-      entry.tanggal === todayDate &&
-      entry.barang.some((item) => item.namaBahan === "Roti")
-  );
+  const rotiData = updatedData.find((entry) => entry.tanggal === todayDate);
 
   if (rotiData) {
-
     await isStocksDataExist();
     // console.log("batalin isanystockdatashell");
-    
-    const rotiItem = rotiData.barang.find((item) => item.namaBahan === "Roti");
-    const rotiQuantity = rotiItem ? rotiItem.jumlah : 0;
+
+    const rotiItems = rotiData.barang.filter((item) =>
+      item.namaBahan.toLowerCase().startsWith("roti")
+    );
+    const rotiQuantity = rotiItems.reduce(
+      (total, item) => total + item.jumlah,
+      0
+    );
+
     console.log("stok baru", rotiQuantity);
     console.log("stok kemarin", yesterdayRemainingStock);
     console.log("rotiQTY", rotiQuantity);
 
     let todayTotalStock = yesterdayRemainingStock + rotiQuantity;
-    let todayRemainingStock = todayTotalStock - todaySoldStock;
+    let todayRemainingStock = todayTotalStock - todaySoldStock - spoiledStock;
 
     putStockData(
       todayDate,
@@ -43,7 +45,7 @@ export async function updateRotiStock() {
       todayRemainingStock
     );
   } else {
-    let todayRemainingStock = yesterdayRemainingStock - todaySoldStock;
+    let todayRemainingStock = yesterdayRemainingStock - todaySoldStock - spoiledStock;
     const stockData = {
       additional_stock: 0,
       remaining_stock: todayRemainingStock,
@@ -52,5 +54,5 @@ export async function updateRotiStock() {
 
     await putNewStockData(todayDate, stockData);
   }
-  displayFinance()
+  displayFinance();
 }

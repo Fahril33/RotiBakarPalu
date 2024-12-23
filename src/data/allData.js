@@ -13,6 +13,7 @@ export async function allSalesDataByDate(date) {
   const incomeTotal = todaySales.totalIncome || 0;
   const totalMerchantIncome = todaySales.totalMerchantIncome || 0;
   const totalOutletIncome = todaySales.totalOutletIncome || 0;
+  const isThere = allSalesDatas.find((sale) => sale.date === date) || false;
 
   return {
     todaySales,
@@ -20,6 +21,7 @@ export async function allSalesDataByDate(date) {
     incomeTotal,
     totalMerchantIncome,
     totalOutletIncome,
+    isThere
   };
 }
 
@@ -56,24 +58,22 @@ export async function allStockDataByDate(date) {
 
 export async function allShoplistDataByDate(date) {
   const shoppingListData = await RBPsource.getDaftarBelanja();
-  // console.log("date", date);
   const todayShoplist =
     shoppingListData.find((item) => item.tanggal === date) || {};
   const totalShopCash = todayShoplist.totalCash || 0;
   const totalShopDebit = todayShoplist.totalDebit || 0;
   const totalBelanja = todayShoplist.totalBelanja || 0;
 
-  const rotiData = shoppingListData.find(
-    (entry) =>
-      entry.tanggal === date &&
-      entry.barang.some((item) => item.namaBahan === "Roti")
-  );
+  const rotiData = shoppingListData.find((entry) => entry.tanggal === date);
 
-  console.log("rdata", rotiData);
   if (rotiData) {
-    const rotiItem = rotiData.barang.find((item) => item.namaBahan === "Roti");
-    const rotiQuantity = rotiItem ? rotiItem.jumlah : 0;
-    console.log("roti segini", rotiQuantity);
+    const rotiItems = rotiData.barang.filter((item) =>
+      item.namaBahan.toLowerCase().startsWith("roti")
+    );
+    const rotiQuantity = rotiItems.reduce(
+      (total, item) => total + item.jumlah,
+      0
+    );
 
     return { rotiQuantity, totalShopCash, totalShopDebit, totalBelanja };
   }
@@ -439,6 +439,7 @@ export async function allSalesData() {
   };
 }
 
+// unused
 export async function allShoppingListData() {
   const shoppingListData = await RBPsource.getDaftarBelanja();
   const datePicked = (await datePickerValue()).dateValue;

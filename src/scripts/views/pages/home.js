@@ -5,6 +5,7 @@ import {
   allFinanceDataByDate,
   allFinanceDataThisMonth,
   allPredictionDataByDate,
+  allSalesDataByDate,
   allStockDataThisMonth,
 } from "../../../data/allData";
 import RBPsource from "../../../data/source";
@@ -28,6 +29,7 @@ const Home = {
   },
 
   async afterRender() {
+    console.log('adoh', (((await allSalesDataByDate(getCurrentDate().pickedDate)).isThere) === false));
     //
     // Check Allowed
     //

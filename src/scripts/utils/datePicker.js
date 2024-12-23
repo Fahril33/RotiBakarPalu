@@ -1,3 +1,4 @@
+
 export function getCurrentDate() {
   const now = new Date();
   const day = String(now.getDate()).padStart(2, "0");
@@ -24,8 +25,15 @@ export function getCurrentDate() {
     reFormattedDate: `${day}-${month}-${year}`,
   };
 }
-export function getTomorrowDate() {
-  const now = new Date();
+export function getTomorrowDate(isCurrent = false) {
+  let now;
+  if (!isCurrent) {
+    now = new Date();
+  } else {
+    const dateValue = document.getElementById("dataDatePicker").value;
+    now = new Date(dateValue);
+  }
+
   now.setDate(now.getDate() + 1); // Increment the date by 1
   const day = String(now.getDate()).padStart(2, "0");
   const dayn = String(now.getDate());
@@ -59,7 +67,7 @@ export function getYesterdayDate() {
 }
 
 export async function minusOneDayDate() {
-  const minusOneDateValue = (await datePickerValue()).dateValue; // Misalnya ini menghasilkan '2024-11-06'
+  const minusOneDateValue = (await datePickerValue()).dateValue;
 
   // Mengubah string tanggal menjadi objek Date
   const date = new Date(minusOneDateValue);

@@ -1,6 +1,6 @@
 import { allPredictionDataByDate } from "../../data/allData";
 import { putPredictionData } from "../../data/utils/predictionHandler";
-import { getCurrentDate, getTomorrowDate } from "./datePicker";
+import { datePickerValue, getCurrentDate, getTomorrowDate } from "./datePicker";
 
 const C45 = require("c4.5");
 const axios = require("axios");
@@ -15,6 +15,7 @@ async function fetchDataAndTrainModel(testData) {
     }
 
     const filteredData = allData.filter((item) => item.operasional === true);
+    console.log(`Data training length: ${filteredData.length}`);
     const formattedData = filteredData.map((item) => [
       item.event_raya,
       item.weekend,
@@ -58,9 +59,24 @@ async function fetchDataAndTrainModel(testData) {
   }
 }
 
-export async function usePrediction() {
-  const currentDate = getCurrentDate().pickedDate;
-  const tomorrowDate = getTomorrowDate().tomorrowDate;
+export async function usePrediction(customDate = false) {
+  let currentDate;
+  let tomorrowDate;
+  let isCustom
+
+  if (!customDate) {
+    currentDate = getCurrentDate().pickedDate;
+    tomorrowDate = getTomorrowDate().tomorrowDate;
+    isCustom = false
+  } else {
+    currentDate = (await datePickerValue()).dateValue;
+    tomorrowDate = getTomorrowDate(true).tomorrowDate;
+    isCustom = true
+  }
+
+  // console.log("currentDate", currentDate);
+  // console.log("tomorrowDate", tomorrowDate);
+
   const currentData = await allPredictionDataByDate(currentDate);
   const tomorrowData = await allPredictionDataByDate(tomorrowDate);
   const {
@@ -88,22 +104,29 @@ export async function usePrediction() {
 
   try {
     const catchedData = await fetchDataAndTrainModel(tesData);
-    console.log("Prediksi Hari Ini:", catchedData.predictTodayData);
-    console.log("Prediksi Besok:", catchedData.predictTomorrowData);
+    // console.log("Prediksi Hari Ini:", catchedData.predictTodayData);
+    // console.log("Prediksi Besok:", catchedData.predictTomorrowData);
     const resultToday = catchedData.predictTodayData;
     const resultTomorrow = catchedData.predictTomorrowData;
-    await catchPrediction(resultToday, resultTomorrow);
+    await catchPrediction(resultToday, resultTomorrow, isCustom);
   } catch (error) {
     console.error("Error during prediction:", error);
   }
 }
 
-async function catchPrediction(resultToday, resultTomorrow) {
-  console.log("RTD", resultToday);
-  console.log("RTM", resultTomorrow);
+async function catchPrediction(resultToday, resultTomorrow, isCustom) {
+  // console.log("RTD", resultToday);
+  // console.log("RTM", resultTomorrow);
+  let todayDate;
+  let tomorrowDate
 
-  const todayDate = getCurrentDate().pickedDate;
-  const tomorrowDate = getTomorrowDate().tomorrowDate;
+  if (!isCustom){
+    todayDate = getCurrentDate().pickedDate;
+    tomorrowDate = getTomorrowDate().tomorrowDate;
+  }else{
+    todayDate = (await datePickerValue()).dateValue;
+    tomorrowDate = getTomorrowDate(true).tomorrowDate;
+  }
   const todayData = {
     hasil_prediksi: resultToday,
   };
@@ -111,5 +134,15 @@ async function catchPrediction(resultToday, resultTomorrow) {
     hasil_prediksi: resultTomorrow,
   };
   await putPredictionData(todayData, todayDate);
-  await putPredictionData(tomorrowData, tomorrowDate);
+  // kalau bukan hari ini, jangan up prediksi besok
+  console.log("curdet", getCurrentDate().pickedDate);
+  console.log('pikdet', (await datePickerValue()).dateValue);
+  console.log(
+    "issama",
+    getCurrentDate().pickedDate === (await datePickerValue()).dateValue
+  );
+  if (getCurrentDate().pickedDate === (await datePickerValue()).dateValue) {
+    await putPredictionData(tomorrowData, tomorrowDate);
+    console.log('pred besok jalan', );
+  }
 }

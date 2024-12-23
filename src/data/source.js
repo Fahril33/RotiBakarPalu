@@ -9,10 +9,10 @@ class RBPsource {
         }
         return response.json();
       })
-      .then((data) => {
+      .then(() => {
         document.getElementById("loginBtn").disabled = false;
       })
-      .catch((error) => {
+      .catch(() => {
         document.querySelector(".card-login-header").style.display = "block";
         document.getElementById("loginBtn").disabled = true;
       });
@@ -108,7 +108,7 @@ class RBPsource {
         }
 
         return await response.json();
-      } catch (error) { 
+      } catch (error) {
         console.error("Error fetching user data:", error);
         return null;
       }

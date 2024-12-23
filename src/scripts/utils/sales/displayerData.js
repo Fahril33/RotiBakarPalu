@@ -28,7 +28,7 @@ export async function displayerSold() {
   const dateValue = (await datePickerValue()).dateValue;
 
   if (nowRemainingStock != remainingStock) {
-    // await updateSoldStockData(salesData, remainingStock, dateValue);
+    await updateSoldStockData(salesData, remainingStock, dateValue);
   } else {
     // console.log("data sama aja");
   }
@@ -78,7 +78,7 @@ export async function displayerHolidays() {
   let liburValue = (await allPredictionDataByDate(dateValue)).libur;
   // let liburValue = true;
   let rayaValue = (await allPredictionDataByDate(dateValue)).raya;
-  console.log("WR", weekEndValue, rayaValue, liburValue);
+  // console.log("WR", weekEndValue, rayaValue, liburValue);
 
   if (liburValue) {
     const weekendIcon = holidayIconMap[liburValue] || weekendIconMap["unknown"];

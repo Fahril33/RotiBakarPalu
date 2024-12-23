@@ -26,6 +26,7 @@ export async function showPredictionModal() {
     pickedDate
   );
   const spoiledStock = (await allStockDataByDate(pickedDate)).spoiledStock;
+  console.log("spoiledStock", spoiledStock);
   const userRole = await RBPsource.getUserData();
   console.log("userRole", userRole.role);
 
@@ -284,32 +285,19 @@ export async function showPredictionModal() {
         }
       }
 
-      console.log("updatedData", updatedData);
+      // console.log("updatedData", updatedData);
 
       try {
         await isPredictionDataExist(pickedDate);
         await putPredictionData(updatedData, pickedDate);
+        await putNewStockData(pickedDate, {
+          spoiled_stock: updatedSpoiledStock,
+        });
         if (pickedDate === getCurrentDate().pickedDate) {
-          await putNewStockData(pickedDate, {
-            spoiled_stock: updatedSpoiledStock,
-          });
+          // 
         }
-        const Toast = Swal.mixin({
-          toast: true,
-          position: "top-end",
-          showConfirmButton: false,
-          timer: 2500,
-          timerProgressBar: true,
-          didOpen: (toast) => {
-            toast.onmouseenter = Swal.stopTimer;
-            toast.onmouseleave = Swal.resumeTimer;
-          },
-        });
-        Toast.fire({
-          icon: "success",
-          title: "Data berhasil diperbarui.",
-        });
-        await usePrediction();
+
+        await usePrediction(true);
         await displayerSold();
         await displayerWeather();
         await displayerHolidays();
@@ -318,6 +306,21 @@ export async function showPredictionModal() {
         console.error("Error updating prediction data:", error);
       }
 
+      const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.onmouseenter = Swal.stopTimer;
+          toast.onmouseleave = Swal.resumeTimer;
+        },
+      });
+      Toast.fire({
+        icon: "success",
+        title: "Data berhasil diperbarui.",
+      });
       // Close the modal after submission
       closeModal(modal);
     });

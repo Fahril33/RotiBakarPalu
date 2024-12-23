@@ -9,12 +9,14 @@ import {
 } from "../../data/allData";
 import {
   createNewFinanceDataShell,
+  postFinance,
   putFinanceData,
 } from "../../data/utils/financeHandler";
 import { getHolidayValue } from "../../data/utils/holidayHandler";
 import { syncSoldToPrediction } from "../../data/utils/predictionHandler";
 import {
   isAnyStockDataShell,
+  postStockData,
   putNewStockData,
 } from "../../data/utils/stockHandler";
 import { checkWeatherData } from "../../data/utils/weatherHandler";
@@ -22,9 +24,11 @@ import {
   getCurrentDate,
   getTomorrowDate,
   getYesterdayDate,
+  minusOneDayDate,
 } from "./datePicker";
 import { closeModal, showModal } from "./sales/modal-handler";
 import { usePrediction } from "./algorithm";
+import { PutSalesData } from "../../data/utils/salesHandler";
 
 // Tambahkan fungsi ini di luar logDatesSince
 async function subtractOneDay(dateString) {
@@ -39,7 +43,7 @@ async function subtractOneDay(dateString) {
 export async function logDatesSince(pickedDate, logsince = false) {
   // let dateValue = (await datePickerValue()).dateValue;
   let dateValue = pickedDate;
-  // console.log("dateValue", dateValue);
+  console.log("dateValue", dateValue);
 
   const [year, month, day] = dateValue.split("-").map(Number);
   const startDate = new Date(year, month - 1, day); // Bulan dimulai dari 0
@@ -110,6 +114,12 @@ export async function logDatesSince(pickedDate, logsince = false) {
       await syncSoldToPrediction(formattedDate);
 
       //
+      // fix days on sales
+      //
+      const salesDay = (await hariDariTanggal(formattedDate)).hari;
+      await PutSalesData(formattedDate, { day: salesDay });
+
+      //
       // Sync Finance
       //
 
@@ -131,8 +141,10 @@ export async function logDatesSince(pickedDate, logsince = false) {
         in_debit: inDebit,
         out_cash: outCash,
         out_debit: outDebit,
-        total_cash: ydayTotalCash + inCash - outCash + debitToCash - cashToDebit,
-        total_debit: ydayTotalDebit + inDebit - outDebit + cashToDebit - debitToCash,
+        total_cash:
+          ydayTotalCash + inCash - outCash + debitToCash - cashToDebit,
+        total_debit:
+          ydayTotalDebit + inDebit - outDebit + cashToDebit - debitToCash,
       };
 
       // console.log("calon data", financeData);
@@ -174,8 +186,6 @@ export async function logDatesSince(pickedDate, logsince = false) {
       // Tambahkan satu hari
       currentDate.setDate(currentDate.getDate() + 1);
     }
-
-    
   } else {
     // console.log("The dateValue is not less than today's date.");
   }
@@ -237,7 +247,6 @@ export async function callDataShell() {
     `,
     });
 
-
     // =? DATA PREDIKSI ADA?
     if (!predicitionDataToday || !predictionDataTomorrow) {
       try {
@@ -268,7 +277,7 @@ export async function callDataShell() {
       // console.log("Data Prediksi sudah ada");
     }
 
-    // Caritau kapan terakhir buka 
+    // Caritau kapan terakhir buka
     const yesterdayDate = getYesterdayDate().yesterday;
     const operationalYesterday = (await allPredictionDataByDate(yesterdayDate))
       .operasional;
@@ -361,9 +370,12 @@ export function manualSyncData() {
       e.preventDefault();
       const dateValue = modal.querySelector("#startDate").value;
       const selectedDate = new Date(dateValue);
+      console.log('selectedDate', selectedDate);
       const today = new Date();
       today.setHours(0, 0, 0, 0); // Set waktu hari ini ke 00:00:00 untuk perbandingan yang akurat
 
+      console.log('t0day', today);
+      console.log('is?', (selectedDate > today));
       // Periksa apakah tanggal yang dipilih kurang dari hari ini
       if (selectedDate > today) {
         Swal.fire({
@@ -391,24 +403,26 @@ export function manualSyncData() {
           if (result.isConfirmed) {
             await logDatesSince(dateValue, true);
             closeModal(modal);
+            Swal.fire({
+              icon: "success",
+              title: "Sinkronisasi Selesai",
+              text: "Semua data telah berhasil disinkronkan.",
+              customClass: {
+                popup: "swal2-small",
+              },
+              confirmButtonText: "OK",
+            }).then((result) => {
+              if (result.isConfirmed) {
+                // window.location.reload();
+              }
+            });
           }
         });
+        
       }
 
       // Tampilkan swal success setelah looping selesai
-      Swal.fire({
-        icon: "success",
-        title: "Sinkronisasi Selesai",
-        text: "Semua data telah berhasil disinkronkan.",
-        customClass: {
-          popup: "swal2-small",
-        },
-        confirmButtonText: "OK",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          window.location.reload();
-        }
-      });
+      
     });
 
   // Tambahkan event listener untuk menutup modal
@@ -416,3 +430,112 @@ export function manualSyncData() {
     modal.style.display = "none";
   });
 }
+
+export async function syncSalesToOthers(date) {
+  const yesterdayDate = (await minusOneDayDate()).resultDate;
+
+  //
+  // Sales to Stock Sync
+  //
+  let newStocksShellData;
+
+  // StockShell
+  const stockShellToday = (await allStockDataByDate(date)).isThere;
+  const stockShellYesterday = (await allStockDataByDate(yesterdayDate)).isThere;
+
+  if (!stockShellYesterday) {
+    console.log(
+      "Shell Stock hari sebelumnya tidak ada, deklarasi callDataShell()"
+    );
+    await callDataShell()
+  }
+
+  // Stocks Data
+  const initialStock = await (
+    await allStockDataByDate(yesterdayDate)
+  ).remainingStock;
+  const additionalStock = (await allShoplistDataByDate(date)).rotiQuantity;
+  //
+  const spoiledStock = stockShellToday
+    ? (await allStockDataByDate(date)).spoiledStock
+    : 0;
+  //
+  const soldStock = await (await allSalesDataByDate(date)).soldTotal;
+  const totalStock = initialStock + additionalStock;
+  //
+  //
+  newStocksShellData = {
+    ...(stockShellToday ? {} : { date: date }),
+    initial_stock: initialStock,
+    additional_stock: additionalStock,
+    spoiled_stock: spoiledStock,
+    sold_stock: soldStock,
+    total_stock: totalStock,
+    remaining_stock: totalStock - soldStock - spoiledStock,
+  };
+
+  if (!stockShellToday) {
+    await postStockData(newStocksShellData);
+    //
+  } else {
+    await putNewStockData(date, newStocksShellData);
+    //
+  }
+
+  //
+  // Sales to finance
+  //
+  let newFinanceShellData;
+
+  // Finance shell
+  const financeShellToday = (await allFinanceDataByDate(date)).isThere;
+  const financeShellYesterday = (await allFinanceDataByDate(yesterdayDate))
+    .isThere;
+
+  if (!financeShellYesterday) {
+    console.log("shell finance kemarin tidak ada, deklarasikan callShell()");
+    await callDataShell()
+  }
+
+  // Finance data
+  const inCash = (await allSalesDataByDate(date)).totalOutletIncome;
+  const inDebit = (await allSalesDataByDate(date)).totalMerchantIncome;
+  const outCash = (await allShoplistDataByDate(date)).totalShopCash;
+  const outDebit = (await allShoplistDataByDate(date)).totalShopDebit;
+  //
+  const yesterdayCash = (await allFinanceDataByDate(yesterdayDate)).totalCash;
+  const yesterdayDebit = (await allFinanceDataByDate(yesterdayDate)).totalDebit;
+
+  newFinanceShellData = {
+    ...(financeShellToday ? {} : { date: date }),
+    in_cash: inCash,
+    in_debit: inDebit,
+    out_cash: outCash,
+    out_debit: outDebit,
+    total_cash: yesterdayCash + inCash - outCash,
+    total_debit: yesterdayDebit + inDebit - outDebit,
+  };
+
+  if (!financeShellToday) {
+    await postFinance(newFinanceShellData);
+    //
+  } else {
+    await putFinanceData(newFinanceShellData, date);
+    //
+  }
+}
+
+
+export async function hariDariTanggal(tanggal) {
+  const dateParts = tanggal.split("-");
+  const tahun = parseInt(dateParts[0]);
+  const bulan = parseInt(dateParts[1]) - 1; // Bulan di JavaScript dimulai dari 0
+  const tanggalInt = parseInt(dateParts[2]);
+
+  const date = new Date(tahun, bulan, tanggalInt);
+  const hari = date.toLocaleString("id-ID", { weekday: "long" });
+
+  // console.log('hari', hari);
+  return { hari };
+}
+

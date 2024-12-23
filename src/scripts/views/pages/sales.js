@@ -14,13 +14,10 @@ import {
 } from "../../utils/sales/displayerData";
 import {
   handleFormSubmit,
-  syncSalesToOthers,
 } from "../../utils/sales/form-handler";
 import { showModal, closeModal } from "../../utils/sales/modal-handler";
 import { datePickerValue, getCurrentDate } from "../../utils/datePicker";
 import { bagIcon, soldIcon, editIcon } from "../../utils/icons";
-
-import { syncSoldToPrediction } from "../../../data/utils/predictionHandler";
 
 // import { usePrediction } from "../../utils/algorithm";
 import { showPredictionModal } from "../../utils/sales/prediction-modal";
@@ -28,7 +25,6 @@ import { callDataShell, logDatesSince } from "../../utils/syncData";
 import { checkUserRole } from "../../utils/interceptor";
 import Swal from "sweetalert2";
 import { allPredictionDataByDate } from "../../../data/allData";
-// import { logDatesSince } from "../../utils/syncData";
 
 const Sales = {
   async render() {
@@ -157,13 +153,11 @@ const Sales = {
       // console.log(`Data for date ${selectedDate}:`, filteredData);
       this.populateSalesTable(filteredData);
 
-      // await logDatesSince((await datePickerValue()).dateValue, true);
       await displayerSold();
       await displayerIncome();
       await displayerWeather();
       await displayerHolidays();
       await displayerPredictionData();
-      // await syncSalesToOthers((await datePickerValue()).dateValue);
 
       if (!(await checkUserRole())) {
         await hideComponents(selectedDate);
@@ -372,13 +366,12 @@ const Sales = {
           title: "Pesanan berhasil diperbarui.",
         });
         closeModal(modal);
-        // await logDatesSince(date);
+        await logDatesSince(date);
         await this.displaySalesData();
 
         //
         // Sesuaikan Nilai Terjual di Prediciton
         //
-        // await syncSoldToPrediction(date);
       } catch (error) {
         console.error("An error occurred while updating data:", error);
       }
@@ -475,13 +468,8 @@ const Sales = {
           title: "Pesanan berhasil dihapus.",
         });
 
-        // await logDatesSince(date);
+        await logDatesSince(date);
         await this.displaySalesData();
-
-        //
-        // Sesuaikan Nilai Terjual di Prediciton
-        //
-        // await syncSoldToPrediction(date);
       } catch (error) {
         console.error("An error occurred while deleting data:", error);
       }
