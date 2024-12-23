@@ -77,6 +77,7 @@ ItemsContainer
   /* justify-self: end; */
   min-width: 200px;
   width: 100%;
+  
 }
 
 .item-predictions {
@@ -387,14 +388,19 @@ input[type="submit"]:hover {
 .tableSaleContainer {
   display: flex;
   overflow-x: auto;
+  min-height: 300px;
 }
 
 .table-sales-today {
   width: 100%;
 }
+#salesAction{
+  width: 10%;
+}
 table {
   border-collapse: collapse;
-  margin: 40px;
+  /* margin: 40px; */
+  margin-bottom: auto;
 }
 
 th,

@@ -28,7 +28,7 @@ export async function displayerSold() {
   const dateValue = (await datePickerValue()).dateValue;
 
   if (nowRemainingStock != remainingStock) {
-    await updateSoldStockData(salesData, remainingStock, dateValue);
+    // await updateSoldStockData(salesData, remainingStock, dateValue);
   } else {
     // console.log("data sama aja");
   }

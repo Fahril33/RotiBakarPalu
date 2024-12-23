@@ -681,7 +681,7 @@ const Settings = {
       <div class="material-name">
         <p>${kategori}</p>
       </div>
-      <div class="material-list">
+      <div class="material-list" style="min-height: 300px">
         <ul>
           <li class="list-item">
             <table>
@@ -703,7 +703,7 @@ const Settings = {
                     <td>${index + 1}</td>
                     <td>${item.namaBahan}</td>
                     <td>Rp${item.harga.toLocaleString()}</td>
-                    <td>${item.satuan}</td>
+                    <td style="text-align: end">${item.satuan}</td>
                     <td>${item.jenisSatuan}</td>
                     <td id="ingredients-td">
                       <div class="user-actions">
@@ -749,6 +749,7 @@ const Settings = {
             <option value="Bahan" selected>Bahan</option>
             <option value="Coklat">Coklat</option>
             <option value="Selai">Selai</option>
+            <option value="Lainnya">Lainnya</option>
           </select>
         </div>   
         <div class="form-group">
@@ -769,10 +770,13 @@ const Settings = {
         <div class="form-group">
           <label for="jenisSatuanItem">Jenis Satuan</label>
           <select id="jenisSatuanItem" name="jenisSatuanItem">
-            <option value="g" selected>Gram</option>
-            <option value="kg">Kilogram</option>
-            <option value="Item">Item</option>
-          </select>
+            <option value="g" selected>Gram (gr)</option>
+            <option value="kg">Kilogram (kg)</option>
+            <option value="ml">Mili liter (ml)</option>
+            <option value="L">Liter (L)</option>
+            <option value="pcs">Item (pcs)</option>
+            <option value="pak">Bungkus (pak)</option>
+            </select>
         </div> 
         <div class="form-group">
           <button type="submit">Tambahkan</button>
@@ -862,7 +866,7 @@ const Settings = {
           } else {
             // Jika berhasil
             Swal.fire({
-              title: "Item Berhasil Ditambahkan!",
+              title: "Selesai!",
               text: "Item baru telah berhasil ditambahkan ke sistem.",
               icon: "success",
               width: "400px",
@@ -933,6 +937,9 @@ const Settings = {
             <option value="Selai" ${
               ingredient.kategori === "Selai" ? "selected" : ""
             }>Selai</option>
+            <option value="Lainnya" ${
+              ingredient.kategori === "Lainnya" ? "selected" : ""
+            }>Lainnya</option>
           </select>
         </div>   
         <div class="form-group">
@@ -961,13 +968,22 @@ const Settings = {
           <select id="jenisSatuanItem" name="jenisSatuanItem">
             <option value="g" ${
               ingredient.jenisSatuan === "g" ? "selected" : ""
-            }>Gram</option>
+            }>Gram (gr)</option>
             <option value="kg" ${
               ingredient.jenisSatuan === "kg" ? "selected" : ""
-            }>Kilogram</option>
-            <option value="Item" ${
-              ingredient.jenisSatuan === "Item" ? "selected" : ""
-            }>Item</option>
+            }>Kilogram (kg)</option>
+            <option value="pcs" ${
+              ingredient.jenisSatuan === "pcs" ? "selected" : ""
+            }>Item (pcs)</option>
+            <option value="ml" ${
+              ingredient.jenisSatuan === "ml" ? "selected" : ""
+            }>Mili liter (ml)</option>
+            <option value="ml" ${
+              ingredient.jenisSatuan === "L" ? "selected" : ""
+            }>Liter (L)</option>
+            <option value="pak" ${
+              ingredient.jenisSatuan === "pak" ? "selected" : ""
+            }>Bungkus (pak)</option>
           </select>
         </div> 
         <div class="form-group">

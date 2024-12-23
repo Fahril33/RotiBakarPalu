@@ -18,10 +18,11 @@ const Login = {
     document.querySelector('.card-login-items img[alt="RBPlogo"]').src =
       RBPlogo;
     const data = await RBPsource.serverStatus();
-    console.log('data', data);
+    console.log("data", data);
     if (!data == []) {
       document.querySelector(".card-login-header").style.display = "block";
       document.getElementById("loginBtn").disabled = true;
+      return;
     }
 
     const form = document.getElementById("loginForm");
@@ -36,8 +37,6 @@ const Login = {
 
     //
     // togglePassword
-    //
-
     const togglePassword = document.getElementById("togglePassword");
     const passwordInput = document.getElementById("password");
     const eyeIcon = document.getElementById("eyeIcon");
@@ -55,43 +54,70 @@ const Login = {
   },
 
   async login(identifier, password) {
-    const url = "http://localhost:5000/api/auth";
     try {
-      const response = await fetch(`${url}/login`, {
+      const response = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ identifier, password }),
       });
+      const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.onmouseenter = Swal.stopTimer;
+          toast.onmouseleave = Swal.resumeTimer;
+        },
+      });
 
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem("token", data.token);
         await urlOtorizator();
-        const Toast = Swal.mixin({
-          toast: true,
-          position: "top-end",
-          showConfirmButton: false,
-          timer: 2500,
-          timerProgressBar: true,
-          didOpen: (toast) => {
-            toast.onmouseenter = Swal.stopTimer;
-            toast.onmouseleave = Swal.resumeTimer;
-          },
-        });
+
+        
+
         Toast.fire({
           icon: "success",
           title: "Anda Berhasil Masuk.",
         });
+      } else if (response.status === 400) {
+        const data = await response.json();
+        const credentialEmpty = document.querySelectorAll("#identifierLoginEmpty");
+        
+        const identifierError = document.querySelector("#identifierLoginError");
+        const passwordError = document.querySelector("#passwordLoginError");
+        if (data.msg === "Identifier and password are required") {
+          credentialEmpty.forEach(element => {
+            element.style.display = "inline";
+          });
+          identifierError.style.display = "none";
+          passwordError.style.display = "none";
+        } else if (data.msg === "Invalid email/username") {
+          credentialEmpty.forEach(element => {
+            element.style.display = "none";
+          });
+          identifierError.style.display = "inline";
+          passwordError.style.display = "none";
+        } else if (data.msg === "Invalid password") {
+          credentialEmpty.forEach(element => {
+            element.style.display = "none";
+          });
+          identifierError.style.display = "none";
+          passwordError.style.display = "inline";
+        } else {
+          alert(data.msg);
+        }
       } else {
-        // Tampilkan pesan kesalahan tanpa detail sensitif
-        alert("Email atau password salah. Silakan coba lagi.");
+        // alert("Terjadi kesalahan saat login. Silakan coba lagi.");
       }
     } catch (error) {
-      // Tangkap kesalahan jaringan atau internal
-      alert("Terjadi kesalahan saat login. Silakan coba lagi.");
-      console.warn("Login error:", error.message); // Log lebih aman
+      // alert("Terjadi kesalahan jaringan. Silakan coba lagi.");
+      console.warn("Login error:", error.message);  
     }
   },
 

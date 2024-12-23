@@ -57,7 +57,7 @@ class App {
       return;
     }
 
-    if ((url === "/login") | (url === "/home/settings")) {
+    if ((url === "/login") | (url === "/")) {
       header.style.display = "none"; // Sembunyikan header
       navbar.style.display = "none"; // Sembunyikan navbar
       miniNavbar.style.display = "none"; // Sembunyikan navbar
@@ -128,7 +128,7 @@ class App {
             console.log("Close");
             await putPredictionData({ operasional: false }, todayDate);
           }
-        }, 300); // Tunggu 300ms sebelum mengirim permintaan
+        }, 500); // Tunggu 300ms sebelum mengirim permintaan
       });
     }
 

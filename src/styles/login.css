@@ -21,6 +21,11 @@ h2#swal2-title {
   font-size: medium;
   font-weight: bold;
 }
+.loginError {
+  display: none;   
+  font-size: small;
+  color: red;
+}
 
 .card-login-body {
   display: grid;

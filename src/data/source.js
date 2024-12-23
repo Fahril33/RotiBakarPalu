@@ -108,7 +108,7 @@ class RBPsource {
         }
 
         return await response.json();
-      } catch (error) {
+      } catch (error) { 
         console.error("Error fetching user data:", error);
         return null;
       }

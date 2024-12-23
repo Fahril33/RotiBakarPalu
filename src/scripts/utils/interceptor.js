@@ -105,7 +105,19 @@ export async function urlOtorizator() {
         console.error("Error fetching user data:", error);
       });
   } else {
-    console.log("No token found, please log in.");
+    Swal.fire({
+      icon: "warning",
+      title: "Silahkan masuk kembali.",
+      position: "top-end",
+      showConfirmButton: false,
+      timer: 2500,
+      timerProgressBar: true,
+      toast: true,
+      didOpen: (toast) => {
+        toast.onmouseenter = Swal.stopTimer;
+        toast.onmouseleave = Swal.resumeTimer;
+      },
+    });
   }
 }
 

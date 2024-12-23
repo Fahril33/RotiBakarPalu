@@ -7,7 +7,11 @@ import {
   displayUpcomingEvent,
 } from "../../utils/finance/financialDisplayer";
 import { callDataShell, logDatesSince } from "../../utils/syncData";
-import { getCurrentDate, getYesterdayDate } from "../../utils/datePicker";
+import {
+  datePickerValue,
+  getCurrentDate,
+  getYesterdayDate,
+} from "../../utils/datePicker";
 import { checkUserRole } from "../../utils/interceptor";
 import Swal from "sweetalert2";
 import { closeModal, showModal } from "../../utils/sales/modal-handler";
@@ -128,9 +132,11 @@ const Finance = {
               const totalPrice = item.price * cachedQuantity; // Calculate total price for the item
 
               newRow.innerHTML = `
-                <td>${itemCount++}</td>
-                <td>${item.name}</td>
-                <td>Rp. ${item.price.toLocaleString("id-ID")}</td>
+                <td >${itemCount++}</td>
+                <td>${item.name} ${item.satuan} ${item.jenisSatuan}</td>
+                <td>Rp. <span contenteditable="true" >${item.price.toLocaleString(
+                  "id-ID"
+                )}</span></td>
                 <td><input type="number" value="${cachedQuantity}" min="1" id="quantity-${itemId}" class="quantity-input"></td>
                 <td>Rp. ${totalPrice.toLocaleString("id-ID")}</td>
                 <td>
@@ -152,12 +158,77 @@ const Finance = {
               const quantityInput = newRow.querySelector(`#quantity-${itemId}`);
               quantityInput.addEventListener("input", (event) => {
                 const newQuantity = parseInt(event.target.value, 10) || 0; // Get new quantity
-                const updatedTotalPrice = item.price * newQuantity; // Calculate new total price
+                const pricePerItem = parseInt(
+                  newRow
+                    .querySelector("td:nth-child(3) span")
+                    .textContent.replace(/\D/g, ""),
+                  10
+                ); // Get price from the table cell
+                const updatedTotalPrice = pricePerItem * newQuantity; // Calculate new total price
                 newRow.querySelector(
                   "td:nth-child(5)"
                 ).textContent = `Rp. ${updatedTotalPrice.toLocaleString(
                   "id-ID"
                 )}`; // Update total price cell
+              });
+
+              // Add event listener to update total price when price is edited
+              const priceSpan = newRow.querySelector("td:nth-child(3) span");
+              priceSpan.addEventListener("blur", (event) => {
+                // const newPrice = parseInt(
+                //   event.target.textContent.replace(/\D/g, ""),
+                //   10
+                // );
+                const sanitizedPrice = event.target.textContent.replace(
+                  /[^\d]/g,
+                  ""
+                );
+                const validPrice = parseInt(sanitizedPrice, 10);
+
+                if (
+                  isNaN(validPrice) ||
+                  validPrice <= 0 ||
+                  sanitizedPrice !== event.target.textContent.replace(/\./g, "")
+                ) {
+                  event.target.textContent = item.price.toLocaleString("id-ID"); // Revert to original price if input is invalid or contains invalid characters
+                  const currentQuantity =
+                    parseInt(quantityInput.value, 10) || 0;
+                  const resetTotalPrice = item.price * currentQuantity; // Calculate total price with original price
+                  newRow.querySelector(
+                    "td:nth-child(5)"
+                  ).textContent = `Rp. ${resetTotalPrice.toLocaleString(
+                    "id-ID"
+                  )}`; // Update total price cell
+                } else {
+                  const currentQuantity =
+                    parseInt(quantityInput.value, 10) || 0;
+                  const updatedTotalPrice = validPrice * currentQuantity; // Calculate new total price
+                  newRow.querySelector(
+                    "td:nth-child(5)"
+                  ).textContent = `Rp. ${updatedTotalPrice.toLocaleString(
+                    "id-ID"
+                  )}`; // Update total price cell
+                }
+              });
+
+              // Add event listener to reset quantity to 1 if less than 1
+              quantityInput.addEventListener("blur", (event) => {
+                const newQuantity = parseInt(event.target.value, 10);
+                if (isNaN(newQuantity) || newQuantity < 1) {
+                  event.target.value = 1; // Reset to 1 if input is invalid or less than 1
+                  const pricePerItem = parseInt(
+                    newRow
+                      .querySelector("td:nth-child(3) span")
+                      .textContent.replace(/\D/g, ""),
+                    10
+                  ); // Get price from the table cell
+                  const updatedTotalPrice = pricePerItem * 1; // Calculate total price with quantity 1
+                  newRow.querySelector(
+                    "td:nth-child(5)"
+                  ).textContent = `Rp. ${updatedTotalPrice.toLocaleString(
+                    "id-ID"
+                  )}`; // Update total price cell
+                }
               });
 
               tableBody.appendChild(newRow);
@@ -298,10 +369,9 @@ const Finance = {
             tableBody.innerHTML = "";
 
             // Call the new function to update Roti stock
-            await logDatesSince(getCurrentDate().pickedDate);
-
+            // await logDatesSince(getCurrentDate().pickedDate);
             await updateRotiStock();
-            setTodayDate();
+            await filterDataByDate((await datePickerValue()).dateValue);
 
             console.log("Data updated successfully");
           } catch (error) {
@@ -325,11 +395,22 @@ const Finance = {
           tableBody.innerHTML = "";
 
           // Call the new function to update Roti stock
-          await logDatesSince(getCurrentDate().pickedDate);
+          // await logDatesSince(getCurrentDate().pickedDate);
           await updateRotiStock();
-          setTodayDate();
+          await filterDataByDate((await datePickerValue()).dateValue);
+
           console.log("New data added successfully");
         }
+
+        Swal.fire({
+          title: "Sukses",
+          text: "Data belanja diperbarui",
+          icon: "success",
+          confirmButtonText: "OK",
+          customClass: {
+            popup: "swal2-small",
+          },
+        });
 
         // Uncheck all checkboxes and radio buttons
         checkboxes.forEach((checkbox) => {
@@ -405,8 +486,6 @@ const Finance = {
         (entry) => entry.tanggal === selectedDate
       );
 
-      // console.log(`Data for date ${selectedDate}:`, filteredData);
-
       // Display the filtered data in the template
       displayData(filteredData);
     }
@@ -463,34 +542,34 @@ const Finance = {
       table.id = "shoppingHistoryTable";
       table.classList.add("shoppingTable");
       table.innerHTML = `
-    <thead class="tableHead">
-      <tr>
-        <th width="3%">No</th>
-        <th>Nama Bahan</th>
-        <th>Jumlah</th>
-        <th>Harga</th>
-        <th>Total Harga</th>
-        <th>Pembayaran</th> <!-- New Payment Column -->
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody id="">
-    </tbody>
-    <tfoot>
-      <tr>
-        <td colspan="4" style="font-weight: bold; text-align: left;">Total Pengeluaran Tunai</td>
-        <td colspan="3" id="totalBelanjaCash" style="font-weight: bold;">Rp. 0</td>
-      </tr>
-      <tr>
-        <td colspan="4" style="font-weight: bold; text-align: left;">Total Pengeluaran Kredit</td>
-        <td colspan="3" id="totalBelanjaDebit" style="font-weight: bold;">Rp. 0</td>
-      </tr>
-      <tr>
-        <td colspan="4" style="font-weight: bold; text-align: left;">Total Pengeluaran</td>
-        <td colspan="3" id="totalBelanja" style="font-weight: bold;">Rp. 0</td>
-      </tr>
-    </tfoot>
-  `;
+          <thead class="tableHead">
+            <tr>
+              <th width="10px">#</th>
+              <th>Nama Item</th>
+              <th>Jumlah</th>
+              <th>Harga</th>
+              <th>Total Harga</th>
+              <th>Pembayaran</th> <!-- New Payment Column -->
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="">
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4" style="font-weight: bold; text-align: left;">Total Pengeluaran Tunai</td>
+              <td colspan="3" id="totalBelanjaCash" style="font-weight: bold;">Rp. 0</td>
+            </tr>
+            <tr>
+              <td colspan="4" style="font-weight: bold; text-align: left;">Total Pengeluaran Kredit</td>
+              <td colspan="3" id="totalBelanjaDebit" style="font-weight: bold;">Rp. 0</td>
+            </tr>
+            <tr>
+              <td colspan="4" style="font-weight: bold; text-align: left;">Total Pengeluaran</td>
+              <td colspan="3" id="totalBelanja" style="font-weight: bold;">Rp. 0</td>
+            </tr>
+          </tfoot>
+        `;
 
       let rowNumber = 1;
       let totalBelanja = 0;
@@ -627,7 +706,7 @@ const Finance = {
 
           await logDatesSince(getCurrentDate().pickedDate);
           await displayFinance();
-          setTodayDate();
+          await filterDataByDate((await datePickerValue()).dateValue);
         } catch (error) {
           console.error("Error updating payment method:", error);
         }
@@ -779,10 +858,10 @@ const Finance = {
 
           console.log("Data updated successfully:", data);
 
-          await logDatesSince(getCurrentDate().pickedDate);
+          // await logDatesSince(getCurrentDate().pickedDate);
 
           await updateRotiStock();
-          setTodayDate();
+          await filterDataByDate((await datePickerValue()).dateValue);
         } catch (error) {
           console.error("Error updating shopping list data:", error);
           // Tampilkan pesan error ke pengguna
@@ -887,9 +966,10 @@ const Finance = {
                 )}`;
               }
 
-              await logDatesSince(getCurrentDate().pickedDate);
+              // await logDatesSince(getCurrentDate().pickedDate);
               await updateRotiStock();
-              setTodayDate();
+              await filterDataByDate((await datePickerValue()).dateValue);
+
               console.log(`Bahan ${namaBahan} berhasil dihapus.`);
             } catch (error) {
               console.error("Error deleting item:", error);
@@ -969,6 +1049,8 @@ const Finance = {
         acc[`${item._id}-checkbox`] = {
           name: item.namaBahan,
           price: item.harga,
+          satuan: item.satuan,
+          jenisSatuan: item.jenisSatuan
         };
         return acc;
       }, {});
@@ -1121,8 +1203,8 @@ const Finance = {
     document
       .getElementById("resetFinanceSwitch")
       .addEventListener("click", async () => {
-        const toCashValue = document.querySelector("#toCash").value
-        const toDebitValue = document.querySelector("#toDebit").value
+        const toCashValue = document.querySelector("#toCash").value;
+        const toDebitValue = document.querySelector("#toDebit").value;
         if (toDebitValue === "Rp 0" && toCashValue === "Rp 0") {
           Swal.fire({
             icon: "info",
@@ -1136,7 +1218,7 @@ const Finance = {
           return;
         }
         const result = await Swal.fire({
-          icon: "warning", 
+          icon: "warning",
           title: "Apakah anda yakin?",
           text: "Nilai tukar akan dikembalikan ke nilai awal",
           showCancelButton: true,

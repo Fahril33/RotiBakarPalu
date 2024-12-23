@@ -8,7 +8,10 @@ export function getCurrentDate() {
 
   var datePicker = document.getElementById("dataDatePicker");
   if (datePicker) {
-    datePicker.value = formattedDate;
+    async () => {
+      datePicker.value = await datePickerValue()
+    }
+    // datePicker.value = formattedDate;
   } else {
     // console.log("Elemen dengan ID 'dataDatePicker' tidak ditemukan.");
   }

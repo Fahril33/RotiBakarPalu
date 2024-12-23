@@ -12,7 +12,10 @@ import {
   displayerWeather,
   hideComponents,
 } from "../../utils/sales/displayerData";
-import { handleFormSubmit } from "../../utils/sales/form-handler";
+import {
+  handleFormSubmit,
+  syncSalesToOthers,
+} from "../../utils/sales/form-handler";
 import { showModal, closeModal } from "../../utils/sales/modal-handler";
 import { datePickerValue, getCurrentDate } from "../../utils/datePicker";
 import { bagIcon, soldIcon, editIcon } from "../../utils/icons";
@@ -24,6 +27,7 @@ import { showPredictionModal } from "../../utils/sales/prediction-modal";
 import { callDataShell, logDatesSince } from "../../utils/syncData";
 import { checkUserRole } from "../../utils/interceptor";
 import Swal from "sweetalert2";
+import { allPredictionDataByDate } from "../../../data/allData";
 // import { logDatesSince } from "../../utils/syncData";
 
 const Sales = {
@@ -159,6 +163,7 @@ const Sales = {
       await displayerWeather();
       await displayerHolidays();
       await displayerPredictionData();
+      // await syncSalesToOthers((await datePickerValue()).dateValue);
 
       if (!(await checkUserRole())) {
         await hideComponents(selectedDate);
@@ -172,8 +177,6 @@ const Sales = {
     // await checkWeatherData();
     await displayerSold();
     await displayerIncome();
-    await displayerWeather();
-    await displayerPredictionData();
 
     await this.filterDataByDate(
       document.getElementById("dataDatePicker").value
@@ -215,6 +218,24 @@ const Sales = {
         </tr>
       `;
     }
+
+    // Cek Operasional
+    (async () => {
+      const thisDayDate = (await datePickerValue()).dateValue;
+      const thisDayOperational = (await allPredictionDataByDate(thisDayDate))
+        .operasional;
+        
+      if (thisDayOperational === true) {
+        document.getElementById("dataDatePicker").style.backgroundColor =
+          "#00ff5e63";
+      } else if (thisDayOperational === false) {
+        document.getElementById("dataDatePicker").style.backgroundColor =
+          "#ff00001a";
+      } else {
+        document.getElementById("dataDatePicker").style.backgroundColor =
+          "white";
+      }
+    })();
 
     this.attachEditListeners();
     this.attachDeleteListeners();
@@ -351,13 +372,13 @@ const Sales = {
           title: "Pesanan berhasil diperbarui.",
         });
         closeModal(modal);
-        await logDatesSince(date);
+        // await logDatesSince(date);
         await this.displaySalesData();
 
         //
         // Sesuaikan Nilai Terjual di Prediciton
         //
-        await syncSoldToPrediction(date);
+        // await syncSoldToPrediction(date);
       } catch (error) {
         console.error("An error occurred while updating data:", error);
       }
@@ -454,13 +475,13 @@ const Sales = {
           title: "Pesanan berhasil dihapus.",
         });
 
-        await logDatesSince(date);
+        // await logDatesSince(date);
         await this.displaySalesData();
 
         //
         // Sesuaikan Nilai Terjual di Prediciton
         //
-        await syncSoldToPrediction(date);
+        // await syncSoldToPrediction(date);
       } catch (error) {
         console.error("An error occurred while deleting data:", error);
       }

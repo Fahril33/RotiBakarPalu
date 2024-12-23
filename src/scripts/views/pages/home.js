@@ -28,6 +28,9 @@ const Home = {
   },
 
   async afterRender() {
+    //
+    // Check Allowed
+    //
     const token = localStorage.getItem("token");
     // Logika redirect untuk logout
     if (!token) {
@@ -1201,7 +1204,7 @@ const Home = {
     displayCashFlowCharts();
 
     //
-    // displayer
+    // DISPLAYER
     //
 
     const totalCashValue = document.getElementById("total-cash");
@@ -1216,7 +1219,7 @@ const Home = {
 
     function profitShowHideHandler(idToHide, idToShow) {
       idToHide.style.display = "none";
-      idToShow.style.display = "unset";
+      idToShow.style.display = "inline";
     }
 
     function persentaseSelisih(dataBaru, dataSebelumnya) {
@@ -1246,6 +1249,13 @@ const Home = {
       if (dataSebelumnya === 0) {
         // Jika data sebelumnya 0, tapi data baru tidak 0
         if (dataBaru !== 0) {
+          // Jika data baru negatif dan data sebelumnya 0
+          if (dataBaru < 0) {
+            return {
+              hasilSelisih: "-100.00",
+              pesan: "Penurunan 100%",
+            };
+          }
           // console.log("Pertumbuhan 100%");
           return {
             hasilSelisih: "100.00",
@@ -1305,7 +1315,7 @@ const Home = {
     const todayCashStatusArrUp = document.querySelector(
       "#todayCashStatus #arrUp"
     );
-    const todayCashStatusArrUpArrDown = document.querySelector(
+    const todayCashStatusArrDown = document.querySelector(
       "#todayCashStatus #arrDown"
     );
     const todayCashStatusArrUpText = document.querySelector(
@@ -1316,10 +1326,10 @@ const Home = {
     );
 
     if (selisihFinanceD > 0) {
-      profitShowHideHandler(todayCashStatusArrUpArrDown, todayCashStatusArrUp);
+      profitShowHideHandler(todayCashStatusArrDown, todayCashStatusArrUp);
       todayCashStatusArrUpText.textContent = selisihFinanceD;
     } else {
-      profitShowHideHandler(todayCashStatusArrUp, todayCashStatusArrUpArrDown);
+      profitShowHideHandler(todayCashStatusArrUp, todayCashStatusArrDown);
       todayCashStatusArrDownText.textContent = selisihFinanceD;
     }
 
@@ -1710,7 +1720,7 @@ const Home = {
       prediksiAkurat: prediksiAkurat,
       persentaseAkurasi: `${persentaseAkurasi}%`,
       prediksiAkuratNull: prediksiAkuratNull,
-      prediksiAkuratFalse: prediksiAkuratFalse
+      prediksiAkuratFalse: prediksiAkuratFalse,
     };
   },
 
@@ -1747,8 +1757,7 @@ const Home = {
     // Hitung akurasi untuk hari ini dan besok
     const akurasiHariIni = await this.hitungAkurasiPrediksi(
       dataPrediksiHariIniFilter,
-      databasePrediksi,
-      
+      databasePrediksi
     );
     const akurasiBesok = await this.hitungAkurasiPrediksi(
       dataPrediksiBesokFilter,

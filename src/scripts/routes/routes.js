@@ -6,7 +6,7 @@ import Settings from "../views/pages/settings"
 // import Detail from "../views/pages/detail";
 
 const routes = {
-  "/": Home, // default page
+  "/": Login, // default page
   "/home": Home,
   "/settings": Settings,
   "/sales": Sales,

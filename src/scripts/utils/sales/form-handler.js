@@ -1,10 +1,21 @@
 import generateID from "./generateID";
 import RBPsource from "../../../data/source";
-import { datePickerValue, getCurrentDate } from "../datePicker";
-import { stockConverter } from "../../../data/utils/stockHandler";
 import {
+  datePickerValue,
+  getCurrentDate,
+  minusOneDayDate,
+} from "../datePicker";
+import {
+  postStockData,
+  putNewStockData,
+  stockConverter,
+} from "../../../data/utils/stockHandler";
+import {
+  allFinanceDataByDate,
   allPredictionDataByDate,
   allSalesDataByDate,
+  allShoplistDataByDate,
+  allStockDataByDate,
 } from "../../../data/allData";
 import {
   isPredictionDataExist,
@@ -12,8 +23,16 @@ import {
 } from "../../../data/utils/predictionHandler";
 import { logDatesSince } from "../syncData";
 import Swal from "sweetalert2";
+import {
+  postFinance,
+  putFinanceData,
+} from "../../../data/utils/financeHandler";
 
 export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
+  // Disable Add Sales Button
+  const salesBtn = document.getElementById("addSales");
+  salesBtn.disabled = true;
+
   // Ambil nilai dari input form
   const harga = document.querySelector("#tipe").value;
   const jumlah = document.querySelector("#quantity").value;
@@ -69,7 +88,7 @@ export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
     totalMerchantIncome: totalMerchantIncome,
     totalOutletIncome: totalOutletIncome,
   };
-  console.log("Data penjualan:", salesData);
+  // console.log("Data penjualan:", salesData);
 
   // Periksa apakah sudah ada data dengan tanggal hari ini atau belum
   const allSalesData = await RBPsource.salesData();
@@ -77,7 +96,7 @@ export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
     (sale) => sale.date === formattedDate
   );
   if (existingData.length > 0) {
-    console.log("Data untuk hari ini sudah ada:", existingData);
+    // console.log("Data untuk hari ini sudah ada:", existingData);
 
     // Lakukan put
     // const existingSale = existingData[0]; // Ambil data penjualan yang ada
@@ -130,12 +149,13 @@ export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
 
       // Perbarui tampilan tabel dengan data terbaru
       salesInstance.populateSalesTable(updatedSalesData);
+      await syncSalesToOthers(formattedDate);
 
       //
       // Sesuaikan Nilai Terjual di Prediciton
       //
 
-      await logDatesSince(formattedDate);
+      // await logDatesSince(formattedDate);
     } catch (error) {
       console.error("Terjadi kesalahan saat memperbarui data:", error);
     }
@@ -178,14 +198,15 @@ export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
 
       // Ambil data terbaru dari server setelah berhasil menyimpan
       const updatedSalesData = await RBPsource.salesData();
-      await logDatesSince(formattedDate);
-
+      // await logDatesSince(formattedDate);
       // Perbarui tampilan tabel dengan data terbaru
       salesInstance.populateSalesTable(updatedSalesData);
+      await syncSalesToOthers(formattedDate);
 
       const soldConvertedValue = await stockConverter(jumlah);
       const predicitionData = {
         terjual: soldConvertedValue,
+        operasional: true,
       };
 
       const isPredictionShellAvailable = (
@@ -203,6 +224,10 @@ export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
       console.error("Terjadi kesalahan saat menyimpan data:", error);
     }
   }
+
+  // enable sales button after upload data
+  salesBtn.disabled = false;
+
   //
   // STATUS Outlet
   const todayDate = getCurrentDate().pickedDate;
@@ -216,3 +241,95 @@ export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
     await putPredictionData({ operasional: true }, todayDate);
   }
 };
+
+export async function syncSalesToOthers(date) {
+  const yesterdayDate = (await minusOneDayDate()).resultDate;
+
+  //
+  // Sales to Stock Sync
+  //
+  let newStocksShellData;
+
+  // StockShell
+  const stockShellToday = (await allStockDataByDate(date)).isThere;
+  const stockShellYesterday = (await allStockDataByDate(yesterdayDate)).isThere;
+
+  if (!stockShellYesterday) {
+    console.log(
+      "Shell Stock hari sebelumnya tidak ada, deklarasi callDataShell()"
+    );
+  }
+
+  // Stocks Data
+  const initialStock = await (
+    await allStockDataByDate(yesterdayDate)
+  ).remainingStock;
+  const additionalStock = (await allShoplistDataByDate(date)).rotiQuantity;
+  //
+  const spoiledStock = stockShellToday
+    ? (await allStockDataByDate(date)).spoiledStock
+    : 0;
+  //
+  const soldStock = await (await allSalesDataByDate(date)).soldTotal;
+  const totalStock = initialStock + additionalStock;
+  //
+  //
+  newStocksShellData = {
+    ...(stockShellToday ? {} : { date: date }),
+    initial_stock: initialStock,
+    additional_stock: additionalStock,
+    spoiled_stock: spoiledStock,
+    sold_stock: soldStock,
+    total_stock: totalStock,
+    remaining_stock: totalStock - soldStock - spoiledStock,
+  };
+
+  if (!stockShellToday) {
+    await postStockData(newStocksShellData);
+    //
+  } else {
+    await putNewStockData(date, newStocksShellData);
+    //
+  }
+
+  //
+  // Sales to finance
+  //
+  let newFinanceShellData;
+
+  // Finance shell
+  const financeShellToday = (await allFinanceDataByDate(date)).isThere;
+  const financeShellYesterday = (await allFinanceDataByDate(yesterdayDate))
+    .isThere;
+
+  if (!financeShellYesterday) {
+    console.log("shell finance kemarin tidak ada, deklarasikan callShell()");
+  }
+
+  // Finance data
+  const inCash = (await allSalesDataByDate(date)).totalOutletIncome;
+  const inDebit = (await allSalesDataByDate(date)).totalMerchantIncome;
+  const outCash = (await allShoplistDataByDate(date)).totalShopCash;
+  const outDebit = (await allShoplistDataByDate(date)).totalShopDebit;
+  //
+  const yesterdayCash = (await allFinanceDataByDate(yesterdayDate)).totalCash;
+  const yesterdayDebit = (await allFinanceDataByDate(yesterdayDate)).totalDebit;
+
+  newFinanceShellData = {
+    ...(financeShellToday ? {} : { date: date }),
+    in_cash: inCash,
+    in_debit: inDebit,
+    out_cash: outCash,
+    out_debit: outDebit,
+    total_cash: yesterdayCash + inCash - outCash,
+    total_debit: yesterdayDebit + inDebit - outDebit,
+  };
+
+  if (!financeShellToday) {
+    await postFinance(newFinanceShellData);
+    //
+  } else {
+    await putFinanceData(newFinanceShellData, date);
+    //
+  }
+}

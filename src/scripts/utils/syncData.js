@@ -39,7 +39,7 @@ async function subtractOneDay(dateString) {
 export async function logDatesSince(pickedDate, logsince = false) {
   // let dateValue = (await datePickerValue()).dateValue;
   let dateValue = pickedDate;
-  console.log("dateValue", dateValue);
+  // console.log("dateValue", dateValue);
 
   const [year, month, day] = dateValue.split("-").map(Number);
   const startDate = new Date(year, month - 1, day); // Bulan dimulai dari 0
@@ -87,21 +87,21 @@ export async function logDatesSince(pickedDate, logsince = false) {
 
       let isStockShellAvailable = (await allStockDataByDate(formattedDate))
         .filteredData;
-      console.log("isstockada", isStockShellAvailable);
+      // console.log("isstockada", isStockShellAvailable);
       if (isStockShellAvailable === `none`) {
-        console.log("gaada bang, wait ditambahin");
+        // console.log("gaada bang, wait ditambahin");
         await isAnyStockDataShell(formattedDate);
-        console.log("oke udah ditambahin, lanjut sinkron data stock");
+        // console.log("oke udah ditambahin, lanjut sinkron data stock");
         await putNewStockData(formattedDate, stockData);
-        console.log(
-          "Data stok untuk",
-          formattedDate,
-          "sinkron dengan",
-          formattedDateMinusOne
-        );
+        // console.log(
+        //   "Data stok untuk",
+        //   formattedDate,
+        //   "sinkron dengan",
+        //   formattedDateMinusOne
+        // );
       } else {
         await putNewStockData(formattedDate, stockData);
-        console.log("ada, ini bang", isStockShellAvailable);
+        // console.log("ada, ini bang", isStockShellAvailable);
       }
 
       //
@@ -135,34 +135,34 @@ export async function logDatesSince(pickedDate, logsince = false) {
         total_debit: ydayTotalDebit + inDebit - outDebit + cashToDebit - debitToCash,
       };
 
-      console.log("calon data", financeData);
+      // console.log("calon data", financeData);
 
       let isFinanceShellAvailable = (await allFinanceDataByDate(formattedDate))
         .filteredData;
       if (isFinanceShellAvailable === `none`) {
-        console.log("gaada shell bang, wait ditambahin dulu");
+        // console.log("gaada shell bang, wait ditambahin dulu");
         await createNewFinanceDataShell(formattedDate);
-        console.log("oke udah ditambahin, lanjut sinkron data finance");
+        // console.log("oke udah ditambahin, lanjut sinkron data finance");
         await putFinanceData(financeData, formattedDate);
-        console.log(
-          "Data finance untuk",
-          formattedDate,
-          "sinkron dengan",
-          formattedDateMinusOne
-        );
+        // console.log(
+        //   "Data finance untuk",
+        //   formattedDate,
+        //   "sinkron dengan",
+        //   formattedDateMinusOne
+        // );
       } else {
-        console.log(
-          "shell ada nih bang:",
-          isFinanceShellAvailable,
-          "skip ke sinkron data"
-        );
+        // console.log(
+        //   "shell ada nih bang:",
+        //   isFinanceShellAvailable,
+        //   "skip ke sinkron data"
+        // );
         await putFinanceData(financeData, formattedDate);
-        console.log(
-          "Data finance untuk",
-          formattedDate,
-          "sinkron dengan",
-          formattedDateMinusOne
-        );
+        // console.log(
+        //   "Data finance untuk",
+        //   formattedDate,
+        //   "sinkron dengan",
+        //   formattedDateMinusOne
+        // );
       }
 
       // Tambahkan jeda sebelum melanjutkan ke tanggal berikutnya
@@ -176,22 +176,8 @@ export async function logDatesSince(pickedDate, logsince = false) {
     }
 
     
-    // Tampilkan swal success setelah looping selesai
-    Swal.fire({
-      icon: "success",
-      title: "Sinkronisasi Selesai",
-      text: "Semua data telah berhasil disinkronkan.",
-      customClass: {
-        popup: "swal2-small",
-      },
-      confirmButtonText: "OK",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        window.location.reload();
-      }
-    });
   } else {
-    console.log("The dateValue is not less than today's date.");
+    // console.log("The dateValue is not less than today's date.");
   }
 }
 
@@ -218,9 +204,9 @@ export async function callDataShell() {
   const tomorrowDate = getTomorrowDate().tomorrowDate;
 
   const financeData = (await allFinanceDataByDate(currDate)).filteredData;
-  console.log("financeData", financeData);
+  // console.log("financeData", financeData);
   const stockData = (await allStockDataByDate(currDate)).filteredData;
-  console.log("stockData", stockData);
+  // console.log("stockData", stockData);
   const predicitionDataToday = (await allPredictionDataByDate(currDate))
     .filteredData;
   const predictionDataTomorrow = await (
@@ -251,12 +237,13 @@ export async function callDataShell() {
     `,
     });
 
+
     // =? DATA PREDIKSI ADA?
     if (!predicitionDataToday || !predictionDataTomorrow) {
       try {
         await checkWeatherData();
       } catch (error) {
-        console.error("Error occurred:", error);
+        // console.error("Error occurred:", error);
         Swal.fire({
           icon: "error",
           title: `${error}`,
@@ -268,7 +255,7 @@ export async function callDataShell() {
       try {
         await getHolidayValue();
       } catch (error) {
-        console.error("Error occurred:", error);
+        // console.error("Error occurred:", error);
         Swal.fire({
           icon: "error",
           title: `${error}`,
@@ -278,9 +265,10 @@ export async function callDataShell() {
         return;
       }
     } else {
-      console.log("Data Prediksi sudah ada");
+      // console.log("Data Prediksi sudah ada");
     }
 
+    // Caritau kapan terakhir buka 
     const yesterdayDate = getYesterdayDate().yesterday;
     const operationalYesterday = (await allPredictionDataByDate(yesterdayDate))
       .operasional;
@@ -302,7 +290,7 @@ export async function callDataShell() {
         }
       }
       // return operationalDate;
-      console.log("terakhir buka pada tanggal", operationalDate);
+      // console.log("terakhir buka pada tanggal", operationalDate);
       await logDatesSince(operationalDate);
     }
 
@@ -310,7 +298,7 @@ export async function callDataShell() {
 
     loadingToast.close();
   } else {
-    console.log("Semua Data Tersedia");
+    // console.log("Semua Data Tersedia");
     // Cuaca besok ada?
     const realtomorrowWeather = (
       await allPredictionDataByDate(getCurrentDate().pickedDate)
@@ -326,13 +314,13 @@ export async function callDataShell() {
     // prediction besok ada?
     const realtomorrowPrediction = (await allPredictionDataByDate(tomorrowDate))
       .hasilPrediksi;
-    console.log("rtp", realtomorrowPrediction);
+    // console.log("rtp", realtomorrowPrediction);
     if (
       realtomorrowPrediction === "" ||
       realtomorrowPrediction === "none" ||
       realtomorrowPrediction === "unknown"
     ) {
-      console.log("kosong cuy");
+      // console.log("kosong cuy");
       await usePrediction();
     }
   }
@@ -388,7 +376,7 @@ export function manualSyncData() {
           },
         });
       } else {
-        console.log("dateValue", dateValue);
+        // console.log("dateValue", dateValue);
         Swal.fire({
           title: "Konfirmasi",
           text: `Apakah Anda yakin ingin sinkronisasi data sejak tanggal ${dateValue}?`,
@@ -406,6 +394,21 @@ export function manualSyncData() {
           }
         });
       }
+
+      // Tampilkan swal success setelah looping selesai
+      Swal.fire({
+        icon: "success",
+        title: "Sinkronisasi Selesai",
+        text: "Semua data telah berhasil disinkronkan.",
+        customClass: {
+          popup: "swal2-small",
+        },
+        confirmButtonText: "OK",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.reload();
+        }
+      });
     });
 
   // Tambahkan event listener untuk menutup modal

@@ -251,8 +251,8 @@ const createFinanceTemplate = () => `
         <table class="shoppingTable">
           <thead class"tableHead">
             <tr>
-              <th width="">No</th>
-              <th width="20%">Nama Bahan</th>
+              <th width="20px">#</th>
+              <th width="20%">Nama Item</th>
               <th width="20%">Harga Satuan</th>
               <th width="10%">Quantity</th>
               <th width="20%">Total Harga</th>
@@ -522,8 +522,8 @@ const createSettingTemplate = () => {
       </ul>
     </div>
     <div class="settings-header">
-      <p>Daftar Bahan</p>
-      <button id="addIngredients">+Bahan</button>
+      <p>Daftar Kebutuhan</p>
+      <button id="addIngredients">+Item</button>
     </div>
     <!--  -->
     <div class="card">
@@ -547,11 +547,13 @@ const createLoginTemplate = () => {
         <div class="card-login-items inputs"> 
           <div class="card-login-item head"> 
             <p>Login</p> 
-          </div> 
-          <div class="card-login-item body"> 
+            </div> 
+            <div class="card-login-item body"> 
             <div> 
               <label for="email">Email/Username :</label> 
               <input type="text" id="email" name="email" required /> 
+              <span class="loginError" id="identifierLoginError">Identitas tidak terdaftar.</span>
+              <span class="loginError" id="identifierLoginEmpty">Keduanya harus diisi.</span>          
             </div> 
             <div> 
               <label for="password">Password:</label> 
@@ -566,7 +568,9 @@ const createLoginTemplate = () => {
                   <i class="fas fa-eye-slash" id="eyeIcon"></i> 
                 </button> 
               </div> 
-            </div> 
+              <span class="loginError" id="passwordLoginError">Password tidak cocok.</span>
+              <span class="loginError" id="identifierLoginEmpty">Keduanya harus diisi.</span>          
+              </div> 
           </div> 
           <div class="card-login-item foot" > 
             <div id="loginForm"> 

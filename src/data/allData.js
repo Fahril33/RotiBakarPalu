@@ -28,6 +28,8 @@ export async function allStockDataByDate(date) {
   // console.log("all stock bang", allStockDatas);
   const filteredData =
     allStockDatas.find((stock) => stock.date === date) || `none`;
+  const isThere =
+    allStockDatas.find((stock) => stock.date === date) || false;
 
   const {
     initial_stock: initialStock = 0,
@@ -48,6 +50,7 @@ export async function allStockDataByDate(date) {
     soldStock,
     totalStock,
     remainingStock,
+    isThere
   };
 }
 
@@ -81,6 +84,8 @@ export async function allFinanceDataByDate(date) {
   const allFinanceData = await RBPsource.getFinances();
   const filteredData =
     allFinanceData.find((item) => item.date === date) || `none`;
+  const isThere =
+    allFinanceData.find((item) => item.date === date) || false;
 
   const filteredDataThisMonth = allFinanceData.filter((item) => {
     const itemDate = new Date(item.date);
@@ -136,6 +141,7 @@ export async function allFinanceDataByDate(date) {
     totalDebit,
     cashToDebit,
     debitToCash,
+    isThere,
   };
 }
 
