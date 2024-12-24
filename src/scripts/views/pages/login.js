@@ -1,9 +1,10 @@
 import Swal from "sweetalert2";
-import { urlOtorizator } from "../../utils/interceptor";
+import { reconnectServer, updateUIOnServerStatus, urlOtorizator } from "../../utils/interceptor";
 import { createLoginTemplate } from "../template/template-creator";
 import { RBPlogo } from "../../utils/icons";
 import "../../../styles/login.css";
 import RBPsource from "../../../data/source";
+import UrlParser from "../../routes/url-parser";
 
 const Login = {
   async render() {
@@ -17,13 +18,13 @@ const Login = {
   async afterRender() {
     document.querySelector('.card-login-items img[alt="RBPlogo"]').src =
       RBPlogo;
-    const data = await RBPsource.serverStatus();
-    console.log("data", data);
-    if (!data == []) {
-      document.querySelector(".card-login-header").style.display = "block";
-      document.getElementById("loginBtn").disabled = true;
-      return;
+    const serverStatus = (await RBPsource.serverStatus()).isServerConnected;
+    console.log("serverStatus", serverStatus);
+
+    if (!serverStatus) {
+      await reconnectServer();
     }
+    updateUIOnServerStatus(serverStatus);
 
     const form = document.getElementById("loginForm");
     const submitButton = form.querySelector('button[type="submit"]');
@@ -53,6 +54,8 @@ const Login = {
     });
   },
 
+  
+
   async login(identifier, password) {
     try {
       const response = await fetch("http://localhost:5000/api/auth/login", {
@@ -79,32 +82,32 @@ const Login = {
         localStorage.setItem("token", data.token);
         await urlOtorizator();
 
-        
-
         Toast.fire({
           icon: "success",
           title: "Anda Berhasil Masuk.",
         });
       } else if (response.status === 400) {
         const data = await response.json();
-        const credentialEmpty = document.querySelectorAll("#identifierLoginEmpty");
-        
+        const credentialEmpty = document.querySelectorAll(
+          "#identifierLoginEmpty"
+        );
+
         const identifierError = document.querySelector("#identifierLoginError");
         const passwordError = document.querySelector("#passwordLoginError");
         if (data.msg === "Identifier and password are required") {
-          credentialEmpty.forEach(element => {
+          credentialEmpty.forEach((element) => {
             element.style.display = "inline";
           });
           identifierError.style.display = "none";
           passwordError.style.display = "none";
         } else if (data.msg === "Invalid email/username") {
-          credentialEmpty.forEach(element => {
+          credentialEmpty.forEach((element) => {
             element.style.display = "none";
           });
           identifierError.style.display = "inline";
           passwordError.style.display = "none";
         } else if (data.msg === "Invalid password") {
-          credentialEmpty.forEach(element => {
+          credentialEmpty.forEach((element) => {
             element.style.display = "none";
           });
           identifierError.style.display = "none";
@@ -117,7 +120,7 @@ const Login = {
       }
     } catch (error) {
       // alert("Terjadi kesalahan jaringan. Silakan coba lagi.");
-      console.warn("Login error:", error.message);  
+      console.warn("Login error:", error.message);
     }
   },
 

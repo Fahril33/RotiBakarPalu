@@ -11,6 +11,9 @@ export async function PutSalesData(formattedDate, updatedData) {
       showConfirmButton: false,
       timer: 1000,
       timerProgressBar: true,
+      customClass: {
+        title: "custom-swalTitle",
+      },
       didOpen: (toast) => {
         toast.addEventListener("mouseenter", Swal.stopTimer);
         toast.addEventListener("mouseleave", Swal.resumeTimer);
@@ -19,7 +22,7 @@ export async function PutSalesData(formattedDate, updatedData) {
 
     Toast.fire({
       icon: "error",
-      title: `Mengabaikan ${formattedDate} (tutup)`,
+      title: `Skip update hari pada ${formattedDate} (tutup)`,
     });
     return
   }

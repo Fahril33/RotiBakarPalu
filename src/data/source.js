@@ -1,22 +1,19 @@
 import API_ENDPOINT from "../config/config";
+import UrlParser from "../scripts/routes/url-parser";
 
 class RBPsource {
   static async serverStatus() {
-    fetch(API_ENDPOINT.STATUS)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then(() => {
-        document.getElementById("loginBtn").disabled = false;
-      })
-      .catch(() => {
-        document.querySelector(".card-login-header").style.display = "block";
-        document.getElementById("loginBtn").disabled = true;
-      });
+    try {
+      const response = await fetch(API_ENDPOINT.STATUS);
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      return { isServerConnected: true };
+    } catch (error) {
+      return { isServerConnected: false };
+    }
   }
+
   static async salesData() {
     try {
       const response = await fetch(API_ENDPOINT.SALES);
@@ -458,12 +455,12 @@ export async function getHolidays(date) {
 
         if (matchingHoliday) {
           return {
-            liburValue: spesifik.toLowerCase(), // Mengembalikan nama hari libur dalam format yang diinginkan
+            liburValue: spesifik, // Mengembalikan nama hari libur dalam format yang diinginkan
           };
         }
       }
     } else {
-      console.log("Tidak ada hari libur hari ini, KERJA!");
+      // console.log("Tidak ada hari libur hari ini, KERJA!");
       const isPuasa = (await convertGtoH()).hasilPemeriksaan;
       if (isPuasa) {
         return {

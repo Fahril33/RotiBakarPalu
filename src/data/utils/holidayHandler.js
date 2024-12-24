@@ -9,8 +9,10 @@ import { postPredictionData, putPredictionData } from "./predictionHandler";
 export async function getHolidayValue() {
   const currentDate = getCurrentDate().pickedDate;
   const currentDaten = getCurrentDate().pickedDaten;
+  console.log('todDaten', currentDaten);
   const tomorrowDate = getTomorrowDate().tomorrowDate;
   const tomorrowDaten = getTomorrowDate().pickedDaten;
+  console.log('tmdate', tomorrowDaten);
   try {
     const result = await getHolidays(currentDaten);
     console.log("hasil ini", result);
@@ -34,7 +36,7 @@ export async function getHolidayValue() {
 
       await HolidayData(resultValue, tomorrowDaten, tomorrowDate);
 
-      console.log("Libur Valuez:", resultValue);
+      console.log("Event besok:", resultValue);
     } else {
       console.error("Result is null or liburValue is not defined");
     }

@@ -2,53 +2,6 @@ import Swal from "sweetalert2";
 import UrlParser from "../routes/url-parser";
 import RBPsource from "../../data/source";
 
-// Contoh fungsi interceptor
-async function checkTokenExpiration(response) {
-  // Jika response status 401 (Unauthorized),
-  // kemungkinan token sudah expired
-  if (response.status === 401) {
-    // Logout otomatis
-    localStorage.removeItem("token");
-    window.location.hash = "#/login";
-    return false;
-  }
-  return true;
-}
-
-// Contoh penggunaan di fungsi fetch
-async function fetchWithAuth(url, options = {}) {
-  const token = localStorage.getItem("token");
-
-  const defaultHeaders = {
-    Authorization: `Bearer ${token}`,
-    "Content-Type": "application/json",
-  };
-
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      ...defaultHeaders,
-      ...options.headers,
-    },
-  });
-
-  // Cek token expiration
-  const isValidToken = await checkTokenExpiration(response);
-
-  if (!isValidToken) {
-    return null;
-  }
-
-  return response;
-}
-
-// Fungsi untuk menangani semua permintaan HTTP
-async function handleFetch(url, options) {
-  return await fetchWithAuth(url, options);
-}
-
-export { fetchWithAuth, handleFetch };
-
 export async function urlOtorizator() {
   const url = UrlParser.parseActiveUrlWithCombiner();
   const token = localStorage.getItem("token");
@@ -141,4 +94,94 @@ export async function checkUserRole() {
     return false;
   }
   return true;
+}
+
+export async function serverStatusWatcher() {
+  let serverStatus;
+  setInterval(async () => {
+    serverStatus = (await RBPsource.serverStatus()).isServerConnected;
+    if (!serverStatus) {
+      await reconnectServer();
+    }
+  }, 10000); // Interval pemeriksaan
+}
+
+export async function reconnectServer() {
+  const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: false,
+    timerProgressBar: true,
+    customClass: "server-toast",
+    didOpen: (toast) => {
+      toast.onmouseenter = Swal.stopTimer;
+      toast.onmouseleave = Swal.resumeTimer;
+    },
+  });
+
+  const loadingToast = Toast.fire({
+    html: `
+        <div style="text-align: center; display: flex; gap: 10px">
+          <div class="loader" style="display: block"></div>
+          <span style="margin: auto;">Server terputus, menghubungkan kembali..</span>
+        </div>
+    `,
+  });
+
+  updateUIOnServerStatus(false);
+
+  let isServerConnected = false;
+  while (!isServerConnected) {
+    const serverStatus = (await RBPsource.serverStatus()).isServerConnected;
+    if (serverStatus) {
+      isServerConnected = true;
+      loadingToast.close();
+      const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.onmouseenter = Swal.stopTimer;
+          toast.onmouseleave = Swal.resumeTimer;
+        },
+      });
+
+      Toast.fire({
+        icon: "success",
+        title: "Server terhubung kembali.",
+      });
+
+      setTimeout(() => {
+        location.reload();
+      }, 1600); // 1 minute in milliseconds
+    } else {
+      await new Promise((resolve) => setTimeout(resolve, 5000)); // Tunggu 5 detik sebelum mencoba lagi
+    }
+  }
+}
+
+export function updateUIOnServerStatus(isConnected) {
+  const url = UrlParser.parseActiveUrlWithCombiner();
+  console.log("url", url);
+  if (url !== "/login") {
+    return;
+  }
+
+  const loginButton = document.getElementById("loginBtn");
+  const cardLoginHeader = document.querySelector(".card-login-header");
+
+  if (isConnected) {
+    loginButton.disabled = false;
+    if (cardLoginHeader) {
+      cardLoginHeader.style.display = "none";
+    }
+  } else {
+    loginButton.disabled = true;
+    if (cardLoginHeader) {
+      cardLoginHeader.style.display = "block";
+    }
+  }
 }

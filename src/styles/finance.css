@@ -575,6 +575,10 @@ h4 {
   border: 8px solid;
   border-color: #000 #0000;
   animation: l1 1s infinite;
+  text-align: center;
+}
+.server-toast{
+  scale: 0.8;
 }
 @keyframes l1 {
   to {

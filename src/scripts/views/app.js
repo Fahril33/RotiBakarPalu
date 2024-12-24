@@ -6,7 +6,7 @@ import {
   allSalesDataByDate,
 } from "../../data/allData";
 import { putPredictionData } from "../../data/utils/predictionHandler";
-import { urlOtorizator } from "../utils/interceptor";
+import { serverStatusWatcher, urlOtorizator } from "../utils/interceptor";
 import RBPsource from "../../data/source";
 import { create404Page } from "./template/template-creator";
 import "../../styles/404page.css";
@@ -68,7 +68,7 @@ class App {
 
     // Username Displayer
     //
-    
+
     if (token && data) {
       // Menampilkan sambutan
       if (data.role === "employee") {
@@ -138,7 +138,8 @@ class App {
     this._content.innerHTML = await page.render();
 
     await page.afterRender();
-     
+
+    await serverStatusWatcher();
   }
 }
 

@@ -38,7 +38,6 @@ const Sales = {
   },
 
   async afterRender() {
-    // showLoader(true, "Memuat data penjualan...");
 
     // image render
     document.getElementById("imgPredict").src = bagIcon;
@@ -165,6 +164,7 @@ const Sales = {
     } catch (error) {
       console.error("Error filtering data:", error);
     }
+    await callDataShell()
   },
   // buat hndler displayer data
   async displaySalesData() {

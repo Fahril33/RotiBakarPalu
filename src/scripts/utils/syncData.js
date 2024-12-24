@@ -28,7 +28,6 @@ import {
 } from "./datePicker";
 import { closeModal, showModal } from "./sales/modal-handler";
 import { usePrediction } from "./algorithm";
-import { PutSalesData } from "../../data/utils/salesHandler";
 
 // Tambahkan fungsi ini di luar logDatesSince
 async function subtractOneDay(dateString) {
@@ -116,8 +115,8 @@ export async function logDatesSince(pickedDate, logsince = false) {
       //
       // fix days on sales
       //
-      const salesDay = (await hariDariTanggal(formattedDate)).hari;
-      await PutSalesData(formattedDate, { day: salesDay });
+      // const salesDay = (await hariDariTanggal(formattedDate)).hari;
+      // await PutSalesData(formattedDate, { day: salesDay });
 
       //
       // Sync Finance
@@ -207,16 +206,15 @@ export function showLoader(isLoading, text) {
 }
 
 //
-//
+// Pemanggilan shell data hari ini dan besok termasuk data prediksi untuk hari ini
 //
 export async function callDataShell() {
   const currDate = getCurrentDate().pickedDate;
   const tomorrowDate = getTomorrowDate().tomorrowDate;
-
+  //
   const financeData = (await allFinanceDataByDate(currDate)).filteredData;
-  // console.log("financeData", financeData);
   const stockData = (await allStockDataByDate(currDate)).filteredData;
-  // console.log("stockData", stockData);
+  //
   const predicitionDataToday = (await allPredictionDataByDate(currDate))
     .filteredData;
   const predictionDataTomorrow = await (
@@ -250,31 +248,18 @@ export async function callDataShell() {
     // =? DATA PREDIKSI ADA?
     if (!predicitionDataToday || !predictionDataTomorrow) {
       try {
-        await checkWeatherData();
+        await Promise.all([checkWeatherData(), getHolidayValue()]);
       } catch (error) {
-        // console.error("Error occurred:", error);
         Swal.fire({
           icon: "error",
-          title: `${error}`,
-          text: "Oops.. Gagal mengambil data cuaca!. Silahkan Refresh Halaman",
-        });
-        loadingToast.close();
-        return;
-      }
-      try {
-        await getHolidayValue();
-      } catch (error) {
-        // console.error("Error occurred:", error);
-        Swal.fire({
-          icon: "error",
-          title: `${error}`,
-          text: "Oops.. Gagal mengambil data Event/Libur!. Silahkan Refresh Halaman",
+          title: `Ooops..`,
+          text: "Gagal mengambil data cuaca atau Event/Libur!. Silahkan Refresh Halaman",
         });
         loadingToast.close();
         return;
       }
     } else {
-      // console.log("Data Prediksi sudah ada");
+      console.log("Data Prediksi sudah ada");
     }
 
     // Caritau kapan terakhir buka
@@ -370,12 +355,12 @@ export function manualSyncData() {
       e.preventDefault();
       const dateValue = modal.querySelector("#startDate").value;
       const selectedDate = new Date(dateValue);
-      console.log('selectedDate', selectedDate);
+      console.log("selectedDate", selectedDate);
       const today = new Date();
       today.setHours(0, 0, 0, 0); // Set waktu hari ini ke 00:00:00 untuk perbandingan yang akurat
 
-      console.log('t0day', today);
-      console.log('is?', (selectedDate > today));
+      console.log("t0day", today);
+      console.log("is?", selectedDate > today);
       // Periksa apakah tanggal yang dipilih kurang dari hari ini
       if (selectedDate > today) {
         Swal.fire({
@@ -418,11 +403,9 @@ export function manualSyncData() {
             });
           }
         });
-        
       }
 
       // Tampilkan swal success setelah looping selesai
-      
     });
 
   // Tambahkan event listener untuk menutup modal
@@ -447,7 +430,7 @@ export async function syncSalesToOthers(date) {
     console.log(
       "Shell Stock hari sebelumnya tidak ada, deklarasi callDataShell()"
     );
-    await callDataShell()
+    await callDataShell();
   }
 
   // Stocks Data
@@ -494,7 +477,7 @@ export async function syncSalesToOthers(date) {
 
   if (!financeShellYesterday) {
     console.log("shell finance kemarin tidak ada, deklarasikan callShell()");
-    await callDataShell()
+    await callDataShell();
   }
 
   // Finance data
@@ -525,7 +508,6 @@ export async function syncSalesToOthers(date) {
   }
 }
 
-
 export async function hariDariTanggal(tanggal) {
   const dateParts = tanggal.split("-");
   const tahun = parseInt(dateParts[0]);
@@ -538,4 +520,3 @@ export async function hariDariTanggal(tanggal) {
   // console.log('hari', hari);
   return { hari };
 }
-

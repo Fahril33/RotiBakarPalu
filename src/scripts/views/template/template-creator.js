@@ -538,7 +538,7 @@ const createLoginTemplate = () => {
   <div class="container-login"> 
     <div class="card-login component">
       <div class="card-login-header">
-        <span id="dbError">Database sedang bermasalah, silahkan <a href="https://wa.me/6281342246239" target="_blank">melapor</a>.</span>
+        <span id="dbError">Server sedang bermasalah, silahkan <a href="https://wa.me/6281342246239" target="_blank">melapor</a>.</span>
       </div>
       <div class="card-login-body">
         <div class="card-login-items image"> 
