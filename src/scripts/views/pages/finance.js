@@ -1,7 +1,6 @@
 import { createFinanceTemplate } from "../template/template-creator";
 import RBPsource from "../../../data/source";
 import API_ENDPOINT from "../../../config/config";
-import { updateRotiStock } from "../../utils/finance/rotiStockUpdater"; // Import the new function
 import {
   displayFinance,
   displayUpcomingEvent,
@@ -15,7 +14,9 @@ import {
 import { checkUserRole } from "../../utils/interceptor";
 import Swal from "sweetalert2";
 import { closeModal, showModal } from "../../utils/sales/modal-handler";
-import { allFinanceDataByDate, allShoplistDataByDate } from "../../../data/allData";
+import {
+  allFinanceDataByDate,
+} from "../../../data/allData";
 import { putFinanceData } from "../../../data/utils/financeHandler";
 const Finance = {
   async render() {
@@ -53,11 +54,8 @@ const Finance = {
       return; // Hentikan proses render
     }
 
-    
-
     await displayUpcomingEvent();
     await callDataShell();
-    await displayFinance();
 
     document
       .getElementById("liburRefresh")
@@ -372,12 +370,21 @@ const Finance = {
             );
             tableBody.innerHTML = "";
 
-            // Call the new function to update Roti stock
-            // await logDatesSince(getCurrentDate().pickedDate);
-            await updateRotiStock();
-            await filterDataByDate((await datePickerValue()).dateValue);
-
-            console.log("Data updated successfully");
+            const Toast = Swal.mixin({
+              toast: true,
+              position: "top-start",
+              showConfirmButton: false,
+              timer: 2500,
+              timerProgressBar: true,
+              didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+              },
+            });
+            Toast.fire({
+              icon: "success",
+              title: "Catatan berhasil diperbarui",
+            });
           } catch (error) {
             console.error("Error updating data:", error);
           }
@@ -398,23 +405,17 @@ const Finance = {
           });
           tableBody.innerHTML = "";
 
-          // Call the new function to update Roti stock
-          // await logDatesSince(getCurrentDate().pickedDate);
-          await updateRotiStock();
-          await filterDataByDate((await datePickerValue()).dateValue);
-
-          console.log("New data added successfully");
+          Swal.fire({
+            icon: "success",
+            title: "Catatan belanja baru berhasil ditambahkan",
+            customClass: {
+              popup: "swal2-small",
+            },
+          });
         }
-
-        Swal.fire({
-          title: "Sukses",
-          text: "Data belanja diperbarui",
-          icon: "success",
-          confirmButtonText: "OK",
-          customClass: {
-            popup: "swal2-small",
-          },
-        });
+        // Call the function to update data and display
+        await logDatesSince(getCurrentDate().pickedDate);
+        await filterDataByDate((await datePickerValue()).dateValue);
 
         // Uncheck all checkboxes and radio buttons
         checkboxes.forEach((checkbox) => {
@@ -492,9 +493,8 @@ const Finance = {
 
       // Display the filtered data in the template
       displayData(filteredData);
+      await displayFinance()
     }
-
-    
 
     //
     // Event listeners for the buttons
@@ -710,7 +710,6 @@ const Finance = {
           }
 
           await logDatesSince(getCurrentDate().pickedDate);
-          await displayFinance();
           await filterDataByDate((await datePickerValue()).dateValue);
         } catch (error) {
           console.error("Error updating payment method:", error);
@@ -865,7 +864,7 @@ const Finance = {
 
           // await logDatesSince(getCurrentDate().pickedDate);
 
-          await updateRotiStock();
+          await logDatesSince(getCurrentDate().pickedDate);
           await filterDataByDate((await datePickerValue()).dateValue);
         } catch (error) {
           console.error("Error updating shopping list data:", error);
@@ -971,11 +970,16 @@ const Finance = {
                 )}`;
               }
 
-              // await logDatesSince(getCurrentDate().pickedDate);
-              await updateRotiStock();
+              await logDatesSince(getCurrentDate().pickedDate);
               await filterDataByDate((await datePickerValue()).dateValue);
 
-              console.log(`Bahan ${namaBahan} berhasil dihapus.`);
+              Swal.fire({
+                icon: "success",
+                title: `Item ${namaBahan} berhasil dihapus.`,
+                customClass: {
+                  popup: "swal2-small",
+                },
+              });
             } catch (error) {
               console.error("Error deleting item:", error);
             }
@@ -1055,7 +1059,7 @@ const Finance = {
           name: item.namaBahan,
           price: item.harga,
           satuan: item.satuan,
-          jenisSatuan: item.jenisSatuan
+          jenisSatuan: item.jenisSatuan,
         };
         return acc;
       }, {});
@@ -1149,7 +1153,7 @@ const Finance = {
         </div>
 
         <div class="form-group">
-          <label for="switchValue" id="switchValueLabel">Tukar tunai kek rekening</label>
+          <label for="switchValue" id="switchValueLabel">Tukar tunai ke rekening</label>
           <input type="number" id="switchValue" name="switchValue" placeholder="Nilai untuk ditukar" required/>
           <span class="error" id="switchFinanceError">Nilai minimal Rp.5000.</span>        
         </div>
@@ -1244,26 +1248,38 @@ const Finance = {
           debit_to_cash: 0,
         };
 
-        await putFinanceData(updatedData, currDate);
-        Swal.fire({
-          icon: "success",
-          title: "Selesai!",
-          text: "Nilai tukar berhasil direset!",
-          confirmButtonText: "OK",
-          customClass: {
-            popup: "swal2-small",
-          },
-        });
-        await displayFinance();
+        try {
+          await putFinanceData(updatedData, currDate);
+          Swal.fire({
+            icon: "success",
+            title: "Selesai!",
+            text: "Nilai tukar berhasil direset!",
+            confirmButtonText: "OK",
+            customClass: {
+              popup: "swal2-small",
+            },
+          });
+          await displayFinance();
 
-        document.querySelector(
-          "#cashFinance"
-        ).value = `Rp ${originalTotalCash.toLocaleString("id-ID")}`;
-        document.querySelector(
-          "#debitValue"
-        ).value = `Rp ${originalTotalDebit.toLocaleString("id-ID")}`;
-        document.querySelector("#toCash").value = `Rp 0`;
-        document.querySelector("#toDebit").value = `Rp 0`;
+          document.querySelector(
+            "#cashFinance"
+          ).value = `Rp ${originalTotalCash.toLocaleString("id-ID")}`;
+          document.querySelector(
+            "#debitValue"
+          ).value = `Rp ${originalTotalDebit.toLocaleString("id-ID")}`;
+          document.querySelector("#toCash").value = `Rp 0`;
+          document.querySelector("#toDebit").value = `Rp 0`;
+        } catch (error) {
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "Gagal mereset nilai tukar. Silakan coba lagi.",
+            confirmButtonText: "OK",
+            customClass: {
+              popup: "swal2-small",
+            },
+          });
+        }  
       });
 
     document

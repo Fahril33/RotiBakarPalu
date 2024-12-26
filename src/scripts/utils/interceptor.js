@@ -2,6 +2,7 @@ import Swal from "sweetalert2";
 import UrlParser from "../routes/url-parser";
 import RBPsource from "../../data/source";
 import API_ENDPOINT from "../../config/config";
+import { closeModal } from "./sales/modal-handler";
 
 export async function urlOtorizator() {
   const url = UrlParser.parseActiveUrlWithCombiner();
@@ -129,6 +130,8 @@ export async function reconnectServer() {
         </div>
     `,
   });
+
+  closeModal()
 
   updateUIOnServerStatus(false);
 

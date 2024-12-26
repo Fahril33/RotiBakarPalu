@@ -54,7 +54,7 @@ const Home = {
       return; // Hentikan proses render
     }
 
-    await callDataShell()
+    await callDataShell();
 
     // Anchors handler
     document.querySelectorAll(".overview-navigator a").forEach((anchor) => {
@@ -424,7 +424,7 @@ const Home = {
             ...(filterType === "daily"
               ? [
                   {
-                    label: "Total Stock",
+                    label: "Total Stok",
                     data: alltotalStockData,
                     borderColor: "rgba(54, 162, 235, 1)",
                     backgroundColor: "rgba(54, 162, 235, 1)",
@@ -434,21 +434,21 @@ const Home = {
                 ]
               : []), // Menyertakan dataset "Total Stock" jika filterType adalah "daily"
             {
-              label: "Additional Stock",
+              label: "Stok Tambahan",
               data: totalAdditionalStockData,
               borderColor: "rgba(75, 192, 192, 1)",
               backgroundColor: "rgba(75, 192, 192, 1)",
               fill: true,
             },
             {
-              label: "Sold Stock",
+              label: "Stok Terjual",
               data: totalSoldStockData,
               borderColor: "rgba(255, 99, 132, 1)",
               backgroundColor: "rgba(255, 99, 132, 1)",
               fill: true,
             },
             {
-              label: "Spoiled Stock",
+              label: "Stok Rusak",
               data: totalSpoiledStockData,
               borderColor: "rgba(255, 206, 86, 1)",
               backgroundColor: "rgba(255, 206, 86, 1)",
@@ -593,22 +593,22 @@ const Home = {
         }
       });
 
+      // Urutkan data berdasarkan tanggal
+      Object.keys(weeks).forEach((week) => {
+        weeks[week] = weeks[week].sort(
+          (a, b) => new Date(a.date) - new Date(b.date)
+        );
+      });
+
       if (filterType === "daily") {
         // Jika targetWeek adalah 'semua', kita ambil semua minggu
-        if (targetWeek === "semua") {
-          // Pastikan setiap minggu juga diurutkan berdasarkan tanggal
-          Object.keys(weeks).forEach((week) => {
-            weeks[week] = weeks[week].sort(
+        return targetWeek === "semua"
+          ? weeks
+          : weeks[targetWeek]
+          ? weeks[targetWeek].sort(
               (a, b) => new Date(a.date) - new Date(b.date)
-            );
-          });
-          return weeks; // Kembalikan semua minggu yang diurutkan
-        } else {
-          // Kembalikan data dari minggu yang dipilih dan diurutkan berdasarkan tanggal
-          return (weeks[targetWeek] || []).sort(
-            (a, b) => new Date(a.date) - new Date(b.date)
-          );
-        }
+            )
+          : [];
       } else if (filterType === "weekly") {
         const weeklyData = Object.keys(weeks)
           .map((week) => {
@@ -755,20 +755,23 @@ const Home = {
             totalCashData.push(item.total_cash);
             totalDebitData.push(item.total_debit);
             totalData.push(item.total_cash + item.total_debit);
+
+            // Ambil nama bulan dari item.date
             const itemDate = new Date(item.date);
             const monthName = itemDate.toLocaleString("default", {
               month: "long",
             });
-            labels.push(monthName);
+            labels.push(monthName); // Gunakan item.month sebagai label
           });
         }
       } else {
         // Jika targetWeek bukan 'semua', ambil data dari minggu yang dipilih
         const weekData = filteredData || [];
+        // console.log("weekData", weekData);
         totalCashData = weekData.map((item) => item.total_cash);
         totalDebitData = weekData.map((item) => item.total_debit);
         totalData = weekData.map((item) => item.total_cash + item.total_debit);
-        labels = weekData.map((item) => item.label); // Gunakan label minggu yang baru
+        labels = weekData.map((item) => item.date); // Gunakan label minggu yang baru
       }
 
       // Buat grafik dengan Chart.js
@@ -904,11 +907,19 @@ const Home = {
 
       // Urutkan data berdasarkan tanggal
       Object.keys(weeks).forEach((week) => {
-        weeks[week] = weeks[week].sort((a, b) => new Date(a.date) - new Date(b.date));
+        weeks[week] = weeks[week].sort(
+          (a, b) => new Date(a.date) - new Date(b.date)
+        );
       });
 
       if (filterType === "daily") {
-        return targetWeek === "semua" ? weeks : weeks[targetWeek] ? weeks[targetWeek].sort((a, b) => new Date(a.date) - new Date(b.date)) : [];
+        return targetWeek === "semua"
+          ? weeks
+          : weeks[targetWeek]
+          ? weeks[targetWeek].sort(
+              (a, b) => new Date(a.date) - new Date(b.date)
+            )
+          : [];
       } else if (filterType === "weekly") {
         const weeklyData = Object.keys(weeks)
           .slice(-5)
@@ -916,12 +927,12 @@ const Home = {
             const weekItems = weeks[week];
             const aggregatedData = weekItems.reduce(
               (acc, current) => {
-                acc.in_cash += current.in_cash;
-                acc.in_debit += current.in_debit;
-                acc.out_cash += current.out_cash;
-                acc.out_debit += current.out_debit;
-                acc.cash_to_debit += current.cash_to_debit;
-                acc.debit_to_cash += current.debit_to_cash;
+                acc.in_cash += current.in_cash || 0; // Gunakan 0 jika tidak ada
+                acc.in_debit += current.in_debit || 0; // Gunakan 0 jika tidak ada
+                acc.out_cash += current.out_cash || 0; // Gunakan 0 jika tidak ada
+                acc.out_debit += current.out_debit || 0; // Gunakan 0 jika tidak ada
+                acc.cash_to_debit += current.cash_to_debit || 0; // Gunakan 0 jika tidak ada
+                acc.debit_to_cash += current.debit_to_cash || 0; // Gunakan 0 jika tidak ada
                 return acc;
               },
               {
@@ -939,6 +950,11 @@ const Home = {
               ...aggregatedData,
             };
           });
+
+          console.log(
+            "weeklydata",
+            weeklyData.sort((a, b) => new Date(a.week) - new Date(b.week))
+          );
 
         return weeklyData.sort((a, b) => new Date(a.week) - new Date(b.week)); // Urutkan berdasarkan nomor minggu
       } else if (filterType === "monthly") {
@@ -967,12 +983,12 @@ const Home = {
               };
             }
 
-            months[monthKey].in_cash += item.in_cash;
-            months[monthKey].in_debit += item.in_debit;
-            months[monthKey].out_cash += item.out_cash;
-            months[monthKey].out_debit += item.out_debit;
-            months[monthKey].cash_to_debit += item.cash_to_debit;
-            months[monthKey].debit_to_cash += item.debit_to_cash;
+            months[monthKey].in_cash += item.in_cash || 0; // Gunakan 0 jika tidak ada
+            months[monthKey].in_debit += item.in_debit || 0; // Gunakan 0 jika tidak ada
+            months[monthKey].out_cash += item.out_cash || 0; // Gunakan 0 jika tidak ada
+            months[monthKey].out_debit += item.out_debit || 0; // Gunakan 0 jika tidak ada
+            months[monthKey].cash_to_debit += item.cash_to_debit || 0; // Gunakan 0 jika tidak ada
+            months[monthKey].debit_to_cash += item.debit_to_cash || 0;
           }
         });
 
@@ -1005,6 +1021,7 @@ const Home = {
           ];
           return monthOrder.indexOf(a.month) - monthOrder.indexOf(b.month);
         });
+        console.log('monthlyData', monthlyData);
 
         return monthlyData;
       }
@@ -1041,6 +1058,8 @@ const Home = {
         targetWeek
       );
 
+      console.log('filteredData', filteredData);
+
       // console.log("Filtered Cash Flow Data:", filteredData);
 
       // Persiapan data untuk chart
@@ -1057,6 +1076,7 @@ const Home = {
         if (filterType === "daily") {
           for (const week in filteredData) {
             const weekData = filteredData[week];
+            console.log('weekData', weekData);
             weekData.forEach((item) => {
               inCashData.push(item.in_cash);
               inDebitData.push(item.in_debit);
@@ -1091,6 +1111,7 @@ const Home = {
       } else {
         // Jika targetWeek bukan 'semua', ambil data dari minggu yang dipilih
         const weekData = filteredData || [];
+        // console.log('flocart week data', weekData);
         inCashData = weekData.map((item) => item.in_cash);
         inDebitData = weekData.map((item) => item.in_debit);
         outCashData = weekData.map((item) => item.out_cash);

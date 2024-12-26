@@ -170,6 +170,8 @@ export async function logDatesSince(pickedDate, logsince = false) {
           ydayTotalCash + inCash - outCash + debitToCash - cashToDebit,
         total_debit:
           ydayTotalDebit + inDebit - outDebit + cashToDebit - debitToCash,
+        cash_to_debit: cashToDebit,
+        debit_to_cash: debitToCash,
       };
 
       // console.log("calon data", financeData);
@@ -341,7 +343,7 @@ export async function callDataShell() {
       realtomorrowPrediction === "unknown"
     ) {
       // console.log("kosong cuy");
-      await usePrediction();
+      await usePrediction(true);
     }
   }
 
