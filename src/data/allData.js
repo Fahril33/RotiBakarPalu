@@ -75,9 +75,9 @@ export async function allShoplistDataByDate(date) {
       0
     );
 
-    return { rotiQuantity, totalShopCash, totalShopDebit, totalBelanja };
+    return { rotiQuantity, totalShopCash, totalShopDebit, totalBelanja, todayShoplist };
   }
-  return { rotiQuantity: 0, totalShopCash, totalShopDebit, totalBelanja };
+  return { rotiQuantity: 0, totalShopCash, totalShopDebit, totalBelanja, todayShoplist };
 }
 
 export async function allFinanceDataByDate(date) {

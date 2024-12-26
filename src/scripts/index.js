@@ -15,6 +15,7 @@ import {
   navigationIcon,
 } from "./utils/icons";
 import { manualSyncData } from "./utils/syncData";
+import API_ENDPOINT from "../config/config";
 
 document.querySelector('.item-icons img[alt="Beranda Icon"]').src = homeIcon;
 document.querySelector('.item-icons img[alt="Penjualan Icon"]').src =
@@ -72,7 +73,7 @@ async function handleLogout() {
   try {
     const token = localStorage.getItem("token");
 
-    const response = await fetch("http://localhost:5000/api/auth/logout", {
+    const response = await fetch(`${API_ENDPOINT.LOGIN}/logout`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

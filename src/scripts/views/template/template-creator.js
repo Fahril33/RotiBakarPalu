@@ -313,10 +313,10 @@ const createHomeTemplate = () => `
     <div class="overview-bar">
       <p>Rincian</p>
       <div class="overview-navigator">
-        <a href="#prediction-charts">Prediksi</a>
-        <a href="#stocks-charts">Stok</a>
-        <a href="#finance-charts">Keuangan</a>
-        <a href="#financialFlow-charts">Arus Kas</a>
+        <a href="#" data-target="prediction-charts">Prediksi</a>
+        <a href="#" data-target="stocks-charts">Stok</a>
+        <a href="#" data-target="finance-charts">Keuangan</a>
+        <a href="#" data-target="financialFlow-charts">Arus Kas</a>
       </div>
     </div>
 

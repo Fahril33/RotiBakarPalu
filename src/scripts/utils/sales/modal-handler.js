@@ -7,9 +7,10 @@ import { logDatesSince } from "../syncData";
 export const showModal = (content) => {
   const existingModal = document.querySelector(".modal");
   if (existingModal) {
-    console.log('modal double jir', );
+    console.log("modal double jir");
     existingModal.remove();
   }
+  document.body.style.overflow = "hidden";
   const modal = document.createElement("div");
   modal.classList.add("modal");
   modal.innerHTML = content;
@@ -33,16 +34,17 @@ export const showModal = (content) => {
 export const closeModal = (modal) => {
   if (modal) {
     document.body.removeChild(modal);
+    document.body.style.overflow = "auto";
   }
 };
 
-export function handleModalSubmit (
+export function handleModalSubmit(
   modal,
   saleMongoId,
   date,
   time,
   API_ENDPOINT
-  ) {
+) {
   modal.querySelector("form").addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -55,7 +57,7 @@ export function handleModalSubmit (
       time: time,
       price: newPrice,
       quantity: newQuantity,
-      income: newPrice * newQuantity, 
+      income: newPrice * newQuantity,
       place: newPlace,
     };
 
@@ -93,9 +95,8 @@ export function handleModalSubmit (
         icon: "success",
         title: "Catatan berhasil diperbarui.",
       });
-      const currDate = getCurrentDate().pickedDate
+      const currDate = getCurrentDate().pickedDate;
       await logDatesSince(currDate);
-
 
       // Perbarui tampilan tabel
       const row = document.querySelector(`tr[data-id="${saleMongoId}"]`);

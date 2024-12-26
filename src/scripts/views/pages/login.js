@@ -1,10 +1,14 @@
 import Swal from "sweetalert2";
-import { reconnectServer, updateUIOnServerStatus, urlOtorizator } from "../../utils/interceptor";
+import {
+  reconnectServer,
+  updateUIOnServerStatus,
+  urlOtorizator,
+} from "../../utils/interceptor";
 import { createLoginTemplate } from "../template/template-creator";
 import { RBPlogo } from "../../utils/icons";
 import "../../../styles/login.css";
 import RBPsource from "../../../data/source";
-import UrlParser from "../../routes/url-parser";
+import API_ENDPOINT from "../../../config/config";
 
 const Login = {
   async render() {
@@ -54,11 +58,9 @@ const Login = {
     });
   },
 
-  
-
   async login(identifier, password) {
     try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
+      const response = await fetch(`${API_ENDPOINT.AUTH}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -123,9 +125,6 @@ const Login = {
       console.warn("Login error:", error.message);
     }
   },
-
-  // Tambahkan metode logout
-  async logout() {},
 };
 
 export default Login;

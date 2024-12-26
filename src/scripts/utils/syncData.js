@@ -28,6 +28,7 @@ import {
 } from "./datePicker";
 import { closeModal, showModal } from "./sales/modal-handler";
 import { usePrediction } from "./algorithm";
+import { updateShoppingListData } from "../../data/utils/shoppingHandler";
 
 // Tambahkan fungsi ini di luar logDatesSince
 async function subtractOneDay(dateString) {
@@ -111,6 +112,31 @@ export async function logDatesSince(pickedDate, logsince = false) {
       // Sync Stock To Prediction
       //
       await syncSoldToPrediction(formattedDate);
+
+      //
+      // Sync Shoplist totals
+      //
+      const shoppingData = (await allShoplistDataByDate(formattedDate)).todayShoplist;
+      const shoppingDataId = shoppingData._id
+
+      const procesedData = await hitungTotalCashDebit(shoppingData);
+      let totalShoppingCash;
+      let totalShoppingDebit;
+      if (procesedData && (procesedData.totalCash || procesedData.totalDebit)) {
+        totalShoppingCash = procesedData.totalCash;
+        totalShoppingDebit = procesedData.totalDebit
+
+        const newData = {
+          totalCash: totalShoppingCash,
+          totalDebit: totalShoppingDebit,
+          totalBelanja: totalShoppingCash+totalShoppingDebit
+        }
+        // console.log('shopdataid', shoppingDataId);
+        // console.log('newData', newData);
+        await updateShoppingListData(shoppingDataId, newData);
+      } else {
+        // console.log("No data available for the selected date.");
+      }
 
       //
       // fix days on sales
@@ -398,7 +424,7 @@ export function manualSyncData() {
               confirmButtonText: "OK",
             }).then((result) => {
               if (result.isConfirmed) {
-                // window.location.reload();
+                window.location.reload();
               }
             });
           }
@@ -519,4 +545,28 @@ export async function hariDariTanggal(tanggal) {
 
   // console.log('hari', hari);
   return { hari };
+}
+
+async function hitungTotalCashDebit(data) {
+  let totalCash = 0;
+  let totalDebit = 0;
+
+  if (!data || !data.barang || data.barang.length === 0) {
+    return;
+  }
+
+  // Iterasi data barang
+  data.barang.forEach((barang) => {
+    if (barang.payment === "cash") {
+      totalCash += barang.totalHarga;
+    } else if (barang.payment === "debit") {
+      totalDebit += barang.totalHarga;
+    }
+  });
+
+  // Update totalCash dan totalDebit
+  data.totalCash = totalCash || 0;
+  data.totalDebit = totalDebit || 0;
+
+  return { totalCash, totalDebit };
 }

@@ -5,7 +5,6 @@ import {
   allFinanceDataByDate,
   allFinanceDataThisMonth,
   allPredictionDataByDate,
-  allSalesDataByDate,
   allStockDataThisMonth,
 } from "../../../data/allData";
 import RBPsource from "../../../data/source";
@@ -18,6 +17,7 @@ import { checkUserRole } from "../../utils/interceptor";
 
 import { createHomeTemplate } from "../template/template-creator";
 import Chart from "chart.js/auto";
+import { callDataShell } from "../../utils/syncData";
 
 const Home = {
   async render() {
@@ -29,7 +29,6 @@ const Home = {
   },
 
   async afterRender() {
-    console.log('adoh', (((await allSalesDataByDate(getCurrentDate().pickedDate)).isThere) === false));
     //
     // Check Allowed
     //
@@ -55,6 +54,22 @@ const Home = {
       return; // Hentikan proses render
     }
 
+    await callDataShell()
+
+    // Anchors handler
+    document.querySelectorAll(".overview-navigator a").forEach((anchor) => {
+      anchor.addEventListener("click", function (e) {
+        e.preventDefault(); // Mencegah perubahan URL
+
+        const targetId = this.getAttribute("data-target");
+        const targetElement = document.getElementById(targetId);
+
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: "smooth" });
+        }
+      });
+    });
+
     const defaultYear = getCurrentDate().year;
     // console.log("defaultY", defaultYear);
     const defaultMonth = getCurrentDate().month;
@@ -63,7 +78,6 @@ const Home = {
     //
     // Prediction Chart
     //
-
     const allPredictionData = (await RBPsource.getPredictions()).filter(
       (item) => item.operasional === true
     );
@@ -403,7 +417,7 @@ const Home = {
       const filterType = stockFilter.value;
       const ctx = document.getElementById("stockChartData").getContext("2d");
       stockChart = new Chart(ctx, {
-        type: "line", // Jenis grafik
+        type: "bar", // Jenis grafik
         data: {
           labels: labels,
           datasets: [
@@ -413,7 +427,7 @@ const Home = {
                     label: "Total Stock",
                     data: alltotalStockData,
                     borderColor: "rgba(54, 162, 235, 1)",
-                    backgroundColor: "rgba(54, 162, 235, 0.2)",
+                    backgroundColor: "rgba(54, 162, 235, 1)",
                     fill: true,
                     hidden: true,
                   },
@@ -423,21 +437,21 @@ const Home = {
               label: "Additional Stock",
               data: totalAdditionalStockData,
               borderColor: "rgba(75, 192, 192, 1)",
-              backgroundColor: "rgba(75, 192, 192, 0.2)",
+              backgroundColor: "rgba(75, 192, 192, 1)",
               fill: true,
             },
             {
               label: "Sold Stock",
               data: totalSoldStockData,
               borderColor: "rgba(255, 99, 132, 1)",
-              backgroundColor: "rgba(255, 99, 132, 0.2)",
+              backgroundColor: "rgba(255, 99, 132, 1)",
               fill: true,
             },
             {
               label: "Spoiled Stock",
               data: totalSpoiledStockData,
               borderColor: "rgba(255, 206, 86, 1)",
-              backgroundColor: "rgba(255, 206, 86, 0.2)",
+              backgroundColor: "rgba(255, 206, 86, 1)",
               fill: true,
             },
           ],
@@ -582,23 +596,49 @@ const Home = {
       if (filterType === "daily") {
         // Jika targetWeek adalah 'semua', kita ambil semua minggu
         if (targetWeek === "semua") {
-          return weeks; // Kembalikan semua minggu
+          // Pastikan setiap minggu juga diurutkan berdasarkan tanggal
+          Object.keys(weeks).forEach((week) => {
+            weeks[week] = weeks[week].sort(
+              (a, b) => new Date(a.date) - new Date(b.date)
+            );
+          });
+          return weeks; // Kembalikan semua minggu yang diurutkan
         } else {
-          // Kembalikan data dari minggu yang dipilih
-          return weeks[targetWeek] || [];
+          // Kembalikan data dari minggu yang dipilih dan diurutkan berdasarkan tanggal
+          return (weeks[targetWeek] || []).sort(
+            (a, b) => new Date(a.date) - new Date(b.date)
+          );
         }
       } else if (filterType === "weekly") {
-        // Ambil data terbaru dari setiap minggu
-        const latestWeeklyData = Object.keys(weeks).map((week) => {
-          const weekItems = weeks[week];
-          return weekItems.reduce((latest, current) => {
-            return new Date(current.date) > new Date(latest.date)
-              ? current
-              : latest;
-          });
+        const weeklyData = Object.keys(weeks)
+          .map((week) => {
+            const weekItems = weeks[week];
+            const aggregatedData = weekItems.reduce(
+              (acc, current) => {
+                acc.total_cash += current.total_cash;
+                acc.total_debit += current.total_debit;
+                return acc;
+              },
+              {
+                total_cash: 0,
+                total_debit: 0,
+              }
+            );
+
+            return {
+              week: week, // Simpan nomor minggu
+              date: weekItems[weekItems.length - 1].date, // Gunakan tanggal terakhir di minggu itu
+              ...aggregatedData,
+            };
+          })
+          .sort((a, b) => new Date(a.date) - new Date(b.date)); // Urutkan berdasarkan tanggal
+
+        // Ubah label menjadi "Minggu ke-X"
+        weeklyData.forEach((item, index) => {
+          item.label = `Week ${index + 1}`; // Menambahkan label minggu
         });
-        console.log("latestWeeklyData:", latestWeeklyData);
-        return latestWeeklyData;
+
+        return weeklyData;
       } else if (filterType === "monthly") {
         const latestMonthlyData = [];
         const months = {}; // Untuk menyimpan data bulanan
@@ -609,7 +649,7 @@ const Home = {
           10
         ); // Pastikan untuk mendapatkan nilai tahun yang benar
 
-        // Mengelompokkan data berdasarkan bulan
+        // Mengelompokkan data berdasarkan bulan dan diurutkan berdasarkan tanggal
         data.forEach((item) => {
           const itemDate = new Date(item.date);
 
@@ -620,7 +660,7 @@ const Home = {
           if (itemYear === selectedYear) {
             const monthKey = `${itemYear}-${itemDate.getMonth()}`; // Kunci untuk bulan
 
-            // Simpan item terbaru untuk bulan ini
+            // Simpan item terbaru untuk bulan ini dan diurutkan berdasarkan tanggal
             if (
               !months[monthKey] ||
               new Date(item.date) > new Date(months[monthKey].date)
@@ -630,7 +670,7 @@ const Home = {
           }
         });
 
-        // Mengambil semua item terbaru dari setiap bulan
+        // Mengambil semua item terbaru dari setiap bulan dan diurutkan berdasarkan tanggal
         Object.values(months).forEach((item) => {
           latestMonthlyData.push(item);
         });
@@ -700,7 +740,7 @@ const Home = {
               totalCashData.push(item.total_cash);
               totalDebitData.push(item.total_debit);
               totalData.push(item.total_cash + item.total_debit);
-              labels.push(item.date);
+              labels.push(item.date); // Anda bisa tetap menggunakan tanggal di sini jika diinginkan
             });
           }
         } else if (filterType === "weekly") {
@@ -708,19 +748,18 @@ const Home = {
             totalCashData.push(item.total_cash);
             totalDebitData.push(item.total_debit);
             totalData.push(item.total_cash + item.total_debit);
-            labels.push(item.date);
+            labels.push(item.label); // Gunakan label minggu yang baru
           });
         } else if (filterType === "monthly") {
           filteredData.forEach((item) => {
             totalCashData.push(item.total_cash);
             totalDebitData.push(item.total_debit);
             totalData.push(item.total_cash + item.total_debit);
-
             const itemDate = new Date(item.date);
             const monthName = itemDate.toLocaleString("default", {
               month: "long",
-            }); // Mendapatkan nama bulan
-            labels.push(monthName); // Menambahkan nama bulan ke label
+            });
+            labels.push(monthName);
           });
         }
       } else {
@@ -729,7 +768,7 @@ const Home = {
         totalCashData = weekData.map((item) => item.total_cash);
         totalDebitData = weekData.map((item) => item.total_debit);
         totalData = weekData.map((item) => item.total_cash + item.total_debit);
-        labels = weekData.map((item) => item.date);
+        labels = weekData.map((item) => item.label); // Gunakan label minggu yang baru
       }
 
       // Buat grafik dengan Chart.js
@@ -863,8 +902,13 @@ const Home = {
         weeks[weekNumber].push(item);
       });
 
+      // Urutkan data berdasarkan tanggal
+      Object.keys(weeks).forEach((week) => {
+        weeks[week] = weeks[week].sort((a, b) => new Date(a.date) - new Date(b.date));
+      });
+
       if (filterType === "daily") {
-        return targetWeek === "semua" ? weeks : weeks[targetWeek] || [];
+        return targetWeek === "semua" ? weeks : weeks[targetWeek] ? weeks[targetWeek].sort((a, b) => new Date(a.date) - new Date(b.date)) : [];
       } else if (filterType === "weekly") {
         const weeklyData = Object.keys(weeks)
           .slice(-5)
@@ -896,7 +940,7 @@ const Home = {
             };
           });
 
-        return weeklyData;
+        return weeklyData.sort((a, b) => new Date(a.week) - new Date(b.week)); // Urutkan berdasarkan nomor minggu
       } else if (filterType === "monthly") {
         const monthlyData = [];
         const months = {};

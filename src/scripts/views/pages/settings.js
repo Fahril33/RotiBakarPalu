@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import { checkUserRole } from "../../utils/interceptor";
 import { closeModal, showModal } from "../../utils/sales/modal-handler";
 import { callDataShell } from "../../utils/syncData";
+import API_ENDPOINT from "../../../config/config";
 
 const Settings = {
   async render() {
@@ -833,7 +834,7 @@ const Settings = {
             return;
           }
 
-          const response = await fetch("http://localhost:5000/api/bahan", {
+          const response = await fetch(`${API_ENDPOINT.BAHAN}`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -1057,23 +1058,20 @@ const Settings = {
         return;
       }
 
-      const response = await fetch(
-        `http://localhost:5000/api/bahan/${ingredientId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            "x-auth-token": token, // Menyertakan token di header
-          },
-          body: JSON.stringify({
-            kategori,
-            namaBahan,
-            harga: hargaItem,
-            satuan: satuanItem,
-            jenisSatuan: jenisSatuanItem,
-          }),
-        }
-      );
+      const response = await fetch(`${API_ENDPOINT.BAHAN}/${ingredientId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "x-auth-token": token, // Menyertakan token di header
+        },
+        body: JSON.stringify({
+          kategori,
+          namaBahan,
+          harga: hargaItem,
+          satuan: satuanItem,
+          jenisSatuan: jenisSatuanItem,
+        }),
+      });
 
       // Menangani kondisi ketika pengguna atau email sudah ada
       if (!response.ok) {
@@ -1130,15 +1128,12 @@ const Settings = {
     if (!confirmDelete.isConfirmed) return;
 
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/bahan/${ingredientId}`,
-        {
-          method: "DELETE",
-          headers: {
-            "x-auth-token": localStorage.getItem("token"),
-          },
-        }
-      );
+      const response = await fetch(`${API_ENDPOINT.LOGIN}/${ingredientId}`, {
+        method: "DELETE",
+        headers: {
+          "x-auth-token": localStorage.getItem("token"),
+        },
+      });
 
       if (!response.ok) {
         throw new Error("Error deleting item");

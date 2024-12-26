@@ -15,7 +15,7 @@ import {
 import { checkUserRole } from "../../utils/interceptor";
 import Swal from "sweetalert2";
 import { closeModal, showModal } from "../../utils/sales/modal-handler";
-import { allFinanceDataByDate } from "../../../data/allData";
+import { allFinanceDataByDate, allShoplistDataByDate } from "../../../data/allData";
 import { putFinanceData } from "../../../data/utils/financeHandler";
 const Finance = {
   async render() {
@@ -52,6 +52,8 @@ const Finance = {
       });
       return; // Hentikan proses render
     }
+
+    
 
     await displayUpcomingEvent();
     await callDataShell();
@@ -362,7 +364,9 @@ const Finance = {
                 body: JSON.stringify({
                   tanggal: selectedDate,
                   barang: updatedItems, // Update barang yang baru
-                  totalBelanja: totalBelanja, // Gunakan total belanja terbaru
+                  totalBelanja: totalBelanja,
+                  totalCash: totalCash,
+                  totalDebit: totalDebit, // Gunakan total belanja terbaru
                 }),
               }
             );
@@ -490,6 +494,8 @@ const Finance = {
       displayData(filteredData);
     }
 
+    
+
     //
     // Event listeners for the buttons
     document
@@ -578,7 +584,6 @@ const Finance = {
 
       data.forEach((entry) => {
         entry.barang.forEach((item) => {
-          console.log("iytem", item.namaBahan);
           const row = document.createElement("tr");
           row.setAttribute("data-id", item._id);
 

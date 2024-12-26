@@ -1,5 +1,4 @@
 import API_ENDPOINT from "../config/config";
-import UrlParser from "../scripts/routes/url-parser";
 
 class RBPsource {
   static async serverStatus() {
@@ -95,7 +94,7 @@ class RBPsource {
 
       try {
         // Mengambil data pengguna
-        const response = await fetch("http://localhost:5000/api/auth/user", {
+        const response = await fetch(`${API_ENDPOINT.AUTH}/user`, {
           method: "GET",
           headers: headers,
         });
@@ -120,16 +119,13 @@ class RBPsource {
     const token = localStorage.getItem("token"); // Ambil token dari local storage atau tempat penyimpanan lainnya
 
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/auth/user/${userId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "x-auth-token": token, // Sertakan token di header
-          },
-        }
-      );
+      const response = await fetch(`${API_ENDPOINT.AUTH}/user/${userId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "x-auth-token": token, // Sertakan token di header
+        },
+      });
 
       if (!response.ok) {
         throw new Error(`Error: ${response.status} - ${response.statusText}`);
@@ -153,7 +149,7 @@ class RBPsource {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/users", {
+      const response = await fetch(`${API_ENDPOINT.AUTH}/users`, {
         method: "GET",
         headers: {
           "x-auth-token": token, // Sertakan token di header
@@ -182,7 +178,7 @@ class RBPsource {
 
   static async getDataBahan() {
     try {
-      const response = await fetch("http://localhost:5000/api/bahan/", {
+      const response = await fetch(`${API_ENDPOINT.BAHAN}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -211,7 +207,7 @@ class RBPsource {
 
   static async getDataBahanById(id) {
     try {
-      const response = await fetch(`http://localhost:5000/api/bahan/${id}`, {
+      const response = await fetch(`${API_ENDPOINT.BAHAN}/${id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

@@ -1,6 +1,7 @@
 import Swal from "sweetalert2";
 import UrlParser from "../routes/url-parser";
 import RBPsource from "../../data/source";
+import API_ENDPOINT from "../../config/config";
 
 export async function urlOtorizator() {
   const url = UrlParser.parseActiveUrlWithCombiner();
@@ -13,7 +14,7 @@ export async function urlOtorizator() {
     };
 
     // Mengambil data pengguna
-    fetch("http://localhost:5000/api/auth/user", {
+    fetch(`${API_ENDPOINT.AUTH}/user`, {
       method: "GET",
       headers: headers,
     })
@@ -165,7 +166,7 @@ export async function reconnectServer() {
 
 export function updateUIOnServerStatus(isConnected) {
   const url = UrlParser.parseActiveUrlWithCombiner();
-  console.log("url", url);
+  // console.log("url", url);
   if (url !== "/login") {
     return;
   }
