@@ -61,6 +61,13 @@ class App {
       header.style.display = "none"; // Sembunyikan header
       navbar.style.display = "none"; // Sembunyikan navbar
       miniNavbar.style.display = "none"; // Sembunyikan navbar
+      if (data) {        
+        if (data.role === "employee") {
+          window.location.hash = "#/sales";
+        } else if (data.role === "manager") {
+          window.location.hash = "#/home";
+        }
+      }
     } else {
       header.style.display = "flex"; // Tampilkan header
       navbar.style.display = "inline-block"; // Tampilkan navbar

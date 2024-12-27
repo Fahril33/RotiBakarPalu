@@ -100,7 +100,7 @@ export async function isStocksDataExist() {
     .yesterdayRemainingStock;
 
   const date = getCurrentDate().pickedDate;
-  
+
   if (anyStockData == 0) {
     const emptyData = {
       date: date,
@@ -139,7 +139,9 @@ export async function isAnyStockDataShell(date) {
 }
 
 export async function stockConverter(value) {
-  if (value >= 0 && value <= 5) {
+  if (value == 0) {
+    return "";
+  } else if (value > 0 && value <= 5) {
     return "rendah";
   } else if (value >= 6 && value <= 15) {
     return "sedang";

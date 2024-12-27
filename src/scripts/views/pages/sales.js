@@ -12,16 +12,14 @@ import {
   displayerWeather,
   hideComponents,
 } from "../../utils/sales/displayerData";
-import {
-  handleFormSubmit,
-} from "../../utils/sales/form-handler";
+import { handleFormSubmit } from "../../utils/sales/form-handler";
 import { showModal, closeModal } from "../../utils/sales/modal-handler";
 import { datePickerValue, getCurrentDate } from "../../utils/datePicker";
 import { bagIcon, soldIcon, editIcon } from "../../utils/icons";
 
 // import { usePrediction } from "../../utils/algorithm";
 import { showPredictionModal } from "../../utils/sales/prediction-modal";
-import { callDataShell, logDatesSince } from "../../utils/syncData";
+import { callDataShell, logDatesSince, syncSalesToOthers } from "../../utils/syncData";
 import { checkUserRole } from "../../utils/interceptor";
 import Swal from "sweetalert2";
 import { allPredictionDataByDate } from "../../../data/allData";
@@ -38,7 +36,6 @@ const Sales = {
   },
 
   async afterRender() {
-
     // image render
     document.getElementById("imgPredict").src = bagIcon;
     document.querySelector('img[alt="soldIcon"]').src = soldIcon;
@@ -52,6 +49,7 @@ const Sales = {
 
     // FormHandler-Input
     const form = document.querySelector(".purchase-form form");
+    if (!form) return;
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       console.log("ini diklik");
@@ -96,8 +94,10 @@ const Sales = {
           return;
         }
       }
-      await handleFormSubmit(API_ENDPOINT, this);
       await this.displaySalesData();
+      await handleFormSubmit(API_ENDPOINT, this);
+      await logDatesSince(pickedDate);
+      await syncSalesToOthers(pickedDate);
     });
 
     document
@@ -164,7 +164,7 @@ const Sales = {
     } catch (error) {
       console.error("Error filtering data:", error);
     }
-    await callDataShell()
+    await callDataShell();
   },
   // buat hndler displayer data
   async displaySalesData() {
@@ -172,13 +172,15 @@ const Sales = {
     await displayerSold();
     await displayerIncome();
 
-    await this.filterDataByDate(
-      document.getElementById("dataDatePicker").value
-    );
+    const datePickerElement = document.getElementById("dataDatePicker");
+    if (datePickerElement) {
+      await this.filterDataByDate(datePickerElement.value);
+    }
   },
 
   populateSalesTable(salesData) {
     const tbody = document.querySelector(".table-sales-today tbody");
+    if (!tbody) return;
     tbody.innerHTML = "";
 
     if (salesData && salesData.sold && salesData.sold.length > 0) {
@@ -218,16 +220,16 @@ const Sales = {
       const thisDayDate = (await datePickerValue()).dateValue;
       const thisDayOperational = (await allPredictionDataByDate(thisDayDate))
         .operasional;
-        
-      if (thisDayOperational === true) {
-        document.getElementById("dataDatePicker").style.backgroundColor =
-          "#00ff5e63";
-      } else if (thisDayOperational === false) {
-        document.getElementById("dataDatePicker").style.backgroundColor =
-          "#ff00001a";
-      } else {
-        document.getElementById("dataDatePicker").style.backgroundColor =
-          "white";
+
+      const datePickerElement = document.getElementById("dataDatePicker");
+      if (datePickerElement) {
+        if (thisDayOperational === true) {
+          datePickerElement.style.backgroundColor = "#00ff5e63";
+        } else if (thisDayOperational === false) {
+          datePickerElement.style.backgroundColor = "#ff00001a";
+        } else {
+          datePickerElement.style.backgroundColor = "white";
+        }
       }
     })();
 
@@ -301,9 +303,14 @@ const Sales = {
     // Continue
 
     const row = e.target.closest("tr");
+    if (!row) return;
     const saleMongoId = row.getAttribute("data-id");
+    if (!saleMongoId) return;
     const saleData = row.querySelectorAll("td");
-    const date = document.getElementById("dataDatePicker").value;
+    if (!saleData) return;
+    const dateInput = document.getElementById("dataDatePicker");
+    if (!dateInput) return;
+    const date = dateInput.value;
     const time = saleData[0].textContent;
     const price = saleData[1].textContent;
     const quantity = saleData[2].textContent;

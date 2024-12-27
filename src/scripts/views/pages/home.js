@@ -56,6 +56,20 @@ const Home = {
 
     await callDataShell();
 
+    let stockChart;
+    let financialChart;
+    let cashFlowChart;
+
+    if (stockChart) {
+      stockChart.destroy();
+    }
+    if (financialChart) {
+      financialChart.destroy();
+    }
+    if (cashFlowChart) {
+      cashFlowChart.destroy();
+    }
+
     // Anchors handler
     document.querySelectorAll(".overview-navigator a").forEach((anchor) => {
       anchor.addEventListener("click", function (e) {
@@ -71,9 +85,7 @@ const Home = {
     });
 
     const defaultYear = getCurrentDate().year;
-    // console.log("defaultY", defaultYear);
     const defaultMonth = getCurrentDate().month;
-    // console.log("defaultmongth", defaultMonth);
 
     //
     // Prediction Chart
@@ -93,6 +105,11 @@ const Home = {
     const stockFilterWeek = document.getElementById("stocks-filter-week");
     const stockFilterMY = document.getElementById("stocks-filter-my");
     const stockFilterY = document.getElementById("stocks-filter-year");
+
+    if (!stockFilter || !stockFilterWeek || !stockFilterMY || !stockFilterY) {
+      // console.log("One or more stock filter elements not found.");
+      return;
+    }
 
     stockFilterMY.value = `${defaultYear}-${defaultMonth}`;
     stockFilterY.value = `${defaultYear}`;
@@ -306,7 +323,6 @@ const Home = {
       }
     }
     // Fungsi untuk menampilkan grafik stock
-    let stockChart;
     async function displayStockCharts() {
       if (stockChart) {
         stockChart.destroy(); // Hancurkan chart yang ada
@@ -392,13 +408,16 @@ const Home = {
       // console.log("totalAdditionalStockData", totalAdditionalStockData);
       // console.log("totalSoldStockData", totalSoldStockData);
       // console.log("totalSpoiledStockData", totalSpoiledStockData);
-      callStockChart(
-        labels,
-        alltotalStockData,
-        totalAdditionalStockData,
-        totalSoldStockData,
-        totalSpoiledStockData
-      );
+
+      if (!stockChart) {
+        callStockChart(
+          labels,
+          alltotalStockData,
+          totalAdditionalStockData,
+          totalSoldStockData,
+          totalSpoiledStockData
+        );
+      }
     }
 
     // Fungsi untuk memanggil grafik stock
@@ -414,6 +433,10 @@ const Home = {
       // console.log("totalAdditionalStockData", totalAdditionalStockData);
       // console.log("totalSoldStockData", totalSoldStockData);
       // console.log("totalSpoiledStockData", totalSpoiledStockData);
+      
+      if (stockChart) {
+        stockChart.destroy(); // Destroy existing chart
+      }
       const filterType = stockFilter.value;
       const ctx = document.getElementById("stockChartData").getContext("2d");
       stockChart = new Chart(ctx, {
@@ -693,17 +716,22 @@ const Home = {
       return Math.ceil((currentDay + dayOfWeek) / 7);
     }
 
-    let financialChart;
     async function displayFinancialCharts(yearInput) {
       if (financialChart) {
         financialChart.destroy(); // Hancurkan chart yang ada
       }
 
-      const selectedWeek = document.getElementById("finance-filter-week").value;
-      const selectedMonth = document.getElementById("finance-filter-my").value;
+      const financeFilterWeek = document.getElementById("finance-filter-week");
+      if (!financeFilterWeek) return;
+      const financeFilterMY = document.getElementById("finance-filter-my");
+      if (!financeFilterMY) return;
+      const financeFilterYear = document.getElementById("finance-filter-year");
+      if (!financeFilterYear) return;
+
+      const selectedWeek = financeFilterWeek.value;
+      const selectedMonth = financeFilterMY.value;
       const [year, month] = selectedMonth.split("-").map(Number); // Memisahkan tahun dan bulan
-      const yearInputValue =
-        yearInput || document.getElementById("finance-filter-year").value; // Gunakan yearInput jika ada
+      const yearInputValue = yearInput || financeFilterYear.value; // Gunakan yearInput jika ada
 
       // Value Master
       const filterType = financeFilter.value; // Ambil jenis filter dari elemen UI
@@ -775,7 +803,9 @@ const Home = {
       }
 
       // Buat grafik dengan Chart.js
-      callFinancialChart(labels, totalCashData, totalDebitData, totalData);
+      if (!financialChart) {
+        callFinancialChart(labels, totalCashData, totalDebitData, totalData);
+      }
     }
 
     function callFinancialChart(
@@ -784,6 +814,9 @@ const Home = {
       totalDebitData,
       totalData
     ) {
+      if (financialChart) {
+        financialChart.destroy(); // Hancurkan chart yang ada
+      }
       const ctx = document
         .getElementById("financialChartData")
         .getContext("2d");
@@ -865,9 +898,13 @@ const Home = {
     //
 
     const cashFlowFilter = document.getElementById("cash-flow-filter");
+    if (!cashFlowFilter) return;
     const cashFlowFilterWeek = document.getElementById("cash-flow-filter-week");
+    if (!cashFlowFilterWeek) return;
     const cashFlowFilterMY = document.getElementById("cash-flow-filter-my");
+    if (!cashFlowFilterMY) return;
     const cashFlowFilterY = document.getElementById("cash-flow-filter-year");
+    if (!cashFlowFilterY) return;
 
     cashFlowFilterMY.value = `${defaultYear}-${defaultMonth}`;
     cashFlowFilterY.value = `${defaultYear}`;
@@ -951,10 +988,10 @@ const Home = {
             };
           });
 
-          console.log(
-            "weeklydata",
-            weeklyData.sort((a, b) => new Date(a.week) - new Date(b.week))
-          );
+        console.log(
+          "weeklydata",
+          weeklyData.sort((a, b) => new Date(a.week) - new Date(b.week))
+        );
 
         return weeklyData.sort((a, b) => new Date(a.week) - new Date(b.week)); // Urutkan berdasarkan nomor minggu
       } else if (filterType === "monthly") {
@@ -1021,24 +1058,22 @@ const Home = {
           ];
           return monthOrder.indexOf(a.month) - monthOrder.indexOf(b.month);
         });
-        console.log('monthlyData', monthlyData);
+        console.log("monthlyData", monthlyData);
 
         return monthlyData;
       }
     }
 
-    let cashFlowChart;
     async function displayCashFlowCharts() {
       if (cashFlowChart) {
         cashFlowChart.destroy();
       }
 
-      const selectedWeek = document.getElementById(
-        "cash-flow-filter-week"
-      ).value;
-      const selectedMonth = document.getElementById(
-        "cash-flow-filter-my"
-      ).value;
+      const weekElement = document.getElementById("cash-flow-filter-week");
+      const monthElement = document.getElementById("cash-flow-filter-my");
+      if (!weekElement || !monthElement) return;
+      const selectedWeek = weekElement.value;
+      const selectedMonth = monthElement.value;
       const [year, month] = selectedMonth.split("-").map(Number);
       const yearInputValue = document.getElementById(
         "cash-flow-filter-year"
@@ -1058,10 +1093,6 @@ const Home = {
         targetWeek
       );
 
-      console.log('filteredData', filteredData);
-
-      // console.log("Filtered Cash Flow Data:", filteredData);
-
       // Persiapan data untuk chart
       let inCashData = [];
       let inDebitData = [];
@@ -1076,7 +1107,7 @@ const Home = {
         if (filterType === "daily") {
           for (const week in filteredData) {
             const weekData = filteredData[week];
-            console.log('weekData', weekData);
+            // console.log('weekData', weekData);
             weekData.forEach((item) => {
               inCashData.push(item.in_cash);
               inDebitData.push(item.in_debit);
@@ -1131,15 +1162,17 @@ const Home = {
       // console.log("Debit to Cash Data:", debitToCashData);
 
       // Panggil fungsi untuk membuat chart
-      callCashFlowChart(
-        labels,
-        inCashData,
-        inDebitData,
-        outCashData,
-        outDebitData,
-        cashToDebitData,
-        debitToCashData
-      );
+      if (!cashFlowChart) {
+        callCashFlowChart(
+          labels,
+          inCashData,
+          inDebitData,
+          outCashData,
+          outDebitData,
+          cashToDebitData,
+          debitToCashData
+        );
+      }
     }
 
     function callCashFlowChart(
@@ -1151,6 +1184,10 @@ const Home = {
       cashToDebitData,
       debitToCashData
     ) {
+      if (cashFlowChart) {
+        cashFlowChart.destroy();
+      }
+      
       const ctx = document.getElementById("cashFlowChartData").getContext("2d");
       cashFlowChart = new Chart(ctx, {
         type: "line",
@@ -1285,8 +1322,10 @@ const Home = {
     // console.log("ystdd", yesterdayDate);
 
     function profitShowHideHandler(idToHide, idToShow) {
-      idToHide.style.display = "none";
-      idToShow.style.display = "inline";
+      if (idToHide && idToShow) {
+        idToHide.style.display = "none";
+        idToShow.style.display = "inline";
+      }
     }
 
     function persentaseSelisih(dataBaru, dataSebelumnya) {
@@ -1626,6 +1665,10 @@ const Home = {
       "#soldStockStatus #arrDown span"
     );
 
+    if (!todaySoldStockStatusArrUp || !todaySoldStockStatusArrDown || !todaySoldStockStatusArrUpText || !todaySoldStockStatusArrDownText) {
+      return;
+    }
+
     if (stockPercentageChangeSold > 0) {
       profitShowHideHandler(
         todaySoldStockStatusArrDown,
@@ -1698,6 +1741,11 @@ const Home = {
     const persenAkuratFalse = ((akuratFalse / totalData) * 100).toFixed(2);
     const persenAkuratNull = ((akuratNull / totalData) * 100).toFixed(2);
 
+    // Pastikan komponen chart ada dulu
+    if (!document.getElementById("predictionAccuracy")) {
+      // console.log("Element with id 'predictionAccuracy' not found.");
+      return;
+    }
     // Buat chart
     const ctx = document.getElementById("predictionAccuracy").getContext("2d");
     new Chart(ctx, {
@@ -1761,7 +1809,7 @@ const Home = {
 
     // Hitung total prediksi sesuai
     const totalPrediksiSesuai = prediksiSesuai.length;
-    console.log("totalPrediksiSesuai", totalPrediksiSesuai);
+    // console.log("totalPrediksiSesuai", totalPrediksiSesuai);
 
     // Hitung prediksi yang akurat
     const prediksiAkurat = prediksiSesuai.filter(
@@ -1774,7 +1822,7 @@ const Home = {
       (item) => item.akurat === null
     ).length;
 
-    console.log("prediksiAkurat", prediksiAkurat);
+    // console.log("prediksiAkurat", prediksiAkurat);
 
     // Hitung persentase akurasi
     const persentaseAkurasi =
@@ -1802,7 +1850,7 @@ const Home = {
       cuaca: dataPrediksiHariIni.cuaca,
       event_raya: dataPrediksiHariIni.event_raya,
     };
-    console.log("Data Prediksi Hari Ini: ", dataPrediksiHariIniFilter);
+    // console.log("Data Prediksi Hari Ini: ", dataPrediksiHariIniFilter);
 
     const dataPrediksiBesok = (
       await allPredictionDataByDate(getTomorrowDate().tomorrowDate)
@@ -1813,7 +1861,7 @@ const Home = {
       cuaca: dataPrediksiBesok.cuaca,
       event_raya: dataPrediksiBesok.event_raya,
     };
-    console.log("Data Prediksi besok: ", dataPrediksiBesokFilter);
+    // console.log("Data Prediksi besok: ", dataPrediksiBesokFilter);
 
     // Contoh database prediksi (seharusnya diambil dari backend/database)
     const databasePrediksi = (await RBPsource.getPredictions()).filter(
@@ -1831,8 +1879,12 @@ const Home = {
       databasePrediksi
     );
 
-    // Ambil elemen tabel
+    // Cek apakah elemennya ada dulu
     const tabelPrediksi = document.querySelector(".predictionsDataTable");
+    if (!tabelPrediksi) {
+      // console.log("Element with class 'predictionsDataTable' not found.");
+      return;
+    }
 
     // Bersihkan isi tabel sebelumnya
     tabelPrediksi.innerHTML = `

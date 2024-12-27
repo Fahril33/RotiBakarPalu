@@ -367,8 +367,8 @@ const createHomeTemplate = () => `
             <i class="fas fa-circle-info"></i>
           </div>
           <div class="profit-icon" id="todayProfitStatus">
-            <i class="fas fa-arrow-up" id="arrUp"><span>12,69%</span></i>
-            <i class="fas fa-arrow-down" id="arrDown"><span>12,69%</span></i>
+            <i class="fas fa-arrow-up" id="arrUp" style="display: none;"><span>12,69%</span></i>
+            <i class="fas fa-arrow-down" id="arrDown" style="display: none;"><span>12,69%</span></i>
             <span> dari bulan lalu</span>
           </div>
         </div>
@@ -377,14 +377,14 @@ const createHomeTemplate = () => `
           <div class="financial-bread">
             <div class="profit-icon" id="soldStockStatus">
               <p4 id="sold-stocks">Memuat..</p4><br>
-              <i class="fas fa-arrow-up" id="arrUp"><span>4</span></i>
-              <i class="fas fa-arrow-down" id="arrDown"><span>3</span></i>
+              <i class="fas fa-arrow-up" id="arrUp" style="display: none;"><span>4</span></i>
+              <i class="fas fa-arrow-down" id="arrDown" style="display: none;"><span>3</span></i>
               <span> dari bulan lalu</span>
             </div>
             <div class="profit-icon" id="spoiledStockStatus">
               <p4 id="spoiled-stocks">Memuat..</p4><br>
-              <i class="fas fa-arrow-up" id="arrUp"><span>3</span></i>
-              <i class="fas fa-arrow-down" id="arrDown"><span>2</span></i>
+              <i class="fas fa-arrow-up" id="arrUp" style="display: none;"><span>3</span></i>
+              <i class="fas fa-arrow-down" id="arrDown" style="display: none;"><span>2</span></i>
               <span> dari bulan lalu</span>
             </div>
           </div>

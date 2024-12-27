@@ -325,6 +325,7 @@ export async function callDataShell() {
     const realtomorrowWeather = (
       await allPredictionDataByDate(getCurrentDate().pickedDate)
     ).cuacaBesok;
+    console.log('realTmW', realtomorrowWeather);
     if (
       realtomorrowWeather === "none" ||
       realtomorrowWeather === "" ||
@@ -343,7 +344,7 @@ export async function callDataShell() {
       realtomorrowPrediction === "unknown"
     ) {
       // console.log("kosong cuy");
-      await usePrediction(true);
+      await usePrediction();
     }
   }
 
@@ -534,6 +535,10 @@ export async function syncSalesToOthers(date) {
     await putFinanceData(newFinanceShellData, date);
     //
   }
+
+  //
+  // Sales To Prediction
+  //
 }
 
 export async function hariDariTanggal(tanggal) {

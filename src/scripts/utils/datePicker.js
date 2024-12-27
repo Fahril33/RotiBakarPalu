@@ -49,7 +49,8 @@ export function getTomorrowDate(isCurrent = false) {
 }
 
 export async function datePickerValue() {
-  const dateValue = document.getElementById("dataDatePicker").value;
+  const datePickerElement = document.getElementById("dataDatePicker");
+  const dateValue = datePickerElement ? datePickerElement.value : null;
   return { dateValue };
 }
 

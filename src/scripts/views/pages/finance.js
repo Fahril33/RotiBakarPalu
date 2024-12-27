@@ -14,9 +14,7 @@ import {
 import { checkUserRole } from "../../utils/interceptor";
 import Swal from "sweetalert2";
 import { closeModal, showModal } from "../../utils/sales/modal-handler";
-import {
-  allFinanceDataByDate,
-} from "../../../data/allData";
+import { allFinanceDataByDate } from "../../../data/allData";
 import { putFinanceData } from "../../../data/utils/financeHandler";
 const Finance = {
   async render() {
@@ -57,25 +55,34 @@ const Finance = {
     await displayUpcomingEvent();
     await callDataShell();
 
-    document
-      .getElementById("liburRefresh")
-      .addEventListener("click", async () => {
+    document;
+    const liburRefreshButton = document.getElementById("liburRefresh");
+    if (liburRefreshButton) {
+      liburRefreshButton.addEventListener("click", async () => {
         const errorEventElement = document.querySelector(".liburError");
         const errorTextEventElement = document.querySelector(".liburError p");
         const errorBtnEventElement =
           document.querySelector(".liburError button");
         const loaderEventElement = document.querySelector("#liburLoader");
-        loaderEventElement.style.display = "block";
-        errorTextEventElement.style.display = "none";
-        errorBtnEventElement.style.display = "none";
-        errorEventElement.style.display = "none";
-        setTimeout(() => {
-          errorTextEventElement.style.display = "block";
-          errorBtnEventElement.style.display = "block";
-          loaderEventElement.style.display = "none";
-        }, 5000);
-        await displayUpcomingEvent();
+        if (
+          loaderEventElement &&
+          errorEventElement &&
+          errorTextEventElement &&
+          errorBtnEventElement
+        ) {
+          loaderEventElement.style.display = "block";
+          errorTextEventElement.style.display = "none";
+          errorBtnEventElement.style.display = "none";
+          errorEventElement.style.display = "none";
+          setTimeout(() => {
+            errorTextEventElement.style.display = "block";
+            errorBtnEventElement.style.display = "block";
+            loaderEventElement.style.display = "none";
+          }, 5000);
+          await displayUpcomingEvent();
+        }
       });
+    }
 
     //
     // Handler untuk input daftar belanja
@@ -86,7 +93,9 @@ const Finance = {
 
     // Existing event listeners dan logic
     const checkboxes = document.querySelectorAll(".checkbox-input");
+    if (!checkboxes) return;
     const tableBody = document.getElementById("shoppingListTable");
+    if (!tableBody) return;
 
     // Modifikasi existing logic untuk menggunakan data dinamis
     const itemData = await this.buildItemDataFromIngredients();
@@ -103,8 +112,10 @@ const Finance = {
         quantityCache[id] = input.value;
       });
 
-      // Clear the table first
-      tableBody.innerHTML = "";
+      if (tableBody) {
+        // Clear the table first
+        tableBody.innerHTML = "";
+      }
       itemCount = 1;
 
       // Check if any checkbox or radio button is selected
@@ -114,6 +125,7 @@ const Finance = {
 
       // Show or hide the shopping list based on selection
       const shoppingListContainer = document.getElementById("shoppingList");
+      if (!shoppingListContainer) return;
       if (isAnySelected) {
         shoppingListContainer.style.display = "block"; // Show the shopping list
         // Render the shopping list only if something is selected
@@ -156,6 +168,7 @@ const Finance = {
 
               // Add event listener to update total price when quantity changes
               const quantityInput = newRow.querySelector(`#quantity-${itemId}`);
+              if (!quantityInput) return;
               quantityInput.addEventListener("input", (event) => {
                 const newQuantity = parseInt(event.target.value, 10) || 0; // Get new quantity
                 const pricePerItem = parseInt(
@@ -174,6 +187,7 @@ const Finance = {
 
               // Add event listener to update total price when price is edited
               const priceSpan = newRow.querySelector("td:nth-child(3) span");
+              if (!priceSpan) return;
               priceSpan.addEventListener("blur", (event) => {
                 // const newPrice = parseInt(
                 //   event.target.textContent.replace(/\D/g, ""),
@@ -260,6 +274,8 @@ const Finance = {
     //
     // INPUT DATA BELANJA
     //
+    const submitButton = document.getElementById("submit-button");
+    if (!submitButton) return;
 
     document
       .getElementById("submit-button")
@@ -493,7 +509,7 @@ const Finance = {
 
       // Display the filtered data in the template
       displayData(filteredData);
-      await displayFinance()
+      await displayFinance();
     }
 
     //
@@ -534,8 +550,8 @@ const Finance = {
 
     // Function to display the filtered data in the HTML template
     async function displayData(data) {
-      // console.log("data", data);
       const tableContainer = document.querySelector("#ShoppingList");
+      if (!tableContainer) return;
       tableContainer.innerHTML = ""; // Clear previous data
 
       if (data.length === 0) {
@@ -1005,8 +1021,12 @@ const Finance = {
         return acc;
       }, {});
 
-      // Render kategori dan bahan
+      // Cek apakah komponen containerShopping ada sebelum merender kategori dan bahan
       const containerShopping = document.querySelector(".containerShopping");
+      if (!containerShopping) {
+        // console.error("Element .containerShopping not found.");
+        return;
+      }
 
       Object.entries(categorizedIngredients).forEach(([category, items]) => {
         const categorySection = document.createElement("div");
@@ -1279,7 +1299,7 @@ const Finance = {
               popup: "swal2-small",
             },
           });
-        }  
+        }
       });
 
     document

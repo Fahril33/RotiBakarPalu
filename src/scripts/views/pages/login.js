@@ -11,7 +11,7 @@ import RBPsource from "../../../data/source";
 import API_ENDPOINT from "../../../config/config";
 
 const Login = {
-  async render() {
+  async render() {  
     return `
       <div class="content">
         ${createLoginTemplate()}
@@ -23,7 +23,7 @@ const Login = {
     document.querySelector('.card-login-items img[alt="RBPlogo"]').src =
       RBPlogo;
     const serverStatus = (await RBPsource.serverStatus()).isServerConnected;
-    console.log("serverStatus", serverStatus);
+    console.log("Server", serverStatus ? "Online" : "Offline");
 
     if (!serverStatus) {
       await reconnectServer();

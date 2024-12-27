@@ -1,22 +1,16 @@
 import generateID from "./generateID";
 import RBPsource from "../../../data/source";
-import {
-  datePickerValue,
-  getCurrentDate,
-} from "../datePicker";
-import {
-  stockConverter,
-} from "../../../data/utils/stockHandler";
+import { datePickerValue, getCurrentDate } from "../datePicker";
 import {
   allPredictionDataByDate,
   allSalesDataByDate,
 } from "../../../data/allData";
 import {
-  isPredictionDataExist,
   putPredictionData,
 } from "../../../data/utils/predictionHandler";
-import { hariDariTanggal, logDatesSince, syncSalesToOthers } from "../syncData";
+import { hariDariTanggal } from "../syncData";
 import Swal from "sweetalert2";
+
 export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
   // Disable Add Sales Button
   const salesBtn = document.getElementById("addSales");
@@ -132,19 +126,6 @@ export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
         .catch((error) => {
           console.error("Terjadi kesalahan:", error); // Menangani kesalahan
         });
-
-      // Ambil data terbaru dari server setelah berhasil memperbarui
-      const updatedSalesData = await RBPsource.salesData();
-
-      // Perbarui tampilan tabel dengan data terbaru
-      salesInstance.populateSalesTable(updatedSalesData);
-      await syncSalesToOthers(formattedDate);
-
-      //
-      // Sesuaikan Nilai Terjual di Prediciton
-      //
-
-      await logDatesSince(formattedDate);
     } catch (error) {
       console.error("Terjadi kesalahan saat memperbarui data:", error);
     }
@@ -184,35 +165,12 @@ export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
         .catch((error) => {
           console.error("Terjadi kesalahan:", error); // Menangani kesalahan
         });
-
-      // Ambil data terbaru dari server setelah berhasil menyimpan
-      const updatedSalesData = await RBPsource.salesData();
-      await logDatesSince(formattedDate);
-      // Perbarui tampilan tabel dengan data terbaru
-      salesInstance.populateSalesTable(updatedSalesData);
-      await syncSalesToOthers(formattedDate);
-
-      const soldConvertedValue = await stockConverter(jumlah);
-      const predicitionData = {
-        terjual: soldConvertedValue,
-        operasional: true,
-      };
-
-      const isPredictionShellAvailable = (
-        await allPredictionDataByDate(formattedDate)
-      ).filteredData;
-      if (isPredictionShellAvailable === `none`) {
-        await isPredictionDataExist(formattedDate);
-        console.log("shell predicition dibuat dibuat, lanjut put");
-        await putPredictionData(predicitionData, formattedDate);
-      } else {
-        console.log("shell prediction sudah ada, skip ke put");
-        await putPredictionData(predicitionData, formattedDate);
-      }
     } catch (error) {
       console.error("Terjadi kesalahan saat menyimpan data:", error);
     }
   }
+  // Refresh Table data
+  await salesInstance.displaySalesData();
 
   // enable sales button after upload data
   salesBtn.disabled = false;
@@ -230,4 +188,3 @@ export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
     await putPredictionData({ operasional: true }, todayDate);
   }
 };
-

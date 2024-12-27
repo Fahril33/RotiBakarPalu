@@ -23,9 +23,12 @@ export async function displayerSold() {
   // console.log("rstock", remainingStock);
 
   const soldElement = document.querySelector("#soldCount");
-  soldElement.textContent = `Terjual ${salesData}/${stockData}`;
+  if (soldElement) {
+    soldElement.textContent = `Terjual ${salesData}/${stockData}`;
+  }
 
   const dateValue = (await datePickerValue()).dateValue;
+  if (!dateValue) return;
 
   if (nowRemainingStock != remainingStock) {
     await updateSoldStockData(salesData, remainingStock, dateValue);
@@ -37,16 +40,17 @@ export async function displayerSold() {
 export async function displayerIncome() {
   const salesData = await allSalesData();
   const incomeElement = document.querySelector("#incomeCount");
-  incomeElement.textContent = `Penjualan : ${salesData.incomeTotal.toLocaleString(
-    "id-ID"
-  )}`;
+  if (incomeElement) {
+    incomeElement.textContent = `Penjualan : ${salesData.incomeTotal.toLocaleString(
+      "id-ID"
+    )}`;
+  }
 }
 
 export async function displayerWeather() {
   const dateValue = (await datePickerValue()).dateValue;
   const todayWeather = (await allPredictionDataByDate(dateValue)).cuaca;
   const tomorrowWeather = (await allPredictionDataByDate(dateValue)).cuacaBesok;
-  
 
   // Menentukan ikon cuaca hari ini
   const todayWeatherIcon =
@@ -54,7 +58,10 @@ export async function displayerWeather() {
   const todayWeatherIconElement = document.querySelector(
     'img[alt="weatherIcon"]'
   );
-  todayWeatherIconElement.src = todayWeatherIcon;
+  if (!todayWeatherIconElement) return;
+  if (todayWeatherIconElement) {
+    todayWeatherIconElement.src = todayWeatherIcon;
+  }
 
   // Menentukan ikon cuaca besok
   const tomorrowWeatherIcon =
@@ -62,6 +69,7 @@ export async function displayerWeather() {
   const tomorrowWeatherIconElement = document.querySelector(
     'img[alt="tomorowWeatherIcon"]'
   );
+  if (!tomorrowWeatherIconElement) return;
   tomorrowWeatherIconElement.src = tomorrowWeatherIcon;
 
   // Menampilkan deskripsi cuaca
@@ -83,18 +91,24 @@ export async function displayerHolidays() {
   if (liburValue) {
     const weekendIcon = holidayIconMap[liburValue] || weekendIconMap["unknown"];
     const todayWeekendStatus = document.querySelector('img[alt="weekendIcon"]');
-    todayWeekendStatus.src = weekendIcon;
+    if (todayWeekendStatus) {
+      todayWeekendStatus.src = weekendIcon;
+    }
   } else {
     const weekendIcon =
       weekendIconMap[weekEndValue] || weekendIconMap["unknown"];
     const todayWeekendStatus = document.querySelector('img[alt="weekendIcon"]');
-    todayWeekendStatus.src = weekendIcon;
-    //
+    if (todayWeekendStatus) {
+      todayWeekendStatus.src = weekendIcon;
+    }
   }
 
-  const holidaysIcon = holidaysIconMap[rayaValue] || holidayIconMap["unknown"];
   const todayHolidayStatus = document.querySelector('img[alt="eventIcon"]');
-  todayHolidayStatus.src = holidaysIcon;
+  if (todayHolidayStatus) {
+    const holidaysIcon =
+      holidaysIconMap[rayaValue] || holidayIconMap["unknown"];
+    todayHolidayStatus.src = holidaysIcon;
+  }
 
   if (weekEndValue === "" || weekEndValue === "none") {
     weekEndValue = "unknown";
@@ -117,10 +131,14 @@ export async function displayerHolidays() {
 
 function showHolidaysData(week, raya) {
   const todayWeekStatus = document.querySelector("#weekend");
-  todayWeekStatus.textContent = `${week}`;
+  if (todayWeekStatus) {
+    todayWeekStatus.textContent = `${week}`;
+  }
 
   const todayHolidayText = document.querySelector("#rayaEvent");
-  todayHolidayText.textContent = `${raya}`;
+  if (todayHolidayText) {
+    todayHolidayText.textContent = `${raya}`;
+  }
 }
 
 export async function displayerPredictionData() {
@@ -128,10 +146,12 @@ export async function displayerPredictionData() {
   let todayPredData = (await allPredictionDataByDate(dateValue)).hasilPrediksi;
 
   const todayPredictionText = document.querySelector("#todayPredictionResult");
-  if (todayPredData === "none" || todayPredData === "") {
-    todayPredictionText.textContent = `Tidak ada data hari ini`;
-  } else {
-    todayPredictionText.textContent = `Prediksi penjualan hari ini : ${todayPredData}`;
+  if (todayPredictionText) {
+    if (todayPredData === "none" || todayPredData === "") {
+      todayPredictionText.textContent = `Tidak ada data hari ini`;
+    } else {
+      todayPredictionText.textContent = `Prediksi penjualan hari ini : ${todayPredData}`;
+    }
   }
 }
 
@@ -153,15 +173,11 @@ export async function hideComponents(selectedDate) {
   const oneDaysAhead = new Date(currDate);
   oneDaysAhead.setDate(currDate.getDate() + 1);
 
-  if (pickedDateObj < oneDaysAgo || pickedDateObj > oneDaysAhead) {
-    const editPrediction = document.getElementById("editPrediction");
-    if (editPrediction) {
-      editPrediction.style.display = "none";
-    }
-  } else {
-    const editPrediction = document.getElementById("editPrediction");
-    if (editPrediction) {
-      editPrediction.style.display = "block";
-    }
+  const editPrediction = document.getElementById("editPrediction");
+  if (editPrediction) {
+    editPrediction.style.display =
+      pickedDateObj < oneDaysAgo || pickedDateObj > oneDaysAhead
+        ? "none"
+        : "block";
   }
 }

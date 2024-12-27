@@ -62,16 +62,18 @@ async function fetchDataAndTrainModel(testData) {
 export async function usePrediction(customDate = false) {
   let currentDate;
   let tomorrowDate;
-  let isCustom
+  let isCustom;
+
+  console.log("customDate", !customDate);
 
   if (!customDate) {
     currentDate = getCurrentDate().pickedDate;
     tomorrowDate = getTomorrowDate().tomorrowDate;
-    isCustom = false
+    isCustom = false;
   } else {
     currentDate = (await datePickerValue()).dateValue;
     tomorrowDate = getTomorrowDate(true).tomorrowDate;
-    isCustom = true
+    isCustom = true;
   }
 
   // console.log("currentDate", currentDate);
@@ -118,12 +120,14 @@ async function catchPrediction(resultToday, resultTomorrow, isCustom) {
   // console.log("RTD", resultToday);
   // console.log("RTM", resultTomorrow);
   let todayDate;
-  let tomorrowDate
+  let tomorrowDate;
 
-  if (!isCustom){
+  console.log("isCustoms", isCustom);
+
+  if (!isCustom) {
     todayDate = getCurrentDate().pickedDate;
     tomorrowDate = getTomorrowDate().tomorrowDate;
-  }else{
+  } else {
     todayDate = (await datePickerValue()).dateValue;
     tomorrowDate = getTomorrowDate(true).tomorrowDate;
   }
@@ -135,14 +139,12 @@ async function catchPrediction(resultToday, resultTomorrow, isCustom) {
   };
   await putPredictionData(todayData, todayDate);
   // kalau bukan hari ini, jangan up prediksi besok
-  console.log("curdet", getCurrentDate().pickedDate);
-  console.log('pikdet', (await datePickerValue()).dateValue);
-  console.log(
-    "issama",
-    getCurrentDate().pickedDate === (await datePickerValue()).dateValue
-  );
-  if (getCurrentDate().pickedDate === (await datePickerValue()).dateValue) {
+
+  const currDate = getCurrentDate().pickedDate;
+  const pickedDate = (await datePickerValue()).dateValue;
+  
+  if (currDate === pickedDate || pickedDate === null) {
     await putPredictionData(tomorrowData, tomorrowDate);
-    console.log('pred besok jalan', );
+    console.log("pred besok jalan");
   }
 }
