@@ -86,6 +86,11 @@ const Home = {
 
     const defaultYear = getCurrentDate().year;
     const defaultMonth = getCurrentDate().month;
+    // penanganan awal tahun
+    const defaultMonthCount =
+      parseInt(defaultMonth) === 1 ? 12 : defaultMonth - 1;
+    const defaultYearCount =
+      parseInt(defaultMonth) === 1 ? defaultYear - 1 : defaultYear;
 
     //
     // Prediction Chart
@@ -328,8 +333,11 @@ const Home = {
         stockChart.destroy(); // Hancurkan chart yang ada
       }
 
-      const selectedWeek = document.getElementById("stocks-filter-week").value;
-      const selectedMonth = document.getElementById("stocks-filter-my").value;
+      const weekElement = document.getElementById("stocks-filter-week");
+      const monthElement = document.getElementById("stocks-filter-my");
+      if (!weekElement || !monthElement) return;
+      const selectedWeek = weekElement.value;
+      const selectedMonth = monthElement.value;
       const [year, month] = selectedMonth.split("-").map(Number);
       const yearInputValue =
         document.getElementById("stocks-filter-year").value;
@@ -409,15 +417,13 @@ const Home = {
       // console.log("totalSoldStockData", totalSoldStockData);
       // console.log("totalSpoiledStockData", totalSpoiledStockData);
 
-      if (!stockChart) {
-        callStockChart(
-          labels,
-          alltotalStockData,
-          totalAdditionalStockData,
-          totalSoldStockData,
-          totalSpoiledStockData
-        );
-      }
+      callStockChart(
+        labels,
+        alltotalStockData,
+        totalAdditionalStockData,
+        totalSoldStockData,
+        totalSpoiledStockData
+      );
     }
 
     // Fungsi untuk memanggil grafik stock
@@ -433,7 +439,7 @@ const Home = {
       // console.log("totalAdditionalStockData", totalAdditionalStockData);
       // console.log("totalSoldStockData", totalSoldStockData);
       // console.log("totalSpoiledStockData", totalSpoiledStockData);
-      
+
       if (stockChart) {
         stockChart.destroy(); // Destroy existing chart
       }
@@ -519,9 +525,13 @@ const Home = {
     //
 
     const financeFilter = document.getElementById("finance-filter");
+    if (!financeFilter) return;
     const financeFilterWeek = document.getElementById("finance-filter-week");
+    if (!financeFilterWeek) return;
     const financeFilterMY = document.getElementById("finance-filter-my");
+    if (!financeFilterMY) return;
     const financeFilterY = document.getElementById("finance-filter-year");
+    if (!financeFilterY) return;
 
     financeFilterMY.value = `${defaultYear}-${defaultMonth}`;
     financeFilterY.value = `${defaultYear}`;
@@ -803,9 +813,8 @@ const Home = {
       }
 
       // Buat grafik dengan Chart.js
-      if (!financialChart) {
-        callFinancialChart(labels, totalCashData, totalDebitData, totalData);
-      }
+
+      callFinancialChart(labels, totalCashData, totalDebitData, totalData);
     }
 
     function callFinancialChart(
@@ -1162,17 +1171,16 @@ const Home = {
       // console.log("Debit to Cash Data:", debitToCashData);
 
       // Panggil fungsi untuk membuat chart
-      if (!cashFlowChart) {
-        callCashFlowChart(
-          labels,
-          inCashData,
-          inDebitData,
-          outCashData,
-          outDebitData,
-          cashToDebitData,
-          debitToCashData
-        );
-      }
+
+      callCashFlowChart(
+        labels,
+        inCashData,
+        inDebitData,
+        outCashData,
+        outDebitData,
+        cashToDebitData,
+        debitToCashData
+      );
     }
 
     function callCashFlowChart(
@@ -1187,7 +1195,7 @@ const Home = {
       if (cashFlowChart) {
         cashFlowChart.destroy();
       }
-      
+
       const ctx = document.getElementById("cashFlowChartData").getContext("2d");
       cashFlowChart = new Chart(ctx, {
         type: "line",
@@ -1565,8 +1573,8 @@ const Home = {
 
     // PREVIOUS MONTH DATA
     const prevMonthData = await allFinanceDataThisMonth(
-      defaultMonth - 1,
-      defaultYear
+      defaultMonthCount,
+      defaultYearCount
     );
     const prevTotalIn = prevMonthData.totalInCash + prevMonthData.totalInDebit;
     const prevTotalOut =
@@ -1634,8 +1642,8 @@ const Home = {
 
     // PREVIOUS MONTH STOCK DATA
     const prevMonthStockData = await allStockDataThisMonth(
-      defaultMonth - 1,
-      defaultYear
+      defaultMonthCount,
+      defaultYearCount
     );
 
     const prevSoldStockData = prevMonthStockData.totalSoldStock;
@@ -1665,7 +1673,12 @@ const Home = {
       "#soldStockStatus #arrDown span"
     );
 
-    if (!todaySoldStockStatusArrUp || !todaySoldStockStatusArrDown || !todaySoldStockStatusArrUpText || !todaySoldStockStatusArrDownText) {
+    if (
+      !todaySoldStockStatusArrUp ||
+      !todaySoldStockStatusArrDown ||
+      !todaySoldStockStatusArrUpText ||
+      !todaySoldStockStatusArrDownText
+    ) {
       return;
     }
 

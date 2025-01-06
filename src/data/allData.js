@@ -206,7 +206,9 @@ export function getFinanceDataForMonth(allFinanceData, month, year) {
 
 export async function allFinanceDataThisMonth(selectedMonth, selectedYear) {
   const financeData = await RBPsource.getFinances();
+  // console.log('financeData', financeData);
 
+  console.log('selectedMonth', selectedMonth);
   // Validasi input
   if (!selectedMonth || !financeData) {
     return {

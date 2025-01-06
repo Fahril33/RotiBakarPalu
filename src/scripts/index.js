@@ -13,9 +13,11 @@ import {
   activityIcon,
   walletIcon,
   navigationIcon,
+  RBPlogo,
 } from "./utils/icons";
 import { manualSyncData } from "./utils/syncData";
 import API_ENDPOINT from "../config/config";
+import { manualPredictionModalHandler } from "./utils/algorithm";
 
 document.querySelector('.item-icons img[alt="Beranda Icon"]').src = homeIcon;
 document.querySelector('.item-icons img[alt="Penjualan Icon"]').src =
@@ -28,6 +30,7 @@ document.querySelector('.item-icon img[alt="Beranda Icon"]').src = homeIcon;
 document.querySelector('.item-icon img[alt="Penjualan Icon"]').src =
   activityIcon;
 document.querySelector('.item-icon img[alt="Keuangan Icon"]').src = walletIcon;
+document.querySelector('.profile-container img[alt="Profile"]').src = RBPlogo;
 
 // Event listener untuk DOMContentLoaded
 document.addEventListener("DOMContentLoaded", async function () {
@@ -132,9 +135,13 @@ window.addEventListener("scroll", function () {
   lastScrollTop = scrollTop;
 });
 
-const manualUpdateButton = document.getElementById("manualUpdate");
-
 // Menambahkan event listener untuk click
+const manualUpdateButton = document.getElementById("manualUpdate");
 manualUpdateButton.addEventListener("click", function () {
   manualSyncData();
 });
+const manualPredictButton = document.getElementById("manualPredict");
+manualPredictButton.addEventListener("click", function () {
+  manualPredictionModalHandler();
+});
+

@@ -317,10 +317,11 @@ export async function callDataShell() {
     }
 
     //
+    await usePrediction();
 
     loadingToast.close();
   } else {
-    // console.log("Semua Data Tersedia");
+    console.log("Semua Data Tersedia");
     // Cuaca besok ada?
     const realtomorrowWeather = (
       await allPredictionDataByDate(getCurrentDate().pickedDate)

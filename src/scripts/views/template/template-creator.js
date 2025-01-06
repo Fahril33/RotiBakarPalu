@@ -550,7 +550,7 @@ const createLoginTemplate = () => {
             </div> 
             <div class="card-login-item body"> 
             <div> 
-              <label for="email">Email/Username :</label> 
+              <label for="email">Email/Username :</label>
               <input type="text" id="email" name="email" required /> 
               <span class="loginError" id="identifierLoginError">Identitas tidak terdaftar.</span>
               <span class="loginError" id="identifierLoginEmpty">Keduanya harus diisi.</span>          

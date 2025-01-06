@@ -234,7 +234,7 @@ li {
   font-weight: 600;
 }
 .list-item table {
-  min-width: 400px;
+  min-width: 560px;
   border-collapse: collapse; /* Menghilangkan jarak antara batas sel */
   border: none; /* Menghilangkan batas tabel */
   background: transparent; /* Menghilangkan latar belakang tabel */
@@ -253,6 +253,7 @@ li {
   padding-top: 0;
   padding-bottom: 0 ;
 }
+
 
 /*
 :::: swal

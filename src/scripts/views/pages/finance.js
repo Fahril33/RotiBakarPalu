@@ -430,8 +430,8 @@ const Finance = {
           });
         }
         // Call the function to update data and display
-        await logDatesSince(getCurrentDate().pickedDate);
         await filterDataByDate((await datePickerValue()).dateValue);
+        await logDatesSince(getCurrentDate().pickedDate);
 
         // Uncheck all checkboxes and radio buttons
         checkboxes.forEach((checkbox) => {
@@ -725,8 +725,8 @@ const Finance = {
             throw new Error("Failed to update payment method");
           }
 
-          await logDatesSince(getCurrentDate().pickedDate);
           await filterDataByDate((await datePickerValue()).dateValue);
+          await logDatesSince(getCurrentDate().pickedDate);
         } catch (error) {
           console.error("Error updating payment method:", error);
         }
@@ -986,9 +986,6 @@ const Finance = {
                 )}`;
               }
 
-              await logDatesSince(getCurrentDate().pickedDate);
-              await filterDataByDate((await datePickerValue()).dateValue);
-
               Swal.fire({
                 icon: "success",
                 title: `Item ${namaBahan} berhasil dihapus.`,
@@ -996,6 +993,9 @@ const Finance = {
                   popup: "swal2-small",
                 },
               });
+              await filterDataByDate((await datePickerValue()).dateValue);
+              await logDatesSince(getCurrentDate().pickedDate);
+
             } catch (error) {
               console.error("Error deleting item:", error);
             }

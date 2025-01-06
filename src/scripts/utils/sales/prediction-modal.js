@@ -11,11 +11,10 @@ import {
 } from "../../../data/utils/predictionHandler";
 import { putNewStockData } from "../../../data/utils/stockHandler";
 import { usePrediction } from "../algorithm";
-import { datePickerValue, getCurrentDate } from "../datePicker";
+import { datePickerValue } from "../datePicker";
 import {
   displayerHolidays,
   displayerPredictionData,
-  displayerSold,
   displayerWeather,
 } from "./displayerData";
 import { showModal, closeModal } from "./modal-handler";
@@ -26,9 +25,9 @@ export async function showPredictionModal() {
     pickedDate
   );
   const spoiledStock = (await allStockDataByDate(pickedDate)).spoiledStock;
-  console.log("spoiledStock", spoiledStock);
+  // console.log("spoiledStock", spoiledStock);
   const userRole = await RBPsource.getUserData();
-  console.log("userRole", userRole.role);
+  // console.log("userRole", userRole.role);
 
   let operasionalBoolean;
   if (operasional === true) {
@@ -49,7 +48,7 @@ export async function showPredictionModal() {
           <input type="text" id="todayDate" name="todayDate" value="${pickedDate}" disabled/>
         </div>
         <div class="form-group">
-          <label for="todayOperasional">Operasional</label>
+          <label for="todayOperasionalEmployee">Operasional</label>
           <input type="text" id="todayOperasionalEmployee" name="todayOperasional" value="${operasionalBoolean}" disabled style="display: block"/>
           <select id="todayOperasionalManager" name="todayOperasional" 
             ${
@@ -192,6 +191,9 @@ export async function showPredictionModal() {
         "#todayOperasionalManager"
       ).value;
 
+      // 
+
+
       let akuratBoolean;
       if (updatedAkurat === "true") {
         akuratBoolean = true;
@@ -293,35 +295,31 @@ export async function showPredictionModal() {
         await putNewStockData(pickedDate, {
           spoiled_stock: updatedSpoiledStock,
         });
-        if (pickedDate === getCurrentDate().pickedDate) {
-          // 
-        }
 
+        // await displayerSold();
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-end",
+          showConfirmButton: false,
+          timer: 2500,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
+          },
+        });
+        Toast.fire({
+          icon: "success",
+          title: "Data berhasil diperbarui.",
+        });
+        // Close the modal after submission
+        closeModal(modal);
         await usePrediction(true);
-        await displayerSold();
+        await displayerPredictionData();
         await displayerWeather();
         await displayerHolidays();
-        await displayerPredictionData();
       } catch (error) {
         console.error("Error updating prediction data:", error);
       }
-
-      const Toast = Swal.mixin({
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 2500,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-          toast.onmouseenter = Swal.stopTimer;
-          toast.onmouseleave = Swal.resumeTimer;
-        },
-      });
-      Toast.fire({
-        icon: "success",
-        title: "Data berhasil diperbarui.",
-      });
-      // Close the modal after submission
-      closeModal(modal);
     });
 }

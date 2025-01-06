@@ -19,7 +19,7 @@ import { bagIcon, soldIcon, editIcon } from "../../utils/icons";
 
 // import { usePrediction } from "../../utils/algorithm";
 import { showPredictionModal } from "../../utils/sales/prediction-modal";
-import { callDataShell, logDatesSince, syncSalesToOthers } from "../../utils/syncData";
+import { callDataShell, logDatesSince } from "../../utils/syncData";
 import { checkUserRole } from "../../utils/interceptor";
 import Swal from "sweetalert2";
 import { allPredictionDataByDate } from "../../../data/allData";
@@ -94,10 +94,9 @@ const Sales = {
           return;
         }
       }
-      await this.displaySalesData();
       await handleFormSubmit(API_ENDPOINT, this);
+      await this.displaySalesData();
       await logDatesSince(pickedDate);
-      await syncSalesToOthers(pickedDate);
     });
 
     document
@@ -157,25 +156,26 @@ const Sales = {
       await displayerWeather();
       await displayerHolidays();
       await displayerPredictionData();
+      // const allPredictionData = (await allPredictionDataByDate(selectedDate)).filteredData;
+      // console.log('allpredictiondata', allPredictionData);
 
       if (!(await checkUserRole())) {
-        await hideComponents(selectedDate);
+        await hideComponents(selectedDate); 
       }
     } catch (error) {
       console.error("Error filtering data:", error);
     }
-    await callDataShell();
+    // await callDataShell();
   },
   // buat hndler displayer data
   async displaySalesData() {
-    // await checkWeatherData();
-    await displayerSold();
-    await displayerIncome();
-
     const datePickerElement = document.getElementById("dataDatePicker");
     if (datePickerElement) {
       await this.filterDataByDate(datePickerElement.value);
     }
+
+    await displayerSold();
+    await displayerIncome();
   },
 
   populateSalesTable(salesData) {
@@ -368,13 +368,13 @@ const Sales = {
             toast.onmouseleave = Swal.resumeTimer;
           },
         });
+        closeModal(modal);
         Toast.fire({
           icon: "success",
           title: "Pesanan berhasil diperbarui.",
         });
-        closeModal(modal);
-        await logDatesSince(date);
         await this.displaySalesData();
+        await logDatesSince(date);
 
         //
         // Sesuaikan Nilai Terjual di Prediciton
@@ -470,13 +470,13 @@ const Sales = {
             toast.onmouseleave = Swal.resumeTimer;
           },
         });
+        await this.displaySalesData();
         Toast.fire({
           icon: "success",
           title: "Pesanan berhasil dihapus.",
         });
 
         await logDatesSince(date);
-        await this.displaySalesData();
       } catch (error) {
         console.error("An error occurred while deleting data:", error);
       }

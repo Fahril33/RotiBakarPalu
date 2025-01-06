@@ -77,7 +77,6 @@ ItemsContainer
   /* justify-self: end; */
   min-width: 200px;
   width: 100%;
-  
 }
 
 .item-predictions {
@@ -222,6 +221,10 @@ ItemsContainer
     margin-top: 8px;
     white-space: normal; /* Izinkan teks untuk membungkus */
   }
+
+  .daftarBelanja{
+  margin-bottom: 68px;
+}
 }
 
 /* Profile */
@@ -264,7 +267,7 @@ ItemsContainer
   border-radius: 4px;
   overflow: hidden;
 }
-.dropdown-menu a{
+.dropdown-menu a {
   cursor: pointer;
 }
 
@@ -386,6 +389,8 @@ input[type="submit"]:hover {
 
 /* Table Penjualan Hari ini */
 
+
+
 .tableSaleContainer {
   display: flex;
   overflow-x: auto;
@@ -395,7 +400,7 @@ input[type="submit"]:hover {
 .table-sales-today {
   width: 100%;
 }
-#salesAction{
+#salesAction {
   width: 10%;
 }
 table {
@@ -1043,31 +1048,71 @@ tr:nth-child(even) {
 :::: Form Update Sync Data
 */
 
-#manualSyncDataForm{
+#manualSyncDataForm {
   display: grid;
   grid-template-columns: 1fr 1fr;
   overflow: auto;
 }
 #startDate {
   cursor: pointer;
-} 
-#manualSyncDataForm .form-group{
+}
+#manualSyncDataForm .form-group {
   padding: 0;
   margin: auto;
 }
-#manualSyncDataForm .form-group submit{
+#manualSyncDataForm .form-group submit {
   width: auto;
   padding: auto;
 }
 
-
 /*
 :::: Buttons Sales Page
 */
-#editPrediction{
+#editPrediction {
   display: block;
 }
 
+/*
+:::: manual prediction
+*/
+.manualPrediction {
+  width: 100%;
+  background-color: #fef2e5;
+  padding: 10px;
+  border-radius: 5px;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+}
+#testDataResult{
+  display: none;
+}
+#resultText {
+  font-size: medium;
+  font-weight: 500;
+}
+
+.hasilManualPred {
+  padding: 3px 6px;
+  border-radius: 2px;
+  color: rgb(241, 241, 241);
+  margin-left: 5px;
+}
+.unknown{
+  background-color: #888;
+}
+.tinggi {
+  background-color: #2bd96b;
+  /* color: #003e00; */
+}
+.sedang {
+  background-color: #3182ce;
+  /* color: #000434; */
+}
+.rendah {
+  background-color: #c44a4a;
+  /* color: #3f0000; */
+}
 
 /*
 :::: 

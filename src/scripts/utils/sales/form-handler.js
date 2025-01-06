@@ -1,13 +1,10 @@
 import generateID from "./generateID";
-import RBPsource from "../../../data/source";
 import { datePickerValue, getCurrentDate } from "../datePicker";
 import {
   allPredictionDataByDate,
   allSalesDataByDate,
 } from "../../../data/allData";
-import {
-  putPredictionData,
-} from "../../../data/utils/predictionHandler";
+import { putPredictionData } from "../../../data/utils/predictionHandler";
 import { hariDariTanggal } from "../syncData";
 import Swal from "sweetalert2";
 
@@ -74,11 +71,11 @@ export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
   // console.log("Data penjualan:", salesData);
 
   // Periksa apakah sudah ada data dengan tanggal hari ini atau belum
-  const allSalesData = await RBPsource.salesData();
-  const existingData = allSalesData.filter(
-    (sale) => sale.date === formattedDate
-  );
-  if (existingData.length > 0) {
+  console.log("formattedDate", formattedDate);
+  const existingData = (await allSalesDataByDate(formattedDate)).todaySales;
+  const soldData = existingData.sold;
+  const dataLenght = soldData ? soldData.length : 0;
+  if (dataLenght > 0) {
     // console.log("Data untuk hari ini sudah ada:", existingData);
 
     // Lakukan put
@@ -122,6 +119,7 @@ export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
             icon: "success",
             title: "Pesanan berhasil dicatat.",
           });
+          salesBtn.disabled = false;
         })
         .catch((error) => {
           console.error("Terjadi kesalahan:", error); // Menangani kesalahan
@@ -161,6 +159,7 @@ export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
             icon: "success",
             title: "Pesanan berhasil dicatat.",
           });
+          salesBtn.disabled = false;
         })
         .catch((error) => {
           console.error("Terjadi kesalahan:", error); // Menangani kesalahan
@@ -171,9 +170,6 @@ export const handleFormSubmit = async (API_ENDPOINT, salesInstance) => {
   }
   // Refresh Table data
   await salesInstance.displaySalesData();
-
-  // enable sales button after upload data
-  salesBtn.disabled = false;
 
   //
   // STATUS Outlet

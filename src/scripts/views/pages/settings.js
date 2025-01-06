@@ -685,15 +685,15 @@ const Settings = {
       <div class="material-list" style="min-height: 300px">
         <ul>
           <li class="list-item">
-            <table>
+            <table class="settings-needs">
               <thead>
                 <tr>
                   <th>#</th>
                   <th>Nama</th>
-                  <th>Harga</th>
-                  <th>Satuan</th>
-                  <th>Jenis Satuan</th>
-                  <th></th>
+                  <th style="width: 124px">Harga</th>
+                  <th style="width: 40px">Satuan</th>
+                  <th style="width: 20px">Jenis Satuan</th>
+                  <th style="width: 20px"></th>
                 </tr>
               </thead>
               <tbody>
