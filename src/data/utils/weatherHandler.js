@@ -137,7 +137,7 @@ export async function checkWeatherData() {
   } else {
     const todayWeatherValue = (await allPredictionDataByDate(currentDate))
       .cuaca;
-    console.log("twv", todayWeatherValue);
+    // console.log("twv", todayWeatherValue);
     if (todayWeatherValue === "none" || todayWeatherValue === "") {
       const weatherPredictionDataPutNone = {
         cuaca: todayWeather,

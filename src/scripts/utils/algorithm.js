@@ -1,73 +1,94 @@
 import API_ENDPOINT from "../../config/config";
 import { allPredictionDataByDate } from "../../data/allData";
+import RBPsource from "../../data/source";
 import { putPredictionData } from "../../data/utils/predictionHandler";
 import { datePickerValue, getCurrentDate, getTomorrowDate } from "./datePicker";
 import { showModal } from "./sales/modal-handler";
 
 const C45 = require("c4.5");
-const axios = require("axios");
+
+// Fungsi untuk mengonversi data JSON ke CSV
+function jsonToCsv(jsonData) {
+  const parsedArray = [];
+  // Menambahkan header
+  const headers = ["event_raya", "weekend", "libur", "cuaca", "terjual"];
+  parsedArray.push(headers);
+
+  // Menambahkan data
+  for (const row of jsonData) {
+    const values = headers.map((header) => {
+      // Mengonversi boolean ke string dan menangani nilai undefined
+      if (header === "event_raya" && row[header] === "") {
+        return "none"; // Ubah "" menjadi "none"
+      }
+      return row[header] === undefined ? "" : row[header].toString();
+    });
+    parsedArray.push(values);
+  }
+
+  return parsedArray;
+}
 
 async function fetchDataAndTrainModel(testData) {
   try {
-    const response = await axios.get(API_ENDPOINT.PREDICTION);
-    const allData = Array.isArray(response.data) ? response.data : [];
+    const response = await fetch(API_ENDPOINT.PREDICTION);
+    // console.log("response", response);
+    // const allData = Array.isArray(response.data) ? response.data : [];
+    const allData = await response.json();
+    // console.log("resson", allData);
 
     if (allData.length === 0) {
       throw new Error("Data kosong atau tidak valid dari API.");
     }
 
     const filteredData = allData.filter(
-      (item) => item.operasional === true && item.terjual !== ""
-    );
-    const wTinggi = allData.filter(
       (item) =>
         item.operasional === true &&
         item.terjual !== "" &&
-        item.terjual === "tinggi" &&
-        item.weekend === true &&
-        item.libur === false &&
-        item.cuaca === "mendung"
+        new Date(item.date) <= new Date("2024-12-30")
     );
-    const wSedang = allData.filter(
+    // const filteredData = allData.filter(
+    //   (item) =>
+    //     item.operasional === true &&
+    //     item.terjual !== "" &&
+    //     new Date(item.date) >= new Date("2024-10-01")
+    // );
+    // console.log("filteredDAta", filteredData);
+
+    const data = jsonToCsv(filteredData);
+    // console.log("dataNew", data
+
+    const isData = allData.filter(
       (item) =>
         item.operasional === true &&
         item.terjual !== "" &&
-        item.terjual === "sedang" &&
-        item.weekend === true &&
+        item.weekend === false &&
         item.libur === false &&
-        item.cuaca === "mendung"
+        item.cuaca === "mendung" &&
+        item.event_raya === "puasa" 
     );
-    const wRendah = allData.filter(
-      (item) =>
-        item.operasional === true &&
-        item.terjual !== "" &&
-        item.terjual === "rendah" &&
-        item.weekend === true &&
-        item.libur === false &&
-        item.cuaca === "mendung"
-    );
-    console.log("wRendah", wRendah);
-    console.log("wSedang", wSedang);
-    console.log("wTinggi", wTinggi);
+    console.log("isData", isData);
 
-    console.log(`Data training length: ${filteredData.length}`);
-    const formattedData = filteredData.map((item) => [
-      item.event_raya,
-      item.weekend,
-      item.libur,
-      item.cuaca,
-      item.terjual,
-    ]);
+    var headers = Object.keys(data[0]);
+    var features = headers.slice(0, -1); // Mengambil semua fitur kecuali kolom terakhir
+    var featureTypes = headers.slice(0, -1).map(() => "category"); // Menyesuaikan tipe fitur secara otomatis
+    var trainingData = data.map(function (row) {
+      return features
+        .map(function (feature) {
+          return row[feature];
+        })
+        .concat(row[headers[headers.length - 1]]);
+    });
+    console.log("trainingData", trainingData.length);
 
-    const features = ["event_raya", "weekend", "libur", "cuaca"];
-    const featureTypes = ["category", "category", "category", "category"];
-    const target = 4;
+    //  console.log('TD', trainingData);
+    var target = headers[headers.length - 1]; // "class"
+    var c45 = C45();
 
-    const c45 = new C45();
     return new Promise((resolve, reject) => {
       c45.train(
         {
-          data: formattedData,
+          data: trainingData,
           target: target,
           features: features,
           featureTypes: featureTypes,
@@ -85,15 +106,22 @@ async function fetchDataAndTrainModel(testData) {
             reject("Model tidak terbentuk");
             return;
           }
-          console.log("model", model);
-
-          console.log("Model berhasil dibuat");
+          // console.log("model", model);
+          // console.log("Model berhasil dibuat");
 
           try {
+            // var testDataS = [
+            //   ["none", "true", "true", "cerah"], // Ganti dengan nilai instance yang ingin diprediksi
+            //   ["Tahun Baru Masehi", "2", "3", "cerah"],
+            // ];
+            // console.log("tesDatas[0]", testDataS[0]);
+            // console.log("tesData[0]", testData[0]);
+            // const predictTodayDatas = model.classify(testDataS[0]);
             const predictTodayData = model.classify(testData[0]);
             const predictTomorrowData = model.classify(testData[1]);
 
             console.log("Predict Today Raw:", predictTodayData);
+            // console.log("Predict Today Raws:", predictTodayDatas);
             console.log("Predict Tomorrow Raw:", predictTomorrowData);
 
             resolve({
@@ -150,15 +178,33 @@ export async function usePrediction(customDate = false) {
     cuaca: tomorrowCuaca,
   } = tomorrowData;
 
+  console.log("currentRaya", currentRaya);
+  console.log("currentLibur", currentLibur);
+  console.log("currweekend", currentWeekend);
+
   const processedCurrentRaya = currentRaya === "" ? "none" : currentRaya;
+  const processedCurrentLibur = currentLibur === true ? "true" : "false";
+  const processedCurrentWeekend = currentWeekend === true ? "true" : "false";
   const processedTomorrowRaya = tomorrowRaya === "" ? "none" : tomorrowRaya;
+  const processedTomorrowLibur = tomorrowLibur === true ? "true" : "false";
+  const processedTomorrowWeekend = tomorrowWeekend === true ? "true" : "false";
 
   const tesData = [
-    [processedCurrentRaya, currentWeekend, currentLibur, currentCuaca],
-    [processedTomorrowRaya, tomorrowWeekend, tomorrowLibur, tomorrowCuaca],
+    [
+      processedCurrentRaya,
+      processedCurrentWeekend,
+      processedCurrentLibur,
+      currentCuaca,
+    ],
+    [
+      processedTomorrowRaya,
+      processedTomorrowWeekend,
+      processedTomorrowLibur,
+      tomorrowCuaca,
+    ],
   ];
 
-  console.log("tesData", tesData);
+  // console.log("tesData", tesData);
 
   try {
     const catchedData = await fetchDataAndTrainModel(tesData);
@@ -191,6 +237,7 @@ async function catchPrediction(resultToday, resultTomorrow, isCustom) {
     tomorrowDate = getTomorrowDate(true).tomorrowDate;
     console.log("true catch jalan");
   }
+
   const todayData = {
     hasil_prediksi: resultToday,
   };
@@ -198,6 +245,7 @@ async function catchPrediction(resultToday, resultTomorrow, isCustom) {
   const tomorrowData = {
     hasil_prediksi: resultTomorrow,
   };
+  console.log("todayData", todayData);
   await putPredictionData(todayData, todayDate);
   // kalau bukan hari ini, jangan up prediksi besok
 
@@ -206,6 +254,8 @@ async function catchPrediction(resultToday, resultTomorrow, isCustom) {
   // console.log('tomorrowDate', tomorrowDate);
 
   if (currDate === pickedDate || pickedDate === null) {
+    console.log("tomorrowData", tomorrowData);
+    console.log("tomorrowDate", tomorrowDate);
     await putPredictionData(tomorrowData, tomorrowDate);
     // console.log("pred besok jalan");
   }
@@ -242,14 +292,14 @@ export async function manualPredictionModalHandler() {
           <label for="todayWeekendValue">Weekend</label>
           <select id="todayWeekendValue" name="weekendValue">
             <option value="true">Ya</option>
-            <option value="false">Tidak</option>
+            <option value="false" selected>Tidak</option>
           </select>
         </div>
         <div class="form-group">
           <label for="todayLiburValue">Libur</label>
           <select id="todayLiburValue" name="liburValue">
             <option value="true">Ya</option>
-            <option value="false">Tidak</option>
+            <option value="false" selected>Tidak</option>
           </select>
         </div>  
         
@@ -282,29 +332,47 @@ export async function manualPredictionModalHandler() {
       resultText.className = "hasilManualPred";
 
       const cuaca = modal.querySelector("#todayWeatherValue").value;
+      // console.log("Cuaca:", cuaca);
       const hariRaya = modal.querySelector("#TodayEventRayaValue").value;
+      // console.log("Hari Raya:", hariRaya);
       const weekend = modal.querySelector("#todayWeekendValue").value;
+      // console.log("Weekend:", weekend);
       const libur = modal.querySelector("#todayLiburValue").value;
-      // const features = ["event_raya", "weekend", "libur", "cuaca"];
+      // console.log("Libur:", libur);
+
+      const weekendConverted = weekend === "true" ? true : false;
+      const liburConverted = libur === "true" ? true : false;
+
+      const allPredictionData = await RBPsource.getPredictions();
+      // console.log('allpredictiondata', allPredictionData);
+      const isAnyTraining = allPredictionData.filter(
+        (item) =>
+          item.operasional === true &&
+          item.terjual !== "" &&
+          item.cuaca === cuaca &&
+          item.event_raya === hariRaya &&
+          item.weekend === weekendConverted &&
+          item.libur === liburConverted
+      );
+
+      // console.log("filteredDataa", isAnyTraining);
 
       const dataTest = [
-        [
-          hariRaya,
-          weekend === "true" ? true : false,
-          libur === "true" ? true : false,
-          cuaca,
-        ],
-        [
-          hariRaya,
-          weekend === "true" ? true : false,
-          libur === "true" ? true : false,
-          cuaca,
-        ],
+        [hariRaya, weekend, libur, cuaca],
+        [hariRaya, weekend, libur, cuaca],
       ];
       // console.log("dataTest", dataTest);
       const catchedData = await fetchDataAndTrainModel(dataTest);
-      // console.log("catchedData", catchedData);
-      resultText.textContent = catchedData.predictTodayData;
+      console.log("catchedData", catchedData.predictTodayData);
+      if (
+        isAnyTraining.length < 1 &&
+        catchedData.predictTodayData === "unknown"
+      ) {
+        resultText.textContent = "Data training belum ada.";
+        console.log("data training tidak cukup");
+      } else {
+        resultText.textContent = catchedData.predictTodayData;
+      }
       resultText.classList.add(catchedData.predictTodayData);
       predBtn.style.display = "grid";
       loadingComponent.style.display = "none";

@@ -21,22 +21,22 @@ export async function getHolidayValue() {
 
       await HolidayData(resultValue, currentDaten, currentDate);
 
-      console.log("Libur Valuez:", resultValue);
+      // console.log("Libur Valuez:", resultValue);
     } else {
-      console.error("Result is null or liburValue is not defined");
+      // console.error("Result is null or liburValue is not defined");
     }
   } catch (error) {
     console.error("Terjadi kesalahan:", error);
   }
   try {
     const result = await getHolidays(tomorrowDaten);
-    console.log("hasil itu", result);
+    // console.log("hasil itu", result);
     if (result && result.liburValue !== undefined) {
       const resultValue = result.liburValue;
 
       await HolidayData(resultValue, tomorrowDaten, tomorrowDate);
 
-      console.log("Event besok:", resultValue);
+      // console.log("Event besok:", resultValue);
     } else {
       console.error("Result is null or liburValue is not defined");
     }

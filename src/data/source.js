@@ -324,6 +324,7 @@ export async function bacaHariLibur(tanggalHariIni, year) {
     // Fetch data dari API
     const response = await fetch(
       `https://api-harilibur.vercel.app/api?&year=${year}`
+      
     );
     const semuaHariLibur = await response.json();
     // console.log("smwa hari libur", semuaHariLibur);

@@ -445,6 +445,7 @@ const createHomeTemplate = () => `
             </div>
           </div>
           <div class="chart-body">
+              <div id="loadingComponent" class="loader" style="transform: translateY(50px)"></div>
               <canvas id="stockChartData"></canvas>
           </div>
         </div>

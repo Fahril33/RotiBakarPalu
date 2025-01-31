@@ -329,6 +329,9 @@ const Home = {
     }
     // Fungsi untuk menampilkan grafik stock
     async function displayStockCharts() {
+      // const loadingComponent = document.getElementById("loadingComponent");
+      // loadingComponent.style.display = "block";
+      const allPredictionData = await RBPsource.getPredictions();
       if (stockChart) {
         stockChart.destroy(); // Hancurkan chart yang ada
       }
@@ -374,7 +377,16 @@ const Home = {
               totalAdditionalStockData.push(item.additional_stock);
               totalSoldStockData.push(item.sold_stock);
               totalSpoiledStockData.push(item.spoiled_stock);
-              labels.push(item.date);
+
+              // Check operational status for the label color
+              const operationalStatus = allPredictionData.find(
+                (prediction) => prediction.date === item.date
+              )?.operasional;
+              // console.log('operationalStatus', operationalStatus);
+              labels.push({
+                date: item.date,
+                color: operationalStatus === false ? "red" : "black", // Set color based on operational status
+              });
             });
           }
         } else if (filterType === "weekly") {
@@ -399,15 +411,25 @@ const Home = {
         }
       } else {
         // Jika targetWeek bukan 'semua', ambil data dari minggu yang dipilih
+
         const weekData = filteredData || [];
-        alltotalStockData = weekData.map((item) => item.total_stock);
-        totalAdditionalStockData = weekData.map(
-          (item) => item.additional_stock
-        );
-        totalSoldStockData = weekData.map((item) => item.sold_stock);
-        totalSpoiledStockData = weekData.map((item) => item.spoiled_stock);
-        labels = weekData.map((item) => item.date);
-        console.log("ini jalan");
+        weekData.forEach((item) => {
+          alltotalStockData.push(item.total_stock);
+          totalAdditionalStockData.push(item.additional_stock);
+          totalSoldStockData.push(item.sold_stock);
+          totalSpoiledStockData.push(item.spoiled_stock);
+
+          // Check operational status for the label color
+          const operationalStatus = allPredictionData.find(
+            (prediction) => prediction.date === item.date
+          )?.operasional;
+          labels.push({
+            date: item.date,
+            color: operationalStatus === false ? "red" : "black", // Set color based on operational status
+          });
+        });
+
+        // console.log("ini jalan");
       }
 
       // Buat grafik dengan Chart.js
@@ -416,6 +438,7 @@ const Home = {
       // console.log("totalAdditionalStockData", totalAdditionalStockData);
       // console.log("totalSoldStockData", totalSoldStockData);
       // console.log("totalSpoiledStockData", totalSpoiledStockData);
+      // loadingComponent.style.display = "none";
 
       callStockChart(
         labels,
@@ -443,12 +466,14 @@ const Home = {
       if (stockChart) {
         stockChart.destroy(); // Destroy existing chart
       }
+      // console.log('labels', labels);
       const filterType = stockFilter.value;
       const ctx = document.getElementById("stockChartData").getContext("2d");
       stockChart = new Chart(ctx, {
         type: "bar", // Jenis grafik
         data: {
-          labels: labels,
+          labels:
+            filterType === "daily" ? labels.map((label) => label.date) : labels,
           datasets: [
             ...(filterType === "daily"
               ? [
@@ -463,6 +488,7 @@ const Home = {
                 ]
               : []), // Menyertakan dataset "Total Stock" jika filterType adalah "daily"
             {
+              // ?
               label: "Stok Tambahan",
               data: totalAdditionalStockData,
               borderColor: "rgba(75, 192, 192, 1)",
@@ -490,6 +516,11 @@ const Home = {
           scales: {
             y: {
               beginAtZero: true,
+            },
+            x: {
+              ticks: {
+                color: labels.map((label) => label.color), // Ganti 'blue' dengan warna yang kamu mau
+              },
             },
           },
         },
@@ -648,8 +679,8 @@ const Home = {
             const weekItems = weeks[week];
             const aggregatedData = weekItems.reduce(
               (acc, current) => {
-                acc.total_cash += current.total_cash;
-                acc.total_debit += current.total_debit;
+                acc.total_cash = current.total_cash;
+                acc.total_debit = current.total_debit;
                 return acc;
               },
               {
@@ -1750,8 +1781,10 @@ const Home = {
     ).length;
 
     // Hitung persentase
-    const persenAkuratTrue = ((akuratTrue / totalData) * 100).toFixed(2);
-    const persenAkuratFalse = ((akuratFalse / totalData) * 100).toFixed(2);
+    const persenAkuratTrue = ((akuratTrue / (akuratTrue+akuratFalse)) * 100).toFixed(2);
+    const persenAkuratFalse = ((akuratFalse / (akuratTrue+akuratFalse)) * 100).toFixed(2);
+    // const persenAkuratTrueAll = ((akuratTrue / totalData) * 100).toFixed(2);
+    // const persenAkuratFalseAll = ((akuratFalse / totalData) * 100).toFixed(2);
     const persenAkuratNull = ((akuratNull / totalData) * 100).toFixed(2);
 
     // Pastikan komponen chart ada dulu
@@ -1765,8 +1798,8 @@ const Home = {
       type: "pie",
       data: {
         labels: [
-          `Akurat (${persenAkuratTrue}%)`,
-          `Tidak Akurat (${persenAkuratFalse}%)`,
+          `Akurat`,
+          `Tidak Akurat`,
           `Belum Diverifikasi (${persenAkuratNull}%)`,
         ],
         datasets: [
@@ -1799,7 +1832,13 @@ const Home = {
                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
                 const currentValue = context.parsed;
                 const percentage = ((currentValue / total) * 100).toFixed(2);
-                return `${context.label}: ${currentValue} (${percentage}%)`;
+                if (context.label === "Akurat") {
+                  return `${context.label}: ${currentValue} (${percentage}% | ${persenAkuratTrue}%)`;
+                } else if (context.label === "Tidak Akurat") {
+                  return `${context.label}: ${currentValue} (${percentage}% | ${persenAkuratFalse}%)`;
+                } else {
+                  return `${context.label}: ${currentValue} Data`;
+                }
               },
             },
           },
@@ -1811,37 +1850,60 @@ const Home = {
   // Fungsi untuk menghitung akurasi prediksi
   async hitungAkurasiPrediksi(dataPrediksi, databasePrediksi) {
     // Filter data prediksi yang sesuai dengan kriteria
-    const prediksiSesuai = databasePrediksi.filter(
-      (item) =>
-        item.weekend === dataPrediksi.weekend &&
-        item.libur === dataPrediksi.libur &&
-        item.cuaca === dataPrediksi.cuaca &&
-        item.event_raya === dataPrediksi.event_raya
-    );
-    // console.log("prediksiSesuai", prediksiSesuai);
+    let prediksiSesuai;
+
+    if (dataPrediksi.event_raya === "" || dataPrediksi.event_raya === "none") {
+      prediksiSesuai = databasePrediksi.filter(
+        (item) =>
+          item.weekend === dataPrediksi.weekend &&
+          item.libur === dataPrediksi.libur &&
+          item.cuaca === dataPrediksi.cuaca &&
+          (item.event_raya === "" || item.event_raya === "none")
+      );
+      // console.log("1", prediksiSesuai);
+    } else {
+      prediksiSesuai = databasePrediksi.filter(
+        (item) =>
+          item.weekend === dataPrediksi.weekend &&
+          item.libur === dataPrediksi.libur &&
+          item.cuaca === dataPrediksi.cuaca &&
+          item.event_raya === dataPrediksi.event_raya
+      );
+      // console.log("2", prediksiSesuai);
+    }
+
+    console.log("prediksiSesuai", prediksiSesuai);
 
     // Hitung total prediksi sesuai
     const totalPrediksiSesuai = prediksiSesuai.length;
-    // console.log("totalPrediksiSesuai", totalPrediksiSesuai);
+    console.log("totalPrediksiSesuai", totalPrediksiSesuai);
 
     // Hitung prediksi yang akurat
     const prediksiAkurat = prediksiSesuai.filter(
       (item) => item.akurat === true
     ).length;
+    console.log('predAkuratTrue', prediksiAkurat);
+    
     const prediksiAkuratFalse = prediksiSesuai.filter(
       (item) => item.akurat === false
     ).length;
-    const prediksiAkuratNull = prediksiSesuai.filter(
+    console.log('predAkuratFalse', prediksiAkuratFalse);
+    
+      const prediksiAkuratNull = prediksiSesuai.filter(
       (item) => item.akurat === null
     ).length;
+    console.log('predANull', prediksiAkuratNull);
 
     // console.log("prediksiAkurat", prediksiAkurat);
 
     // Hitung persentase akurasi
     const persentaseAkurasi =
       totalPrediksiSesuai > 0
-        ? ((prediksiAkurat / totalPrediksiSesuai) * 100).toFixed(2)
+        ? ((prediksiAkurat / (prediksiAkurat+prediksiAkuratFalse)) * 100).toFixed(2)
         : 0;
+
+
+
 
     return {
       totalPrediksi: totalPrediksiSesuai,
@@ -1874,13 +1936,13 @@ const Home = {
       cuaca: dataPrediksiBesok.cuaca,
       event_raya: dataPrediksiBesok.event_raya,
     };
-    // console.log("Data Prediksi besok: ", dataPrediksiBesokFilter);
+    console.log("Data Prediksi besok: ", dataPrediksiBesokFilter);
 
     // Contoh database prediksi (seharusnya diambil dari backend/database)
     const databasePrediksi = (await RBPsource.getPredictions()).filter(
       (item) => item.operasional === true
     );
-    // console.log("databasePrediksi", databasePrediksi);
+    console.log("databasePrediksi", databasePrediksi);
 
     // Hitung akurasi untuk hari ini dan besok
     const akurasiHariIni = await this.hitungAkurasiPrediksi(

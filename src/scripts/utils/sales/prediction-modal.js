@@ -134,6 +134,9 @@ export async function showPredictionModal() {
           <input type="number" id="todaySpoiledStock" name="todaySpoiled" min="0" value="${spoiledStock}" />
         </div>
         <div class="form-group">
+          <label for="checkbox">Prediksi ulang</label>
+          <input type="checkbox" id="checkbox" name="checkbox" />
+        
           <span class="error" id="dateError" style="font-size: medium; text-align: center;">Oops! Masa depan begitu menarik.</span>
           <button type="submit" id="predBtn">Update</button>
         </div>
@@ -313,8 +316,13 @@ export async function showPredictionModal() {
           title: "Data berhasil diperbarui.",
         });
         // Close the modal after submission
+        
+        const checkboxValue = document.getElementById("checkbox").checked;
+        console.log("Checkbox value:", checkboxValue);
         closeModal(modal);
-        await usePrediction(true);
+        if (checkboxValue) {
+          await usePrediction(true);
+        }
         await displayerPredictionData();
         await displayerWeather();
         await displayerHolidays();

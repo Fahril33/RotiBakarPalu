@@ -43,8 +43,6 @@ const Sales = {
 
     this.initializeDatePicker();
 
-    // Tampilkan loader sebelum memuat data
-
     await this.displaySalesData();
 
     // FormHandler-Input
@@ -156,11 +154,9 @@ const Sales = {
       await displayerWeather();
       await displayerHolidays();
       await displayerPredictionData();
-      // const allPredictionData = (await allPredictionDataByDate(selectedDate)).filteredData;
-      // console.log('allpredictiondata', allPredictionData);
 
       if (!(await checkUserRole())) {
-        await hideComponents(selectedDate); 
+        await hideComponents(selectedDate);
       }
     } catch (error) {
       console.error("Error filtering data:", error);

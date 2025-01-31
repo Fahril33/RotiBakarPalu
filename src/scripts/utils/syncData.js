@@ -116,21 +116,22 @@ export async function logDatesSince(pickedDate, logsince = false) {
       //
       // Sync Shoplist totals
       //
-      const shoppingData = (await allShoplistDataByDate(formattedDate)).todayShoplist;
-      const shoppingDataId = shoppingData._id
+      const shoppingData = (await allShoplistDataByDate(formattedDate))
+        .todayShoplist;
+      const shoppingDataId = shoppingData._id;
 
       const procesedData = await hitungTotalCashDebit(shoppingData);
       let totalShoppingCash;
       let totalShoppingDebit;
       if (procesedData && (procesedData.totalCash || procesedData.totalDebit)) {
         totalShoppingCash = procesedData.totalCash;
-        totalShoppingDebit = procesedData.totalDebit
+        totalShoppingDebit = procesedData.totalDebit;
 
         const newData = {
           totalCash: totalShoppingCash,
           totalDebit: totalShoppingDebit,
-          totalBelanja: totalShoppingCash+totalShoppingDebit
-        }
+          totalBelanja: totalShoppingCash + totalShoppingDebit,
+        };
         // console.log('shopdataid', shoppingDataId);
         // console.log('newData', newData);
         await updateShoppingListData(shoppingDataId, newData);
@@ -246,7 +247,7 @@ export async function callDataShell() {
   const predicitionDataToday = (await allPredictionDataByDate(currDate))
     .filteredData;
   const predictionDataTomorrow = await (
-    await allFinanceDataByDate(tomorrowDate)
+    await allPredictionDataByDate(tomorrowDate)
   ).filteredData;
 
   const Toast = Swal.mixin({
@@ -274,9 +275,12 @@ export async function callDataShell() {
     });
 
     // =? DATA PREDIKSI ADA?
-    if (!predicitionDataToday || !predictionDataTomorrow) {
+    if (predicitionDataToday === `none` || predictionDataTomorrow !== `none`) {
       try {
         await Promise.all([checkWeatherData(), getHolidayValue()]);
+        // console.log("proses pred");
+        await usePrediction();
+        // console.log("selesai pred");
       } catch (error) {
         Swal.fire({
           icon: "error",
@@ -316,9 +320,6 @@ export async function callDataShell() {
       await logDatesSince(operationalDate);
     }
 
-    //
-    await usePrediction();
-
     loadingToast.close();
   } else {
     console.log("Semua Data Tersedia");
@@ -326,7 +327,7 @@ export async function callDataShell() {
     const realtomorrowWeather = (
       await allPredictionDataByDate(getCurrentDate().pickedDate)
     ).cuacaBesok;
-    console.log('realTmW', realtomorrowWeather);
+    // console.log('realTmW', realtomorrowWeather);
     if (
       realtomorrowWeather === "none" ||
       realtomorrowWeather === "" ||
