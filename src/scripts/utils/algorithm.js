@@ -3,6 +3,7 @@ import { allPredictionDataByDate } from "../../data/allData";
 import RBPsource from "../../data/source";
 import { putPredictionData } from "../../data/utils/predictionHandler";
 import { datePickerValue, getCurrentDate, getTomorrowDate } from "./datePicker";
+import { predictSales } from "./python/predict";
 import { showModal } from "./sales/modal-handler";
 
 const C45 = require("c4.5");
@@ -45,7 +46,7 @@ async function fetchDataAndTrainModel(testData) {
       (item) =>
         item.operasional === true &&
         item.terjual !== "" &&
-        new Date(item.date) <= new Date("2024-12-30")
+        new Date(item.date) <= new Date("2024-04-30")
     );
     // const filteredData = allData.filter(
     //   (item) =>
@@ -55,19 +56,20 @@ async function fetchDataAndTrainModel(testData) {
     // );
     // console.log("filteredDAta", filteredData);
 
+    console.log('data leng', filteredData.length);
+    console.log('datafiltered', filteredData);
     const data = jsonToCsv(filteredData);
-    // console.log("dataNew", data
 
-    const isData = allData.filter(
-      (item) =>
-        item.operasional === true &&
-        item.terjual !== "" &&
-        item.weekend === false &&
-        item.libur === false &&
-        item.cuaca === "mendung" &&
-        item.event_raya === "puasa" 
-    );
-    console.log("isData", isData);
+    // const isData = allData.filter(
+    //   (item) =>
+    //     item.operasional === true &&
+    //     item.terjual !== "" &&
+    //     item.weekend === false &&
+    //     item.libur === false &&
+    //     item.cuaca === "mendung" &&
+    //     item.event_raya === "puasa" 
+    // );
+    // console.log("isData", isData);
 
     var headers = Object.keys(data[0]);
     var features = headers.slice(0, -1); // Mengambil semua fitur kecuali kolom terakhir
@@ -376,6 +378,15 @@ export async function manualPredictionModalHandler() {
       resultText.classList.add(catchedData.predictTodayData);
       predBtn.style.display = "grid";
       loadingComponent.style.display = "none";
+
+      const dataForPredict = {
+        weekend,
+        libur,
+        cuaca,
+        event_raya: hariRaya
+      }
+
+      await predictSales(dataForPredict)
     });
 
   // Tambahkan event listener untuk menutup modal

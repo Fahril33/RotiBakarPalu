@@ -1872,11 +1872,11 @@ const Home = {
       // console.log("2", prediksiSesuai);
     }
 
-    console.log("prediksiSesuai", prediksiSesuai);
+    // console.log("prediksiSesuai", prediksiSesuai);
 
     // Hitung total prediksi sesuai
     const totalPrediksiSesuai = prediksiSesuai.length;
-    console.log("totalPrediksiSesuai", totalPrediksiSesuai);
+    // console.log("totalPrediksiSesuai", totalPrediksiSesuai);
 
     // Hitung prediksi yang akurat
     const prediksiAkurat = prediksiSesuai.filter(
@@ -1942,7 +1942,7 @@ const Home = {
     const databasePrediksi = (await RBPsource.getPredictions()).filter(
       (item) => item.operasional === true
     );
-    console.log("databasePrediksi", databasePrediksi);
+    // console.log("databasePrediksi", databasePrediksi);
 
     // Hitung akurasi untuk hari ini dan besok
     const akurasiHariIni = await this.hitungAkurasiPrediksi(
