@@ -3,7 +3,7 @@ import { allPredictionDataByDate } from "../../data/allData";
 import RBPsource from "../../data/source";
 import { putPredictionData } from "../../data/utils/predictionHandler";
 import { datePickerValue, getCurrentDate, getTomorrowDate } from "./datePicker";
-import { predictSales } from "./python/predict";
+import { predictMuch, predictSales } from "./python/predict";
 import { showModal } from "./sales/modal-handler";
 
 const C45 = require("c4.5");
@@ -57,7 +57,7 @@ async function fetchDataAndTrainModel(testData) {
     // console.log("filteredDAta", filteredData);
 
     console.log('data leng', filteredData.length);
-    console.log('datafiltered', filteredData);
+    // console.log('datafiltered', filteredData);
     const data = jsonToCsv(filteredData);
 
     // const isData = allData.filter(
@@ -386,7 +386,10 @@ export async function manualPredictionModalHandler() {
         event_raya: hariRaya
       }
 
-      await predictSales(dataForPredict)
+      const manualPred = await predictSales(dataForPredict)
+      console.log('manualpredRes', manualPred);
+      await predictMuch()
+
     });
 
   // Tambahkan event listener untuk menutup modal

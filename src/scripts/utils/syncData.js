@@ -275,7 +275,12 @@ export async function callDataShell() {
     });
 
     // =? DATA PREDIKSI ADA?
-    if (predicitionDataToday === `none` || predictionDataTomorrow !== `none`) {
+    if (
+      predicitionDataToday === `none` ||
+      predicitionDataToday === `unknown` ||
+      predictionDataTomorrow !== `none` ||
+      predictionDataTomorrow !== `unknown`
+    ) {
       try {
         await Promise.all([checkWeatherData(), getHolidayValue()]);
         // console.log("proses pred");
