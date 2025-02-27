@@ -1882,17 +1882,17 @@ const Home = {
     const prediksiAkurat = prediksiSesuai.filter(
       (item) => item.akurat === true
     ).length;
-    console.log('predAkuratTrue', prediksiAkurat);
+    // console.log('predAkuratTrue', prediksiAkurat);
     
     const prediksiAkuratFalse = prediksiSesuai.filter(
       (item) => item.akurat === false
     ).length;
-    console.log('predAkuratFalse', prediksiAkuratFalse);
+    // console.log('predAkuratFalse', prediksiAkuratFalse);
     
       const prediksiAkuratNull = prediksiSesuai.filter(
       (item) => item.akurat === null
     ).length;
-    console.log('predANull', prediksiAkuratNull);
+    // console.log('predANull', prediksiAkuratNull);
 
     // console.log("prediksiAkurat", prediksiAkurat);
 
@@ -1901,9 +1901,6 @@ const Home = {
       totalPrediksiSesuai > 0
         ? ((prediksiAkurat / (prediksiAkurat+prediksiAkuratFalse)) * 100).toFixed(2)
         : 0;
-
-
-
 
     return {
       totalPrediksi: totalPrediksiSesuai,
@@ -1936,7 +1933,7 @@ const Home = {
       cuaca: dataPrediksiBesok.cuaca,
       event_raya: dataPrediksiBesok.event_raya,
     };
-    console.log("Data Prediksi besok: ", dataPrediksiBesokFilter);
+    // console.log("Data Prediksi besok: ", dataPrediksiBesokFilter);
 
     // Contoh database prediksi (seharusnya diambil dari backend/database)
     const databasePrediksi = (await RBPsource.getPredictions()).filter(

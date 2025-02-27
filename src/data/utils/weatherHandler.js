@@ -3,19 +3,23 @@ import {
   getTomorrowDate,
 } from "../../scripts/utils/datePicker";
 import { allPredictionDataByDate } from "../allData";
-import { getCuacaJam17 } from "../source";
+import { getCuacaData } from "../source";
 import { postPredictionData, putPredictionData } from "./predictionHandler";
 
-async function weatherData() {
-  const { cuacaData1, cuacaData2, cuacaData3 } = await getCuacaJam17();
+export async function filterCuacaJam17() {
+  const startTime = performance.now();
+  const { cuacaData1, cuacaData2, cuacaData3 } = await getCuacaData();
+  const endTime = performance.now();
+  const timeTakenInSeconds = (endTime - startTime) / 1000;
+  console.log(`fetchTime2: ${timeTakenInSeconds} seconds`);
 
-  console.log("1", cuacaData1);
-  console.log("2", cuacaData2);
-  console.log("3", cuacaData3);
+  // console.log("1", cuacaData1);
+  // console.log("2", cuacaData2);
+  // console.log("3", cuacaData3);
 
   const todayString = getCurrentDate().pickedDate;
   const tomorrowString = getTomorrowDate().tomorrowDate;
-  console.log("tms", tomorrowString);
+  // console.log("tms", tomorrowString);
 
   // Buat array dari data cuaca
   const cuacaDataArray = [cuacaData1, cuacaData2, cuacaData3];
@@ -24,7 +28,7 @@ async function weatherData() {
   const filteredTodayData = cuacaDataArray.filter((data) => {
     if (data && data.local_datetime) {
       const localDate = data.local_datetime.split(" ")[0]; // Ambil hanya bagian tanggal
-      console.log("localDate", localDate);
+      // console.log("localDate", localDate);
       return localDate === todayString; // Bandingkan dengan tanggal hari ini
     }
     return false; // Jika data tidak ada, kembalikan false
@@ -101,15 +105,19 @@ async function weatherData() {
   return {
     todayWeather,
     tomorrowWeather,
+    timeTakenInSeconds
   };
 }
 
-export async function checkWeatherData() {
-  const data = await weatherData();
-  const { todayWeather, tomorrowWeather } = data;
+export async function testingcuaca() {
+  console.log('weather catcher', await filterCuacaJam17());
+}
 
-  console.log("tdw", todayWeather);
-  console.log("tmw", tomorrowWeather);
+export async function checkWeatherData() {
+  const { todayWeather, tomorrowWeather } = await filterCuacaJam17();
+
+  // console.log("tdw", todayWeather);
+  // console.log("tmw", tomorrowWeather);
 
   const currentDate = getCurrentDate().pickedDate;
   const tomorrowDate = getTomorrowDate().tomorrowDate;

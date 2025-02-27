@@ -1,4 +1,5 @@
 import API_ENDPOINT from "../../config/config";
+// import { catchQtySold } from "../../scripts/utils/python/predict";
 import { allPredictionDataByDate, allSalesDataByDate } from "../allData";
 import { isWeekend } from "./holidayHandler";
 import { stockConverter } from "./stockHandler";
@@ -12,7 +13,7 @@ export async function postPredictionData(predictionData) {
       },
       body: JSON.stringify(predictionData),
     });
-    
+
     if (!response.ok) {
       const errorText = await response.text(); // Ambil teks kesalahan
       throw new Error(
@@ -87,9 +88,9 @@ export async function isPredictionDataExist(date) {
     };
     await postPredictionData(PredictionData);
     const newData = (await allPredictionDataByDate(date)).filteredData;
-    console.log('Shell Prediction berhasil ditambahkan', newData);
+    console.log("Shell Prediction berhasil ditambahkan", newData);
   } else {
-    console.log('shell prediction sudah ada', date, isAnyToday);
+    console.log("shell prediction sudah ada", date, isAnyToday);
   }
 }
 
@@ -114,8 +115,14 @@ export async function createNewPredictionDataShell(date) {
 export async function syncSoldToPrediction(date) {
   const jumlah = (await allSalesDataByDate(date)).soldTotal;
   const soldConvertedValue = await stockConverter(jumlah);
+
+  // kebutuhan developing
+  // const qty = catchQtySold(date);
+  // console.log("qty", qty);
+  // const newSoldConvertedValue = await newStockConverter(qty);
   const predicitionData = {
     terjual: soldConvertedValue,
+    // newTerjual: newSoldConvertedValue,
   };
 
   let isPredictionShellAvailable = (await allPredictionDataByDate(date))

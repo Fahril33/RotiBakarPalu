@@ -48,6 +48,9 @@ export async function logDatesSince(pickedDate, logsince = false) {
   const [year, month, day] = dateValue.split("-").map(Number);
   const startDate = new Date(year, month - 1, day); // Bulan dimulai dari 0
   const today = new Date();
+  // const endate = "2024-04-30";
+  // const [endYear, endMonth, endDay] = endate.split("-").map(Number);
+  // const finishDate = new Date(endYear, endMonth - 1, endDay);
 
   // Mengecek apakah startDate kurang dari hari ini
   if (startDate < today) {

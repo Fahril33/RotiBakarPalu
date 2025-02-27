@@ -1,5 +1,5 @@
   const CONFIG = {
-    // BASE_URL: "http://192.168.0.75:5000/api/",
+    // BASE_URL: "http://192.168.0.74:5000/api/",
     BASE_URL: "http://localhost:5000/api/",
     // BASE_URL: "http://192.168.248.238:5000/api/",
   };

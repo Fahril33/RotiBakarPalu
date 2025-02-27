@@ -24,8 +24,13 @@ export async function predictMuch() {
   );
   const jsonDataSales = allDataSales.filter((item) => item.totalQuantity !== 0);
 
-  const startDate = new Date("2024-12-01");
+  const startDate = new Date("2024-10-01");
+  // const endDate = new Date("2024-12-31");
+  // const endDate = new Date("2024-12-31");
+  // const startDate = new Date("2024-12-01");
   const endDate = new Date("2025-01-07");
+  // const startDate = new Date("2025-01-01");
+  // const endDate = new Date("2025-01-31");
   const result = jsonData
     .filter((item) => {
       const date = new Date(item.date);
@@ -49,6 +54,8 @@ export async function predictMuch() {
       date: item.date,
       soldQty: item.totalQuantity,
     }));
+// ?
+  console.log("sales qty data", resultSales);
 
   console.log("mapped data", result.length);
   // console.log('mapped data', result);
@@ -61,12 +68,16 @@ export async function predictMuch() {
     const event_raya = item.event_raya;
     const cuaca = item.cuaca;
 
-    const dataTest = {
-      weekend: weekend,
-      libur: libur,
-      cuaca: cuaca,
-      event_raya: event_raya,
-    };
+    const eventRayaConverted = event_raya === "" ? "none" : event_raya;
+    console.log("beforeConverted", event_raya);
+    console.log("afterConverted", eventRayaConverted);
+
+      const dataTest = {
+        weekend: weekend,
+        libur: libur,
+        cuaca: cuaca,
+        event_raya: eventRayaConverted,
+      };
 
     // Cek prediksi
     const predResult = await predictSales(dataTest);
@@ -76,19 +87,17 @@ export async function predictMuch() {
 
     const updatedData = {
       hasil_prediksi: predResult[0],
-      akurat: akurat
+      akurat: akurat,
     };
-    
+
     try {
-      console.log(`updatedData ${date}:\n`, updatedData);
-      
-      console.log("========...Uploading...");
-      await putPredictionData(updatedData, date);
+      // console.log(`updatedData ${date}:\n`, updatedData);
+      // console.log("========...Uploading...");
+      // await putPredictionData(updatedData, date);
     } catch (error) {
       console.error("Failed to put prediction data:", error);
     }
-    console.log('Uploaded.', date);
-
+    console.log("Uploaded.", date);
 
     // Find the corresponding sold quantity for the date
     const soldQty = resultSales.find(
@@ -97,10 +106,14 @@ export async function predictMuch() {
 
     output.push({
       date: date,
+      weekend: weekend,
+      libur: libur,
+      cuaca: cuaca,
+      event_raya: eventRayaConverted,
+      soldQty: soldQty,
       sold: terjual,
       res: predResult[0],
       akurat: akurat,
-      soldQty: soldQty,
     });
   }
   let akuratTrueCount = 0;
@@ -116,15 +129,24 @@ export async function predictMuch() {
 
   console.log(`Akurat True Count: ${akuratTrueCount}`);
   console.log(`Akurat False Count: ${akuratFalseCount}`);
+  const totalPredictions = output.length;
+  console.log("total Predictions", totalPredictions);
+  const accuracyPercentage = (akuratTrueCount / totalPredictions) * 100;
+
+  console.log(`Persentase Akurat: ${accuracyPercentage.toFixed(2)}%`);
   output.sort((a, b) => a.akurat - b.akurat);
   console.log("final output", output);
 }
 
 export async function predictSales(newData) {
   try {
-    const response = await axios.post("http://127.0.0.1:7000/predict", newData);
-    // console.log('res', response.data.prediction[0]);
-    return response.data.prediction; // Assuming the prediction result is in the response.data.prediction
+
+    console.log("dataToPred", newData);
+
+    console.log('request:', newData);
+    const response = await axios.post(`http://127.0.0.1:8000/predict`, newData);
+    console.log('response:', response.data.prediction[0]);
+    return response.data.prediction[0]; // Assuming the prediction result is in the response.data.prediction
   } catch (error) {
     if (error.response) {
       console.error("Server Error:", error.response.data);
@@ -135,4 +157,12 @@ export async function predictSales(newData) {
     }
     throw error; // Rethrow the error to handle it in the calling function
   }
+}
+
+export function catchQtySold(date) {
+  const jsonData = require("./output.json");
+  const filteredData = jsonData.filter((item) => item.operasional === "true");
+  const soldQty =
+    filteredData.find((item) => item.date === date)?.sold_stock || 0;
+  return soldQty;
 }

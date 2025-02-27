@@ -76,7 +76,7 @@ async function handleLogout() {
   try {
     const token = localStorage.getItem("token");
 
-    const response = await fetch(`${API_ENDPOINT.LOGIN}/logout`, {
+    const response = await fetch(`${API_ENDPOINT.AUTH}/logout`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

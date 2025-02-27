@@ -151,3 +151,22 @@ export async function stockConverter(value) {
     return "Nilai tidak valid"; // Menangani nilai negatif atau tidak valid
   }
 }
+export async function newStockConverter(soldQty) {
+  if (soldQty < 0) {
+    return "Nilai tidak valid";
+  } else if (soldQty === 0) {
+    return "";
+  } else if (soldQty <= 5) {
+    return "sedikit";
+  } else if (soldQty <= 10) {
+    return "rendah";
+  } else if (soldQty <= 15) {
+    return "sedang";
+  } else if (soldQty <= 30) {
+    return "tinggi";
+  } else if (soldQty > 30) {
+    return "khusus";
+  } else {
+    return "Nilai tidak valid"; // Menangani nilai negatif atau tidak valid
+  }
+}

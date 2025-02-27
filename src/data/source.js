@@ -231,11 +231,13 @@ class RBPsource {
 }
 
 // Fungsi untuk mengambil data cuaca pada jam 17:00
-export async function getCuacaJam17() {
+export async function getCuacaData() {
   try {
+    console.time("fetchTime");
     const response = await fetch(
       "https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=72.71.06.1001"
     );
+    console.timeEnd("fetchTime");
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -267,6 +269,7 @@ export async function getCuacaJam17() {
     const cuacaData3 = findCuacaByTime(cuaca3, tdatomorrow);
 
     return { cuacaData1, cuacaData2, cuacaData3 };
+    
   } catch (error) {
     console.error("Error fetching data:", error);
     return null;
@@ -360,7 +363,7 @@ export async function bacaHariLibur(tanggalHariIni, year) {
     //   console.log('libur bang', isTodayHoliday);
     // } else {
     //   console.log('bukan libur bang', isTodayHoliday);
-    // }
+    // }  
 
     // Analisis data
     const analisis = {
