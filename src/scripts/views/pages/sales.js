@@ -94,7 +94,7 @@ const Sales = {
       }
       await handleFormSubmit(API_ENDPOINT, this);
       await this.displaySalesData();
-      await logDatesSince(pickedDate);
+      // await logDatesSince(pickedDate);
     });
 
     document
@@ -370,7 +370,7 @@ const Sales = {
           title: "Pesanan berhasil diperbarui.",
         });
         await this.displaySalesData();
-        await logDatesSince(date);
+        // await logDatesSince(date);
 
         //
         // Sesuaikan Nilai Terjual di Prediciton
@@ -472,7 +472,7 @@ const Sales = {
           title: "Pesanan berhasil dihapus.",
         });
 
-        await logDatesSince(date);
+        // await logDatesSince(date);
       } catch (error) {
         console.error("An error occurred while deleting data:", error);
       }

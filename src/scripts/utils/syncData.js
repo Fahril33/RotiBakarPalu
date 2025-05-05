@@ -277,7 +277,7 @@ export async function callDataShell() {
     `,
     });
 
-    // =? DATA PREDIKSI ADA?
+    // =? DATA PREDIKSI TIDAK ADA?
     if (
       predicitionDataToday === `none` ||
       predicitionDataToday === `unknown` ||

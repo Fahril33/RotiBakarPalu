@@ -44,7 +44,7 @@ export async function putPredictionData(predictionData, date) {
     if (!response.ok) {
       throw new Error("Gagal menyimpan data prediction.");
     }
-    console.log("Data prediction berhasil diperbarui melalui PUT.");
+    console.log("Data prediction", date, "berhasil diperbarui melalui PUT.");
   } catch (error) {
     console.error(
       "Terjadi kesalahan saat melakukan PUT data prediction:",

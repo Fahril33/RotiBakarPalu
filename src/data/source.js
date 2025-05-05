@@ -247,26 +247,38 @@ export async function getCuacaData() {
     const cuaca1 = data.data[0].cuaca[0];
     const cuaca2 = data.data[0].cuaca[1];
     const cuaca3 = data.data[0].cuaca[2];
-    const targetTime = "17:00:00";
 
-    const findCuacaByTime = (cuacaData, targetDate) =>
-      cuacaData.find(
-        (item) =>
-          item.local_datetime.startsWith(targetDate) &&
-          item.local_datetime.endsWith(targetTime)
-      );
+    console.log('c1', cuaca1);
+    console.log('c2', cuaca2);
+    console.log('c3', cuaca3);
 
-    const today = new Date().toISOString().split("T")[0];
+    const targetTimes = ["17:00:00", "16:00:00"];
+
+    const findCuacaByTime = (cuacaData, targetDate) => {
+      for (const time of targetTimes) {
+        const found = cuacaData.find(
+          (item) =>
+            item.local_datetime.startsWith(targetDate) &&
+            item.local_datetime.endsWith(time)
+        );
+        if (found) return found;
+      }
+      return null;
+    };
+
+    const options = { timeZone: 'Asia/Makassar', year: 'numeric', month: '2-digit', day: '2-digit' };
+    const today = new Date().toLocaleDateString('en-CA', options);
     const tomorrow = new Date(new Date().setDate(new Date().getDate() + 1))
-      .toISOString()
-      .split("T")[0];
+      .toLocaleDateString('en-CA', options);
     const tdatomorrow = new Date(new Date().setDate(new Date().getDate() + 2))
-      .toISOString()
-      .split("T")[0];
+      .toLocaleDateString('en-CA', options);
 
     const cuacaData1 = findCuacaByTime(cuaca1, today);
     const cuacaData2 = findCuacaByTime(cuaca2, tomorrow);
     const cuacaData3 = findCuacaByTime(cuaca3, tdatomorrow);
+
+        console.log("today", today);
+        console.log("tomorrow", tomorrow);
 
     return { cuacaData1, cuacaData2, cuacaData3 };
     
@@ -284,7 +296,7 @@ async function cekTanggalPuasa() {
   )
     .toString()
     .padStart(2, "0")}-${today.getFullYear()}`;
-  // const formattedDate = `02-04-2024`
+  // const formattedDate = `02-03-2025`
 
   try {
     // Fetch API untuk konversi tanggal
@@ -313,7 +325,7 @@ async function cekTanggalPuasa() {
 
 export async function convertGtoH() {
   const hasilPemeriksaan = (await cekTanggalPuasa()).isPuasa;
-  // console.log(hasilPemeriksaan);
+  console.log(hasilPemeriksaan);
 
   return {
     hasilPemeriksaan,

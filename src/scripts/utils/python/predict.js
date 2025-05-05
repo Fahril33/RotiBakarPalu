@@ -1,5 +1,7 @@
 import axios from "axios";
 import { putPredictionData } from "../../../data/utils/predictionHandler";
+import RBPsource from "../../../data/source";
+import Swal from "sweetalert2";
 
 export async function predictMuch() {
   const response = await fetch("http://127.0.0.1:5000/api/prediction");
@@ -24,13 +26,15 @@ export async function predictMuch() {
   );
   const jsonDataSales = allDataSales.filter((item) => item.totalQuantity !== 0);
 
-  const startDate = new Date("2024-10-01");
+  // const startDate = new Date("2024-10-01");
   // const endDate = new Date("2024-12-31");
+  // const startDate = new Date("2023-11-08");
+  // const endDate = new Date("2024-04-30");
   // const endDate = new Date("2024-12-31");
   // const startDate = new Date("2024-12-01");
-  const endDate = new Date("2025-01-07");
-  // const startDate = new Date("2025-01-01");
-  // const endDate = new Date("2025-01-31");
+  // const endDate = new Date("2025-01-07");
+  const startDate = new Date("2025-01-01");
+  const endDate = new Date("2025-01-31");
   const result = jsonData
     .filter((item) => {
       const date = new Date(item.date);
@@ -40,11 +44,18 @@ export async function predictMuch() {
       date: item.date,
       prediction: item.hasil_prediksi,
       terjual: item.terjual,
+      cuaca: item.cuaca,
       weekend: item.weekend,
       libur: item.libur,
       event_raya: item.event_raya,
-      cuaca: item.cuaca,
     }));
+
+    
+  const sortedResultByWeather = result.sort((a, b) =>
+    a.cuaca.localeCompare(b.cuaca)
+  );
+  console.log("sortedData", sortedResultByWeather);
+
   const resultSales = jsonDataSales
     .filter((item) => {
       const date = new Date(item.date);
@@ -79,14 +90,16 @@ export async function predictMuch() {
         event_raya: eventRayaConverted,
       };
 
+      // console.log('dataTest', dataTest);
+
     // Cek prediksi
     const predResult = await predictSales(dataTest);
-    console.log("res", predResult);
+    // console.log("res", predResult);
     // Cek akurat
-    let akurat = terjual === predResult[0] ? true : false;
+    let akurat = terjual === predResult ? true : false;
 
     const updatedData = {
-      hasil_prediksi: predResult[0],
+      hasil_prediksi: predResult,
       akurat: akurat,
     };
 
@@ -106,14 +119,14 @@ export async function predictMuch() {
 
     output.push({
       date: date,
+      res: predResult,
+      akurat: akurat,
+      sold: terjual,
+      cuaca: cuaca,
       weekend: weekend,
       libur: libur,
-      cuaca: cuaca,
       event_raya: eventRayaConverted,
       soldQty: soldQty,
-      sold: terjual,
-      res: predResult[0],
-      akurat: akurat,
     });
   }
   let akuratTrueCount = 0;
@@ -136,15 +149,78 @@ export async function predictMuch() {
   console.log(`Persentase Akurat: ${accuracyPercentage.toFixed(2)}%`);
   output.sort((a, b) => a.akurat - b.akurat);
   console.log("final output", output);
+
+  const cuaca = output.filter(item => item.cuaca === 'hujan');
+  console.log("hujan:", cuaca);
+  
+  console.log('===================', );
+
+  function filterData(terjual, akurat) {
+    return output.filter(
+      (item) =>
+        // item.operasional === true &&
+        new Date(item.date) >= new Date("2024-10-01") &&
+        new Date(item.date) <= new Date("2025-01-31") &&
+        item.sold === terjual &&
+        // item.hasil_prediksi === "tinggi" &&
+        item.akurat === akurat
+    );
+  }
+
+  //
+  const rendahFalse = filterData("rendah", false);
+  console.log("rendah false", rendahFalse.length);
+  console.log("rendah false", rendahFalse);
+
+  const rendahTrue = filterData("rendah", true);
+  console.log("rendah true", rendahTrue.length);
+  //
+  const sedangFalse = filterData("sedang", false);
+  console.log("sedang false", sedangFalse.length);
+
+  const sedangTrue = filterData("sedang", true);
+  console.log("sedang true", sedangTrue.length);
+  //
+  const tinggiFalse = filterData("tinggi", false);
+  console.log("tinggi false", tinggiFalse.length);
+
+  const tinggiTrue = filterData("tinggi", true);
+  console.log("tinggi true", tinggiTrue.length);
 }
 
 export async function predictSales(newData) {
   try {
 
     console.log("dataToPred", newData);
+    console.log('nd', newData.libur);
+    // const allData = await RBPsource.getPredictions()
+    // console.log('allPredData', allData);
 
-    console.log('request:', newData);
-    const response = await axios.post(`http://127.0.0.1:8000/predict`, newData);
+    // const weekendConverted = newData.weekend === "true" ? true : false
+    // const liburConverted = newData.libur === "true" ? true : false
+
+    // const filteredData = allData
+    //   .filter(
+    //     (item) =>
+    //       item.operasional === true &&
+    //       item.cuaca === newData.cuaca &&
+    //       item.weekend == weekendConverted &&
+    //       item.event_raya === newData.event_raya &&
+    //       item.libur == liburConverted &&
+    //       new Date(item.date) >= new Date("2023-10-01") &&
+    //       new Date(item.date) <= new Date("2024-04-31")
+    //   )
+    //   .map((item) => ({
+    //     terjual: item.terjual,
+    //     cuaca: item.cuaca,
+    //     weekend: item.weekend,
+    //     event_raya: item.event_raya,
+    //     libur: item.libur,
+    //     date: item.date,
+    //   }));
+    // console.log("filteredDataTrained", filteredData);
+
+    const response = await axios.post(`http://127.0.0.1:7000/predict`, newData);
     console.log('response:', response.data.prediction[0]);
     return response.data.prediction[0]; // Assuming the prediction result is in the response.data.prediction
   } catch (error) {
@@ -152,6 +228,16 @@ export async function predictSales(newData) {
       console.error("Server Error:", error.response.data);
     } else if (error.request) {
       console.error("Failed to fetch data:", error.request);
+    Swal.fire({
+      icon: 'error',
+      title: 'Oops...',
+      text: 'Bagian server prediksi sedang bermasalah!',
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 5000,
+      timerProgressBar: true,
+    });
     } else {
       console.error("Error:", error.message);
     }

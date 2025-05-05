@@ -434,11 +434,10 @@ export async function manualPredictionModalHandler() {
     //   cuaca,
     //   event_raya: hariRaya,
     // };
-
     // const manualPred = await predictSales(dataForPredict);
     // console.log("manualpredRes", manualPred);
     // await predictMuch();
-    await testingcuaca();
+    // await testingcuaca();
   });
 
   // Tambahkan event listener untuk menutup modal

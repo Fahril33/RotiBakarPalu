@@ -13,9 +13,9 @@ export async function filterCuacaJam17() {
   const timeTakenInSeconds = (endTime - startTime) / 1000;
   console.log(`fetchTime2: ${timeTakenInSeconds} seconds`);
 
-  // console.log("1", cuacaData1);
-  // console.log("2", cuacaData2);
-  // console.log("3", cuacaData3);
+  console.log("1", cuacaData1);
+  console.log("2", cuacaData2);
+  console.log("3", cuacaData3);
 
   const todayString = getCurrentDate().pickedDate;
   const tomorrowString = getTomorrowDate().tomorrowDate;
